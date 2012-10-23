@@ -1,0 +1,9 @@
+{
+	"name": "gifted-server",
+	"version": "0.0.1",
+	"dependencies":	{
+		"ws" : "*",
+		"socket.io" : "*"
+	},
+	"private": true
+}
