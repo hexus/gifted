@@ -12,7 +12,7 @@
 	<script src="assets.js"></script>
 	<script src="gifted.js"></script>
 <script>
-var canvas, stage, player;
+var canvas, stage, player, dom;
 
 function init() {
 	canvas = document.getElementById("canvas");
@@ -28,17 +28,24 @@ function init() {
 		player.char.gotoAndPlay("running");
 	};
 	
-	var dom = {};
+	dom = {};
 	dom.head_prev = new createjs.DOMElement($("#char_head_prev")[0]);
 	dom.head_next = new createjs.DOMElement($("#char_head_next")[0]);
 	dom.head_prev.regX = dom.head_prev.regY = 0;
 	dom.head_prev.x = 20;
-	dom.head_prev.y = 60;
+	dom.head_prev.y = 80;
 	dom.head_next.x = 140;
-	dom.head_next.y = 60;
+	dom.head_next.y = 80;
+	
+	dom.chat = new createjs.DOMElement($('#chat')[0]);
+	dom.chat.regX = parseInt($('#chat').css('width'),10);
+	dom.chat.x = canvas.width-20; // Right aligned
+	dom.chat.regY = parseInt($('#chat').css('height'),10)/2;
+	dom.chat.y = canvas.height/2;
 	
 	stage.addChild(dom.head_prev);
 	stage.addChild(dom.head_next);
+	stage.addChild(dom.chat);
 	
 	dom.head_frame = 0;
 	
@@ -70,12 +77,17 @@ $(document).ready(init);
 </script>
 </head>
 
-<body style="background-color:#D4D4D4">
-	<div id="client">
-		<input id="char_head_prev" type="button" value="<"/>
-		<input id="char_head_next" type="button" value=">"/>
-		<textarea id="chat" readonly></textarea>
-		<canvas id="canvas" width="846" height="360" style="background-color:#666666"></canvas>
+<body>
+	<div id="wrap">
+		<div id="client">
+			<input id="char_head_prev" type="button" value="<"/>
+			<input id="char_head_next" type="button" value=">"/>
+			<div id="chat">
+				<textarea id="buffer" readonly>Swag swag swag.</textarea><br/>
+				<input id="msg" type="text" value="Swag."/> <input id="send" type="button" value="Send"/>
+			</div>
+			<canvas id="canvas" width="846" height="360"></canvas>
+		</div>
 	</div>
 </body>
 </html>

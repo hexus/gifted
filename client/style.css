@@ -1,1 +1,10 @@
-input{background-color:Indigo;border:none;}
+html,body{margin:0;padding:0;overflow:hidden;background-color:#ddd;}
+input,textarea{background-color:#ccc;color:#fff;border:none;resize:none;}
+input[type=text]{padding:0 2px;}
+
+#wrap{padding:5% 0;}
+#client{margin:0 auto; width:846px; padding:5% 0;}
+#canvas{background-color:#eee;}
+#chat{display:block;}
+#msg{width:80%;}
+#buffer{width:500px;height:200px;}
