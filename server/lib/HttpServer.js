@@ -28,7 +28,7 @@ var server = http.createServer(function(request, response) { // One day this wil
             if(req[2]!=undefined){
                 if(!empty(req[2])){ // if this is a client resource being requested
                     try{
-                        response.writeHead(200, {'Content-Type': 'text/html'});
+                        response.writeHead(200, {'Content-Type': mime.lookup(req[2])});
                         var fileHtml = fs.readFileSync(config.basePath+req[2], 'utf-8'); // no php execution obv
                         response.end(fileHtml);
                     }catch(e){

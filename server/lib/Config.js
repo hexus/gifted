@@ -12,7 +12,7 @@ try{
     console.log("No environment file found: " + e);
 }
 env = (env) ? env : ((process.env)?process.env:false);
-c.version = "0.0.1"; 
+c.version = JSON.parse(fs.readFileSync('./package.json','utf-8')).version  || "Unknown"; 
 c.httpPort = 8080;
 c.listenPort = (env.PORT_GAME)?env.PORT_GAME:37955;
 c.connectUrl = (env.DOTCLOUD_SERVER_GAME_URL)?env.DOTCLOUD_SERVER_GAME_URL:"tcp://localhost:"+c.listenPort;

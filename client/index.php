@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>CreateJS Test Client</title>
-
-<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
-<script src="http://code.createjs.com/easeljs-0.5.0.min.js"></script>
-<script src="http://code.createjs.com/tweenjs-0.3.0.min.js"></script>
-<script src="http://code.createjs.com/movieclip-0.5.0.min.js"></script>
-<script src="http://code.createjs.com/preloadjs-0.2.0.min.js"></script>
-<script src="assets.js"></script>
-<script src="gifted.js"></script>
-
+	<meta charset="UTF-8">
+	<title>CreateJS Test Client</title>
+	<link rel="stylesheet" type="text/css" href="style.css"/>
+	<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+	<script src="http://code.createjs.com/easeljs-0.5.0.min.js"></script>
+	<script src="http://code.createjs.com/tweenjs-0.3.0.min.js"></script>
+	<script src="http://code.createjs.com/movieclip-0.5.0.min.js"></script>
+	<script src="http://code.createjs.com/preloadjs-0.2.0.min.js"></script>
+	<script src="assets.js"></script>
+	<script src="gifted.js"></script>
 <script>
 var canvas, stage, player;
 
@@ -75,6 +74,7 @@ $(document).ready(init);
 	<div id="client">
 		<input id="char_head_prev" type="button" value="<"/>
 		<input id="char_head_next" type="button" value=">"/>
+		<textarea id="chat" readonly></textarea>
 		<canvas id="canvas" width="846" height="360" style="background-color:#666666"></canvas>
 	</div>
 </body>

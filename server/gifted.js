@@ -7,7 +7,7 @@ var config = require('./lib/Config');
 var User = require('./lib/User'); // This will be better...
 
 // Initial output
-console.log("Gifted Server v0.0.1");
+console.log("Gifted Server v"+config.version);
 
 // Helper functions
 var helpers = require('./lib/Helpers');
