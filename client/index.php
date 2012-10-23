@@ -13,26 +13,26 @@
 <script src="gifted.js"></script>
 
 <script>
-var canvas, stage;
+var canvas, stage, player;
 
 function init() {
 	canvas = document.getElementById("canvas");
 	
-	var player = new Player();
-	player.x = 90
+	player = new Player();
+	player.x = 90;
 	player.y = 180;
+	player.scaleX = player.scaleY = 3;
 	stage = new createjs.Stage(canvas);
 	stage.addChild(player);
-	
-	stage.onClick = function(){
-		player.gotoAndPlay("running");
+
+	player.onClick = function(){
+		player.char.gotoAndPlay("running");
 	};
 	
 	var dom = {};
 	dom.head_prev = new createjs.DOMElement($("#char_head_prev")[0]);
 	dom.head_next = new createjs.DOMElement($("#char_head_next")[0]);
-	dom.head_prev.regX = 0;
-	dom.head_prev.regY = 0;
+	dom.head_prev.regX = dom.head_prev.regY = 0;
 	dom.head_prev.x = 20;
 	dom.head_prev.y = 60;
 	dom.head_next.x = 140;
@@ -40,9 +40,6 @@ function init() {
 	
 	stage.addChild(dom.head_prev);
 	stage.addChild(dom.head_next);
-	
-	createjs.Ticker.setFPS(32);
-	createjs.Ticker.addListener(stage);
 	
 	dom.head_frame = 0;
 	
@@ -64,6 +61,9 @@ function init() {
 		player.char.head.wear.gotoAndStop(dom.head_frame);
 	});
 	
+	createjs.Ticker.setFPS(32);
+	createjs.Ticker.addListener(stage);
+	
 	// unhide client div
 }
 
@@ -71,7 +71,7 @@ $(document).ready(init);
 </script>
 </head>
 
-<body onload="init();" style="background-color:#D4D4D4">
+<body style="background-color:#D4D4D4">
 	<div id="client">
 		<input id="char_head_prev" type="button" value="<"/>
 		<input id="char_head_next" type="button" value=">"/>

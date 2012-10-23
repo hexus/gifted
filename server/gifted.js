@@ -1,5 +1,4 @@
 // Core modules
-var http = require('http');
 var net = require('net');
 var ws = require('socket.io');
 
@@ -11,8 +10,9 @@ var User = require('./lib/User'); // This will be better...
 console.log("Gifted Server v0.0.1");
 
 // Helper functions
-function chr(n){return String.fromCharCode(n);}
-function empty(o){return o=="" || o==0 || o==undefined;}
+var helpers = require('./lib/Helpers');
+var chr = helpers.chr;
+var empty = helpers.empty;
 
 var count = 0; // Increments with each connection made
 var users = {};
@@ -24,34 +24,11 @@ users.send = function(str){
 	}
 }
 
-var http = http.createServer(function(request, response) { // One day this will server the game client
-    console.log('Received request for ' + request.url);
-	response.writeHead(200, {'Content-Type': 'text/plain'});
-	switch(request.url){
-		case "/users":
-			var resp = {};
-			for(var i in users)
-				if(users[i] instanceof User)
-					resp[i] = {id:i,name:users[i].name}
-			resp = JSON.stringify(resp);
-			response.end(resp);
-			break;
-		case "/env":
-			response.writeHead(200, {'Content-Type': 'application/json'});
-			response.end(JSON.stringify(config));
-			break;
-		case "/": default:
-		    response.end("Welcome. If you'd like to connect, please use " + config.connectUrl);
-			break;
-	}
-});
-http.listen(8080, function(){
-	console.log("HTTP listening on 8080");
-});
+var httpServer = require('./lib/HttpServer').start(config.httpPort);
 
 // Setup a tcp server
 var server = net.createServer(function(socket){
-	socket.setEncoding("utf8");
+	socket.setEncoding('utf8');
 	socket.setKeepAlive(true,10000);
 	var local = {}; // Local scope socket info (retains for close event when socket no longer exists)
 	local.remoteAddress = socket.remoteAddress;
