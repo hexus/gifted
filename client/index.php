@@ -12,7 +12,7 @@
 	<script src="assets.js"></script>
 	<script src="gifted.js"></script>
 <script>
-var canvas, stage, player, dom;
+var canvas, stage, player, dom, aspect=2.35;
 
 function init() {
 	canvas = document.getElementById("canvas");
@@ -21,8 +21,6 @@ function init() {
 	player.x = 90;
 	player.y = 180;
 	player.scaleX = player.scaleY = 3;
-	stage = new createjs.Stage(canvas);
-	stage.addChild(player);
 
 	player.onClick = function(){
 		player.char.gotoAndPlay("running");
@@ -42,10 +40,6 @@ function init() {
 	dom.chat.x = canvas.width-20; // Right aligned
 	dom.chat.regY = parseInt($('#chat').css('height'),10)/2;
 	dom.chat.y = canvas.height/2;
-	
-	stage.addChild(dom.head_prev);
-	stage.addChild(dom.head_next);
-	stage.addChild(dom.chat);
 	
 	dom.head_frame = 0;
 	
@@ -67,13 +61,30 @@ function init() {
 		player.char.head.wear.gotoAndStop(dom.head_frame);
 	});
 	
+	stage = new createjs.Stage(canvas);
+	stage.addChild(player);
+	stage.addChild(dom.head_prev);
+	stage.addChild(dom.head_next);
+	stage.addChild(dom.chat);
+	
 	createjs.Ticker.setFPS(32);
 	createjs.Ticker.addListener(stage);
 	
 	// unhide client div
 }
 
-$(document).ready(init);
+/* * / // I doubt this will be useful in the end, too ugly-looking. Will just offer full screen or default res centred.
+$(window).resize(function(){
+	canvas.width = window.innerWidth;
+	canvas.height = (canvas.width) / aspect; 
+	stage.scaleX = stage.scaleY = canvas.width/846;
+});
+/* */
+
+$(document).ready(function(){
+	init();
+	//$(window).resize();
+});
 </script>
 </head>
 
