@@ -1,6 +1,6 @@
 // Core modules
 var net = require('net');
-var ws = require('socket.io');
+var io = require('socket.io');
 
 // Gifted modules
 var config = require('./lib/Config');
@@ -60,6 +60,20 @@ var server = net.createServer(function(socket){
 });
 server.listen(config.listenPort, function(){
 	console.log("TCP listening on " + config.listenPort);
+});
+
+var io = io.listen(config.listenPort2,{log:false});
+
+io.sockets.on('connection',function(socket){
+	console.log("Socket.io client connected");
+	//console.log(socket);
+	socket.on('message',function(data){
+		console.log("Socket.io data: " + data);
+		handleData.call(socket,data);
+	});
+	socket.on('disconnect',function(){
+		console.log("Socket.io client disconnected");
+	});
 });
 
 function handleData(data){ // Called in context of a User

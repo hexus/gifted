@@ -9,10 +9,11 @@
 	<script src="http://code.createjs.com/tweenjs-0.3.0.min.js"></script>
 	<script src="http://code.createjs.com/movieclip-0.5.0.min.js"></script>
 	<script src="http://code.createjs.com/preloadjs-0.2.0.min.js"></script>
+	<script src="http://localhost:7001/socket.io/socket.io.js"></script>
 	<script src="assets.js"></script>
 	<script src="gifted.js"></script>
 <script>
-var canvas, stage, player, dom, aspect=2.35;
+var canvas, stage, socket, player, dom, aspect=2.35;
 
 function init() {
 	canvas = document.getElementById("canvas");
@@ -69,6 +70,16 @@ function init() {
 	
 	createjs.Ticker.setFPS(32);
 	createjs.Ticker.addListener(stage);
+	
+	socket = io.connect('http://localhost:7001');
+	
+	socket.on('connect',function(){
+		console.log("Socket.io connected fine!");
+		socket.send('/login-pls');
+		socket.on('message',function(data){
+			console.log("Socket.io data: " + data);
+		});
+	});
 	
 	// unhide client div
 }
