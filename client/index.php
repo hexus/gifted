@@ -13,7 +13,7 @@
 	<script src="assets.js"></script>
 	<script src="gifted.js"></script>
 <script>
-var canvas, stage, socket, player, dom, aspect=2.35;
+var canvas, stage, socket, player, id, users, dom, aspect=2.35;
 
 function init() {
 	canvas = document.getElementById("canvas");
@@ -70,18 +70,74 @@ function init() {
 	
 	createjs.Ticker.setFPS(32);
 	createjs.Ticker.addListener(stage);
+
+	users = {};
 	
 	socket = io.connect('http://localhost:7001');
 	
 	socket.on('connect',function(){
-		console.log("Socket.io connected fine!");
+		function send(str){socket.send(str);}
+		function print(str){$('#buffer').append(str+"\n");}
+		console.log("Socket.io connected!");
+		$('#buffer').empty().text('Logging in...\n');
 		socket.send('/login-pls');
 		socket.on('message',function(data){
-			console.log("Socket.io data: " + data);
+			console.log("Data: " + data);
+			var d = data.split(" ");
+			switch(d[0]){
+				case "/login-request":
+					send("/whoami");
+					break;
+				case "/youare":
+					id = d[1];
+					users[d[1]] = {name:d[2]};
+					break;
+				case "/login-accept":
+					$('#buffer').empty();
+					$('#msg').focus();
+					break;
+				case "/motd":
+					print(data.substr(d[0].length+1));
+					break;
+				case "/uc":
+					if(d[1]!=id){
+						users[d[1]] = {name:d[2]};
+						print(users[d[1]].name + " connected");
+					}
+					break;
+				case "/ud":
+					delete(users[d[1]]);
+					break;
+				case "/c":
+					d = data.split(" ",2)
+					print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
+					break;
+				default:
+					console.log("^ Unrecognised");
+			}
+			//$('#buffer').append(data+'\n');
 		});
 	});
 	
-	// unhide client div
+	function msg(){
+		var str = $('#msg').val();
+		if(str!=''){
+			socket.send("/c " + $('#msg').val());
+			$('#msg').val('');
+		}
+	}
+	
+	$('#send').click(function(){
+		msg();
+	});
+	
+	$('#send').parent().keydown(function(event) {
+		if(event.which == 13) {
+			//event.preventDefault();
+			msg();
+		}
+	});
+
 }
 
 /* * / // I doubt this will be useful in the end, too ugly-looking. Will just offer full screen or default res centred.
@@ -101,12 +157,13 @@ $(document).ready(function(){
 
 <body>
 	<div id="wrap">
+		<?php echo "Hello world!" ?>
 		<div id="client">
 			<input id="char_head_prev" type="button" value="<"/>
 			<input id="char_head_next" type="button" value=">"/>
 			<div id="chat">
 				<textarea id="buffer" readonly>Swag swag swag.</textarea><br/>
-				<input id="msg" type="text" value="Swag."/> <input id="send" type="button" value="Send"/>
+				<input id="msg" type="text" value=""/> <input id="send" type="button" value="Send"/>
 			</div>
 			<canvas id="canvas" width="846" height="360"></canvas>
 		</div>

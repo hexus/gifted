@@ -65,11 +65,14 @@ server.listen(config.listenPort, function(){
 var io = io.listen(config.listenPort2,{log:false});
 
 io.sockets.on('connection',function(socket){
+    var user = {};
+	user = new User(++count,"guest"+count,socket,"Socket.io");
+	users[count] = user;
 	console.log("Socket.io client connected");
 	//console.log(socket);
 	socket.on('message',function(data){
 		console.log("Socket.io data: " + data);
-		handleData.call(socket,data);
+		handleData.call(user,data);
 	});
 	socket.on('disconnect',function(){
 		console.log("Socket.io client disconnected");
@@ -85,6 +88,12 @@ function handleData(data){ // Called in context of a User
 			break;
         case "/login-pls": // Client is ready to log in
 			this.send("/login-request");
+			break;
+		case "/whoami": // Guest login
+			this.send("/youare " + this.id + " " + this.name);
+			this.send("/login-accept");
+			this.send("/motd " + config.motd);
+			users.send("/uc " + this.id + " " + this.name);
 			break;
         case "/login": // A login request
         	if(d[1]!=""){this.name = d[1];}
