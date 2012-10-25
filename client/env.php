@@ -8,7 +8,7 @@
 		$port = 7001;
 		$url = "http://localhost:".$port;
 	}else{ // dotCloud
-		$env = $json_decode($env, true);
+		$env = json_decode($env, true);
 		$port = $env['PORT_GAME2'];
 		$url = "http://".$env['DOTCLOUD_SERVER_GAME2_HOST'].$port;
 	}
