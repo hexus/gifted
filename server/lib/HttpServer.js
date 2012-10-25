@@ -39,14 +39,14 @@ var server = http.createServer(function(request, response) { // One day this wil
     var req = request.url.split("/");
     response.writeHead(200, {'Content-Type': 'text/plain'});
     switch(req[1]){ // req[0] always empty?
-        case "users":
+        /*case "users":
             var resp = {};
-            for(var i in users)
+            for(var i in users) // Currently out of scope
                 if(users[i] instanceof User)
                     resp[i] = {id:i,name:users[i].name}
             resp = JSON.stringify(resp);
             response.end(resp);
-            break;
+            break;*/
         case "env":
             response.writeHead(200, {'Content-Type': 'application/json'});
             response.end(JSON.stringify(config));

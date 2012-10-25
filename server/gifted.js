@@ -82,7 +82,6 @@ io.sockets.on('connection',function(socket){
 	console.log("Socket.io client connected");
 	//console.log(socket);
 	socket.on('message',function(data){
-		console.log("Socket.io data: " + data);
 		handleData.call(user,data);
 	});
 	socket.on('disconnect',function(){
@@ -127,15 +126,3 @@ function handleData(data){ // Called in context of a User
           break;
     }
 }
-
-/* // Useless on dotcloud
-var policy = net.createServer(function(socket){
-	socket.addListener("data",function(data){
-		console.log("Policy data: " + data);
-	});
-});
-
-policy.listen(843,function(){
-	console.log("Policy server listening on 843");
-});
-*/
