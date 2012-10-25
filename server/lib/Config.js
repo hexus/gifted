@@ -17,8 +17,8 @@ c.httpPort = 8080;
 c.clientPath = c.basePath+"index.php";
 c.listenPort = (env.PORT_GAME)?env.PORT_GAME:7000;
 c.listenPort2 = (env.PORT_GAME2)?env.PORT_GAME2:7001;
-c.connectUrl = (env.DOTCLOUD_SERVER_GAME_URL)?env.DOTCLOUD_SERVER_GAME_URL:"tcp://localhost:"+c.listenPort;
-c.motd = "Welcome to the new Gifted Server v" + c.version + "! Thank you for testing.";
+c.connectUrl = (env.DOTCLOUD_CLIENT_HTTP_HOST)?env.DOTCLOUD_CLIENT_HTTP_HOST:"http://localhost:8080/client/";
+c.motd = "Welcome to the new Gifted Server v" + c.version + "! Thanks for testing.";
 
 c.env = env; // Might as well
 module.exports = c;

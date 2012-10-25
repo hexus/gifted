@@ -4,6 +4,7 @@ var mime = require('mime');
 var config = require('./Config');
 var helpers = require('./Helpers');
 var empty = helpers.empty;
+var href = helpers.href;
 var exec = require('child_process').exec;
 
 // Execute a client PHP script and asynchronously return the output
@@ -104,7 +105,8 @@ var server = http.createServer(function(request, response) { // One day this wil
             }
             break;
         default:
-            response.end("Welcome. If you'd like to connect, please use " + config.connectUrl);
+        	response.writeHead(200, {'Content-type':'text/html'});
+            response.end("Welcome. If you'd like to connect, please visit " + href(config.connectUrl));
             break;
     }
 });
