@@ -163,7 +163,6 @@ $(document).ready(function(){
 
 <body>
 	<div id="wrap">
-		<?php echo "Hello world!" ?>
 		<div id="client">
 			<input id="char_head_prev" type="button" value="<"/>
 			<input id="char_head_next" type="button" value=">"/>
