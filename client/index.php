@@ -1,23 +1,9 @@
 <?php
-	try{ // Check for dotCloud environment
-		$envFile = file_get_contents("/home/dotcloud/environment.json");
-	}catch(Exception $e){} // Handled below
-	
-	if(empty($env)){ // Local
-		$env = $_ENV;
-		$port = 7001;
-		$url = "http://localhost:".$port;
-	}else{ // dotCloud
-		$env = $json_decode($envFile, true);
-		$port = $env['PORT_GAME2'];
-		$url = "http://".$env['DOTCLOUD_SERVER_GAME2_HOST'].$port;
-	}
-	
+	include('env.php');
 	// Yay! PHP served via local Node OR via a dotCloud PHP instance!
 	// I am essentially some form of demigod for achieving this.
 	
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
