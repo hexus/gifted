@@ -23,6 +23,15 @@ users.send = function(str){
 		}
 	}
 }
+users.sendTo = function(u){ // Send current users to given user
+	if(u instanceof User){ // Don't faff about mate
+		for(var i in this){
+			if(this[i] instanceof User){
+				u.send('/uc ' + users[i].id + " " + users[i].name);
+			}
+		}
+	}
+}
 
 var httpServer = require('./lib/HttpServer').start(config.httpPort);
 
@@ -76,6 +85,7 @@ io.sockets.on('connection',function(socket){
 	});
 	socket.on('disconnect',function(){
 		console.log("Socket.io client disconnected");
+		delete(users[user.id]);
 	});
 });
 
@@ -94,12 +104,14 @@ function handleData(data){ // Called in context of a User
 			this.send("/login-accept");
 			this.send("/motd " + config.motd);
 			users.send("/uc " + this.id + " " + this.name);
+			users.sendTo(this);
 			break;
         case "/login": // A login request
         	if(d[1]!=""){this.name = d[1];}
 			this.send("/login-accept");
 			this.send("/motd " + config.motd);
 			users.send("/uc " + this.id + " " + this.name);
+			users.sendTo(this);
 			break;
 		// To be ignored / implemented / removed
         case "/info-request": case "/r":

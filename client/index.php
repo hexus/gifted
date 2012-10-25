@@ -1,3 +1,23 @@
+<?php
+	try{ // Check for dotCloud environment
+		$envFile = file_get_contents("/home/dotcloud/environment.json");
+	}catch(Exception $e){} // Handled below
+	
+	if(empty($env)){ // Local
+		$env = $_ENV;
+		$port = 7001;
+		$url = "http://localhost:".$port;
+	}else{ // dotCloud
+		$env = $json_decode($envFile, true);
+		$port = $env['PORT_GAME2'];
+		$url = "http://".$env['DOTCLOUD_SERVER_GAME2_HOST'].$port;
+	}
+	
+	// Yay! PHP served via local Node OR via a dotCloud PHP instance!
+	// I am essentially some form of demigod for achieving this.
+	
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,7 +29,7 @@
 	<script src="http://code.createjs.com/tweenjs-0.3.0.min.js"></script>
 	<script src="http://code.createjs.com/movieclip-0.5.0.min.js"></script>
 	<script src="http://code.createjs.com/preloadjs-0.2.0.min.js"></script>
-	<script src="http://localhost:7001/socket.io/socket.io.js"></script>
+	<script src="<?=$url?>/socket.io/socket.io.js"></script>
 	<script src="assets.js"></script>
 	<script src="gifted.js"></script>
 <script>
@@ -73,7 +93,7 @@ function init() {
 
 	users = {};
 	
-	socket = io.connect('http://localhost:7001');
+	socket = io.connect('<?=$url?>');
 	
 	socket.on('connect',function(){
 		function send(str){socket.send(str);}
