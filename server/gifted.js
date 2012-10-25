@@ -71,7 +71,9 @@ server.listen(config.listenPort, function(){
 	console.log("TCP listening on " + config.listenPort);
 });
 
-var io = io.listen(config.listenPort2,{log:false});
+var io = io.listen(config.listenPort2,{log:false},function(){
+	console.log("Socket.io listening on " + config.listenPort2);
+});
 
 io.sockets.on('connection',function(socket){
     var user = {};

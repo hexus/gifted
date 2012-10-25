@@ -55,6 +55,9 @@ var server = http.createServer(function(request, response) { // One day this wil
         		response.end(out);
         	},false);
         	break;
+        case "port":
+        	response.end(config.listenPort.toString());
+        	break;
         case "client":
             if(req[2]!=undefined){
                 if(!empty(req[2])){ // if this is a client resource being requested
