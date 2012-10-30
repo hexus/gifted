@@ -10,4 +10,4 @@ server:
     game2: tcp
 client:
   type: php
-  approot: client
+  approot: server/client
