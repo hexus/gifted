@@ -11,12 +11,13 @@ var exec = require('child_process').exec;
 function php(file,callback,base){
 	if(base!=false){base=true;}
 	exec("php "+((base)?config.basePath:'')+file,function(e,out,eout){
-		//console.log(e + out + eout);
+		console.log(e+" : "+eout);
 		if(!empty(out)){
 			if(typeof callback == "function"){
 				callback(out);
 			}
 		}else{
+		    
 			readFile(file,callback,base);
 		}
 	});
@@ -39,7 +40,7 @@ function readFile(file,callback,base){
 // Simple http server that responds with server information and client files
 
 var server = http.createServer(function(request, response) { // One day this will server the game client
-    console.log('Received request for ' + request.url);
+    console.log('Requested: ' + request.url);
     var req = request.url.split("/");
     response.writeHead(200, {'Content-Type': 'text/plain'});
     switch(req[1]){ // req[0] always empty?
@@ -100,8 +101,8 @@ var server = http.createServer(function(request, response) { // One day this wil
                     }
                 }
             }else{
-            	response.writeHead(301,{'Location':'/client/'});
-                response.end("Add a slash to the end your request! Like this: /client/\nThank you :)");
+            	response.writeHead(301,{'Location':'/client/'}); 
+                response.end(); // Add a trailing slash if a request is made without one
             }
             break;
         case "favicon.ico":

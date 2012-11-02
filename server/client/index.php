@@ -149,7 +149,7 @@ $(window).resize(function(){
 });
 /* */
 
-$(document).ready(function(){
+$(function(){ // DOM is ready
 	init();
 	//$(window).resize();
 });

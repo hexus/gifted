@@ -1,6 +1,7 @@
 {
 	"name": "gifted-server",
 	"version": "0.0.4",
+	"main": "gifted.js",
 	"dependencies":	{
 		"ws" : "*",
 		"socket.io" : "*",
