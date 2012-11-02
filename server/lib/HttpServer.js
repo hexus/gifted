@@ -11,7 +11,7 @@ var exec = require('child_process').exec;
 function php(file,callback,base){
 	if(base!=false){base=true;}
 	exec("php "+((base)?config.basePath:'')+file,function(e,out,eout){
-		console.log(e + out + eout);
+		//console.log(e + out + eout);
 		if(!empty(out)){
 			if(typeof callback == "function"){
 				callback(out);
@@ -69,6 +69,8 @@ var server = http.createServer(function(request, response) { // One day this wil
                     try{
                         response.writeHead(200, {'Content-Type': mime.lookup(req[2])});
                         if(request.url.substr(-4)==".php"){
+                        	response.writeHead(200, {'Content-Type': 'text/html'});
+                        	console.log(req[2]);
                         	php(req[2],function(out){
                         		response.end(out);
                         	});
