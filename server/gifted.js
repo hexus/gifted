@@ -1,11 +1,7 @@
 // Modules
 var config = require('./lib/Config');
-var globals = require('./lib/Globals')
 var http = require('./lib/HttpServer');
 var sockets = require('./lib/Sockets');
-
-// Classes
-var User = require('./lib/User');
 
 // Initial output
 console.log("Gifted Server v"+config.version);

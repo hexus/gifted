@@ -1,5 +1,5 @@
 var config = require('./Config');
-var users = require('./Globals').users;
+var users = require('./Users').collection;
 
 var h = {};
 

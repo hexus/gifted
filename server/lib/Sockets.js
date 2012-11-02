@@ -1,12 +1,11 @@
 var net = require('net');
 var io = require('socket.io');
-var globals = require('./Globals');
+
 var handleData = require('./Handlers').handleData;
 var empty = require('./Helpers').empty;
-var User = require('./User');
-
-var users = globals.users;
-var count = globals.count;
+var User = require('./Users').class;
+var users = require('./Users').collection;
+var count = users.count;
 
 var servers = {tcp:{},io:{}};
 
