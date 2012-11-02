@@ -12,4 +12,4 @@
 		$port = $env['DOTCLOUD_SERVER_GAME2_PORT'];//file_get_contents($env["DOTCLOUD_SERVER_HTTP_HOST"]."/port");
 		$url = "http://".$env['DOTCLOUD_SERVER_GAME2_HOST'].":".$port;
 	}
-?>	
+?>

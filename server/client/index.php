@@ -1,9 +1,4 @@
-<?php
-	include('env.php');
-	// Yay! PHP served via local Node OR via a dotCloud PHP instance!
-	// I am essentially some form of demigod for achieving this.
-	
-?>
+<?php include('env.php'); ?>
 <!DOCTYPE html>
 <html>
 <head>
