@@ -1,11 +1,13 @@
 var fs = require('fs');
 var http = require('http');
 var mime = require('mime');
+var exec = require('child_process').exec;
 var config = require('./Config');
 var helpers = require('./Helpers');
+var users = require('./Users');
 var empty = helpers.empty;
 var href = helpers.href;
-var exec = require('child_process').exec;
+
 
 // Execute a client PHP script and asynchronously return the output
 function php(file,callback,base){
@@ -44,14 +46,14 @@ var server = http.createServer(function(request, response) { // One day this wil
     var req = request.url.split("/");
     response.writeHead(200, {'Content-Type': 'text/plain'});
     switch(req[1]){ // req[0] always empty?
-        /*case "users":
+        case "users":
             var resp = {};
             for(var i in users) // Currently out of scope
                 if(users[i] instanceof User)
                     resp[i] = {id:i,name:users[i].name}
             resp = JSON.stringify(resp);
             response.end(resp);
-            break;*/
+            break;
         case "env":
             response.writeHead(200, {'Content-Type': 'application/json'});
             response.end(JSON.stringify(config));

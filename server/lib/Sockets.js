@@ -3,8 +3,8 @@ var io = require('socket.io');
 
 var handleData = require('./Handlers').handleData;
 var empty = require('./Helpers').empty;
-var User = require('./Users').class;
-var users = require('./Users').collection;
+var User = require('./User');
+var users = require('./Users');
 var count = users.count;
 
 var servers = {tcp:{},io:{}};
