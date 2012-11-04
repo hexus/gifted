@@ -20,7 +20,12 @@ servers.tcp.start = function(tcpPort){
         var local = {}; // Local scope socket info (retains for close event when socket no longer exists)
         local.remoteAddress = socket.remoteAddress;
         var user = {};
-        user = new User(++count,'guest'+count,socket);
+        user = new User({
+            id:++count,
+            aid:0,
+            name:'guest'+count,
+            socket:socket
+        });
         users[count] = user;
         
         socket.addListener('connect',function(){
@@ -66,7 +71,13 @@ servers.io.start = function(ioPort){
     // Set up event listeners
     io.sockets.on('connection',function(socket){
         var user = {};
-        user = new User(++count,"guest"+count,socket,"Socket.io");
+        user = new User({
+            id:++count,
+            aid:0,
+            name:'guest'+count,
+            socket:socket,
+            socketType:'Socket.io'
+        });
         users[count] = user;
         
         socket.on('connect',function(){

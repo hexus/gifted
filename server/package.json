@@ -1,11 +1,11 @@
 {
 	"name": "gifted-server",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"main": "gifted.js",
 	"dependencies":	{
-		"ws" : "*",
-		"socket.io" : "*",
-		"mime" : "*"
+		"async" : "*",
+		"mime" : "*",
+		"socket.io" : "*"
 	},
 	"private": true
 }

@@ -29,8 +29,8 @@ function init() {
 	};
 	
 	dom = {};
-	dom.head_prev = new createjs.DOMElement($("#char_head_prev")[0]);
-	dom.head_next = new createjs.DOMElement($("#char_head_next")[0]);
+	dom.head_prev = new createjs.DOMElement($("#headwear_prev")[0]);
+	dom.head_next = new createjs.DOMElement($("#headwear_next")[0]);
 	dom.head_prev.regX = dom.head_prev.regY = 0;
 	dom.head_prev.x = 20;
 	dom.head_prev.y = 80;
@@ -45,7 +45,7 @@ function init() {
 	
 	dom.head_frame = 0;
 	
-	$("#char_head_prev").click(function(){
+	$("#headwear_prev").click(function(){
 		if(dom.head_frame>0){
 			dom.head_frame--;
 		}else{
@@ -54,7 +54,7 @@ function init() {
 		player.char.head.wear.gotoAndStop(dom.head_frame);
 	});
 	
-	$("#char_head_next").click(function(){
+	$("#headwear_next").click(function(){
 		if(dom.head_frame<player.char.head.wear.timeline.duration-1){
 			dom.head_frame++;
 		}else{
@@ -71,53 +71,54 @@ function init() {
 	
 	createjs.Ticker.setFPS(32);
 	createjs.Ticker.addListener(stage);
-
+	
+	
+	// 
+	function print(str){$('#buffer').append(str+"\n");}
 	users = {};
 	
 	socket = io.connect('<?=$url?>');
 	
 	socket.on('connect',function(){
-		function send(str){socket.send(str);}
-		function print(str){$('#buffer').append(str+"\n");}
 		console.log("Socket.io connected!");
 		$('#buffer').empty().text('Logging in...\n');
 		socket.send('/login-pls');
-		socket.on('message',function(data){
-			console.log("Data: " + data);
-			var d = data.split(" ");
-			switch(d[0]){
-				case "/login-request":
-					send("/whoami");
-					break;
-				case "/youare":
-					id = d[1];
+	});
+	
+	socket.on('message',function(data){
+		console.log("Data: " + data);
+		var d = data.split(" ");
+		switch(d[0]){
+			case "/login-request":
+				this.send("/whoami");
+				break;
+			case "/youare":
+				id = d[1];
+				users[d[1]] = {name:d[2]};
+				break;
+			case "/login-accept":
+				$('#buffer').empty();
+				$('#msg').focus();
+				break;
+			case "/motd":
+				print(data.substr(d[0].length+1));
+				break;
+			case "/uc":
+				if(d[1]!=id){
 					users[d[1]] = {name:d[2]};
-					break;
-				case "/login-accept":
-					$('#buffer').empty();
-					$('#msg').focus();
-					break;
-				case "/motd":
-					print(data.substr(d[0].length+1));
-					break;
-				case "/uc":
-					if(d[1]!=id){
-						users[d[1]] = {name:d[2]};
-						print(users[d[1]].name + " connected");
-					}
-					break;
-				case "/ud":
-					delete(users[d[1]]);
-					break;
-				case "/c":
-					d = data.split(" ",2)
-					print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
-					break;
-				default:
-					console.log("^ Unrecognised");
-			}
-			//$('#buffer').append(data+'\n');
-		});
+					print(users[d[1]].name + " connected");
+				}
+				break;
+			case "/ud":
+				delete(users[d[1]]);
+				break;
+			case "/c":
+				d = data.split(" ",2)
+				print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
+				break;
+			default:
+				console.log("^ Unrecognised");
+		}
 	});
 	
 	function msg(){
@@ -159,8 +160,8 @@ $(function(){ // DOM is ready
 <body>
 	<div id="wrap">
 		<div id="client">
-			<input id="char_head_prev" type="button" value="<"/>
-			<input id="char_head_next" type="button" value=">"/>
+			<input id="headwear_prev" type="button" value="<"/>
+			<input id="headwear_next" type="button" value=">"/>
 			<div id="chat">
 				<textarea id="buffer" readonly>Swag swag swag.</textarea><br/>
 				<input id="msg" type="text" value=""/> <input id="send" type="button" value="Send"/>
