@@ -4,6 +4,7 @@ var mime = require('mime');
 var exec = require('child_process').exec;
 var config = require('./Config');
 var helpers = require('./Helpers');
+var User = require('./User');
 var users = require('./Users');
 var empty = helpers.empty;
 var href = helpers.href;
@@ -48,9 +49,9 @@ var server = http.createServer(function(request, response) { // One day this wil
     switch(req[1]){ // req[0] always empty?
         case "users":
             var resp = {};
-            for(var i in users) // Currently out of scope
+            for(var i in users) // Synchronous because I'm truly lazy
                 if(users[i] instanceof User)
-                    resp[i] = {id:i,name:users[i].name}
+                    resp[i] = {name:users[i].name,socketType:users[i].socketType}
             resp = JSON.stringify(resp);
             response.end(resp);
             break;
