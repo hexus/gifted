@@ -1,7 +1,5 @@
-var u = {};
-
 // Class
-var User = u = function(args){
+var User = function(args){
     this.id = args.id; // Local ID
     this.aid = args.aid; // Account ID
     this.name = args.name; // Selected character bane
@@ -19,4 +17,4 @@ User.prototype = {
     }
 }
 
-module.exports = u;
+module.exports = User;
