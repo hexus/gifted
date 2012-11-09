@@ -1,44 +1,14 @@
 var fs = require('fs');
 var http = require('http');
 var mime = require('mime');
-var exec = require('child_process').exec;
 var config = require('./Config');
 var helpers = require('./Helpers');
 var User = require('./User');
 var users = require('./Users');
 var empty = helpers.empty;
 var href = helpers.href;
-
-
-// Execute a client PHP script and asynchronously return the output
-function php(file,callback,base){
-	if(base!=false){base=true;}
-	exec("php "+((base)?config.basePath:'')+file,function(e,out,eout){
-		console.log(e+" : "+eout);
-		if(!empty(out)){
-			if(typeof callback == "function"){
-				callback(out);
-			}
-		}else{
-		    
-			readFile(file,callback,base);
-		}
-	});
-}
-
-// Read a client file and asynchronously return the contents 
-function readFile(file,callback,base){
-	if(base!=false){base=true;}
-		if(typeof callback == 'function'){
-			fs.readFile(((base)?config.basePath:'')+file,'utf-8',function(e,data){
-			if(!e){
-				callback(data);
-			}else{
-				callback("404");
-			}
-		});
-	}
-}
+var php = helpers.php;
+var readFile = helpers.readFile;
 
 // Simple http server that responds with server information and client files
 
@@ -62,7 +32,7 @@ var server = http.createServer(function(request, response) { // One day this wil
         case "php":
         	php("-v",function(out){
         		response.end(out);
-        	},false);
+        	});
         	break;
         case "port":
         	response.end(config.listenPort.toString());
@@ -77,11 +47,11 @@ var server = http.createServer(function(request, response) { // One day this wil
                         	console.log(req[2]);
                         	php(req[2],function(out){
                         		response.end(out);
-                        	});
+                        	},true);
                         }else{
                         	readFile(req[2], function(data){
                         		response.end(data);
-                        	});
+                        	},true);
                         }
                     }catch(e){
                         response.writeHead(404); response.end();

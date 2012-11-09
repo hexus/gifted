@@ -79,17 +79,15 @@ servers.io.start = function(ioPort){
             socketType:'Socket.io'
         });
         users[count] = user;
+        console.log("Socket.io client connected");
         
-        socket.on('connect',function(){
-            console.log("Socket.io client connected");    
-        });
         socket.on('message',function(data){
             handleData.call(user,data);
         });
         socket.on('disconnect',function(){
             delete(users[user.id]);
             users.send(user.id);
-            console.log("Socket.io client disconnected");
+            console.log("Socket.io client '"+user.name+"' disconnected");
         });
     });
     

@@ -3,9 +3,10 @@
 	"version": "0.0.5",
 	"main": "gifted.js",
 	"dependencies":	{
-		"async" : "*",
-		"mime" : "*",
-		"socket.io" : "*"
+		"async" 	: "*",
+		"mime" 		: "*",
+		"mysql" 	: "*",
+		"socket.io"	: "*"
 	},
 	"private": true
 }
