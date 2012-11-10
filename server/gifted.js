@@ -1,21 +1,27 @@
 // Modules
 var config = require('./lib/Config');
+var db = require('./lib/DB');
 var http = require('./lib/HttpServer');
 var sockets = require('./lib/Sockets');
 
 // Initial output
 console.log("Gifted Server v"+config.version);
 
-// Connect to database and start servers
-console.log("Connecting to database...");
-var db = require('./lib/DB').connect(function(err){
-    if(!err){
-        console.log("Connected!");
-        var httpServer = http.start(config.httpPort);
-        var tcpServer = sockets.tcp.start(config.listenPort);
-        var ioServer = sockets.io.start(config.listenPort2);
+// Connect to database server
+console.log("Connecting to database server");
+db.connect();
+db.testDatabase(function(exists){
+    if(!exists){
+        db.create(function(){listen();});
     }else{
-        console.log("Database connection error: " + err);
+        listen();
     }
 });
 
+// Start the servers
+var httpServer, tcpServer, ioServer;
+var listen = function(){
+    httpServer = http.start(config.httpPort);
+    tcpServer = sockets.tcp.start(config.listenPort);
+    ioServer = sockets.io.start(config.listenPort2);
+}

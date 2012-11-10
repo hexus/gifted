@@ -15,6 +15,7 @@ Most of the key intentions and features behind the game server are fairly common
 - Receive and respond with a unique, basic protocol
 - Keep information session-persistent
 - Retrieve data (accounts, characters, game worlds) from MySQL and keep it up to date as the server is running
+- Run the same simulation as the game client and remain the authority over the game state
 
 However, some will be more advanced:
 
@@ -27,4 +28,4 @@ However, some will be more advanced:
 The idea of using a master server(s) is one I haven't fully developed, but the intention would be akin to that of a DNS. 
 
 Instead of users connecting to a particular server and then choosing from a number of worlds within that server, they could simply choose
-a world and the master server would take care of what connection they need to make, abstracting the concept of a server from the user.
+a world and the master server would take care of what connection they need to make, abstracting servers from the user.
