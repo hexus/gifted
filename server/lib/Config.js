@@ -25,7 +25,7 @@ c.db = {
     port        : env.DOTCLOUD_DB_MYSQL_PORT || 3306,
     user        : env.DOTCLOUD_DB_MYSQL_LOGIN || 'root',
     password    : env.DOTCLOUD_DB_MYSQL_PASSWORD || 'novasex',
-    database    : 'gifted_test',
+    database    : 'gifted_test2',
     flags       : '-CONNECT_WITH_DB', // Prevents immediate connection to database (it might not exist)
     sql         : readFile('sql/gifted.sql'),
     multipleStatements  : true

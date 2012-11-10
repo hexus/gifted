@@ -13,7 +13,7 @@ db.connect = function(){
 }
 
 db.create = function(callback){
-    c.query(config.db.sql,function(err,result){
+    c.query(config.db.sql.replace('gifted_alpha',escape(config.db.database)),function(err,result){
         console.log(err);
         console.log(result);
         callback();
