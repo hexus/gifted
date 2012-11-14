@@ -6,13 +6,13 @@ module.exports = h;
 
 // Helper functions
 var chr = h.chr = function(n){return String.fromCharCode(n);}
-var empty = h.empty = function(o){return o=="" || o==0 || o==undefined;}
+var empty = h.empty = function(o){return o=="" || o==0 || o==undefined || o=={};}
 var href = h.href = function(href){return "<a href=\"" + href + "\">" + href + "</a>";}
 
 // Execute a PHP command and asynchronously return the output
 h.php = function(file,callback,base){
     if(base!=false){base=true;}
-    exec("php "+((base)?config.basePath:'')+file,function(e,out,eout){
+    exec("php "+((base)?config.basePath:'')+file,{maxBuffer:4096*1024},function(e,out,eout){
         if(!empty(out)){
             if(typeof callback == "function"){
                 callback(out);

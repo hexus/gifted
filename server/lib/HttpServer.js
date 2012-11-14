@@ -1,7 +1,9 @@
 var fs = require('fs');
 var http = require('http');
 var mime = require('mime');
+var zlib = require('zlib');
 var config = require('./Config');
+var global = require('./Global');
 var helpers = require('./Helpers');
 var User = require('./User');
 var users = require('./Users');
@@ -9,6 +11,10 @@ var empty = helpers.empty;
 var href = helpers.href;
 var php = helpers.php;
 var readFile = helpers.readFile;
+
+var Map = require('./Map');
+//var map = new Map();
+//map.generate();
 
 // Simple http server that responds with server information and client files
 
@@ -34,6 +40,10 @@ var server = http.createServer(function(request, response) { // One day this wil
         		response.end(out);
         	});
         	break;
+        case "map":
+        	response.writeHead(200,{'Content-Type':'text/plain'});
+        	response.end(map.createHtml());
+        	break;
         case "port":
         	response.end(config.listenPort.toString());
         	break;
@@ -44,7 +54,6 @@ var server = http.createServer(function(request, response) { // One day this wil
                         response.writeHead(200, {'Content-Type': mime.lookup(req[2])});
                         if(request.url.substr(-4)==".php"){
                         	response.writeHead(200, {'Content-Type': 'text/html'});
-                        	console.log(req[2]);
                         	php(req[2],function(out){
                         		response.end(out);
                         	},true);

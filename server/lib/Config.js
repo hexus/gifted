@@ -10,26 +10,37 @@ try{
     env = readJson('/home/dotcloud/environment.json');
     c.live = true;
     c.basePath = "/home/dotcloud/current/client/";
+    c.static = readJson('/home/dotcloud/current/config.json');
 }catch(e){
 	env = false;
 	c.live = false;
-	c.basePath = "C:/cygwin/home/Hexus/gifted/src/client/";
-    //console.log("Environment " + e);
+	c.basePath = "C:/cygwin/home/Hexus/gifted/client/";
+	c.static = readJson('C:/cygwin/home/Hexus/gifted/server/config.json');
     console.log("### Development environment ###");
+}
+// Static config
+try{
+	var s = readJson('/home/dotcloud')
+}catch(e){
+	
 }
 env = (env) ? env : ((process.env)?process.env:false);
 c.version = readJson('./package.json').version  || "Unknown"; 
-c.httpPort = 8080;
+c.httpPort = c.static.httpPort || 8080;
 c.db = {
     host        : env.DOTCLOUD_DB_MYSQL_HOST || 'localhost',
     port        : env.DOTCLOUD_DB_MYSQL_PORT || 3306,
     user        : env.DOTCLOUD_DB_MYSQL_LOGIN || 'root',
     password    : env.DOTCLOUD_DB_MYSQL_PASSWORD || 'novasex',
-    database    : 'gifted_test2',
+    database    : 'gifted_test',
     flags       : '-CONNECT_WITH_DB', // Prevents immediate connection to database (it might not exist)
-    sql         : readFile('sql/gifted.sql'),
+    sql         : 'CREATE DATABASE IF NOT EXISTS ' + this.database + '; '
+    			+ 'USE' + this.database + ';' + readFile('sql/gifted.sql'),
     multipleStatements  : true
 };
+c.worlds = c.static.maps || [
+	"Buren"
+]
 c.clientPath = c.basePath+"index.php";
 c.listenPort = env.PORT_GAME || 7000;
 c.listenPort2 = env.PORT_GAME2 || 7001;

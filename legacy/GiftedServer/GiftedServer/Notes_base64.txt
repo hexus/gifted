@@ -1,0 +1,8 @@
+﻿BASE72 CHARSET
+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:;.,#@[]{}
+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?!£$%&+-*/
+
+2 digits: 5183
+3 digits: 373248
+4 digits: 26873856
+5 digits: 1934917632
