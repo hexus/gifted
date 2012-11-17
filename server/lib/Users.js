@@ -2,6 +2,8 @@ var async = require('async');
 var empty = require('./Helpers').empty;
 var User = require('./User');
 
+var count = 0;
+
 var warning = function(w){
     console.log("User collection warning: "  + w);
 }
@@ -10,31 +12,41 @@ var error = function(e){
     if(e){console.log("User collection error: " + e);}
 }
 
-// Collection
-var users = []; // Collection of users (integer keys pls)
+var Users = function(){
+	this.collection = [];
+};
 
-users.add = function(u){
+var p = Users.prototype;
+
+p.get = function(id){
+	return this.collection[id] || false;
+}
+
+p.add = function(u){
 	if(u instanceof User){
-		users[u.id] = u;
+		u.id = u.id || ++count;
+		this.collection[u.id] = u;
 	}
 }
 
-users.remove = function(u){
+p.remove = function(u){
 	if(u instanceof User){
-		delete[users[u.id]];
+		delete[this.collection[u.id]];
 	}else if(typeof(u)=='number'){
-		delete[users[u]];
+		delete[this.collection[u]];
 	}
 }
 
-users.send = function(str,ex){
+p.send = function(str,ex){
     if(empty(ex)){ex=null;}
     if(!empty(str)){
-        async.forEach(users,function(i,c){ // Parallel baby (only takes arrays >:/)
-            if(i instanceof User && i!=ex){
-                i.send(str);
+        async.forEach(this.collection,function(i,c){ // Parallel baby (only takes arrays >:/)
+            if(i instanceof User){
+            	if(ex==null || i!=ex){
+                	i.send(str);
+               	}
             }else{
-                delete(users[i.id]);
+                delete(this.collection[i.id]);
                 warning("Non-user removed from collection");
             }
             c();
@@ -48,17 +60,19 @@ users.send = function(str,ex){
         }*/
     }
 }
-users.sendUser = function(u){
-	users.send('/uc ' + u.id + ' ' + u.name, u); // Send user to all excluding self
+
+p.sendUser = function(u){
+	this.send('/uc ' + u.id + ' ' + u.name, u); // Send user to all excluding self
 }
-users.sendTo = function(u){ // Send users to given user
+
+p.sendTo = function(u){ // Send users to given user
     if(u instanceof User){ // Don't faff about mate
         // Asynchronous
-        async.forEach(users,function(i,c){
+        async.forEach(this.collection,function(i,c){
             if(i instanceof User){
                 if(i!=u){u.send('/uc ' + i.id + ' ' + i.name)};
             }else{
-                delete(users[i.id]);
+                delete(this.collection[i.id]);
                 warning("Non-User removed from collection");
             }
             c();
@@ -73,4 +87,4 @@ users.sendTo = function(u){ // Send users to given user
     }
 }
 
-module.exports = users;
+module.exports = Users;

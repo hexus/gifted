@@ -2,20 +2,39 @@ var async = require('async');
 var empty = require('./Helpers').empty;
 var Room = require('./Room');
 
-var rooms = [];
+var count = 0; // Count of rooms
 
-rooms.add = function(r){
+var Rooms = function(args){
+	this.collection = [];
+};
+
+var p = Rooms.prototype;
+
+p.get = function(id){
+	return (!id) ? this.collection : this.collection[id] || false;
+}
+
+p.list = function(){
+	var json = {};
+	for(var r in this.get()){
+		if(this.get(r)){
+			json[r] = {name:this.get(r).name};
+		}
+	}
+	return JSON.stringify(json);
+}
+
+p.add = function(r){
 	if(r instanceof Room){
-		rooms[r.name] = r;
+		r.id = r.id || ++count;
+		this.collection[r.id] = r;
 	}
 }
 
-rooms.remove = function(r){
+p.remove = function(r){
 	if(r instanceof Room){
-		delete[rooms[r.name]];
-	}else if(typeof(r)=='string'){
-		delete[rooms[r]];
+		delete[this.collection[r.id]];
 	}
 }
 
-module.exports = rooms;
+module.exports = Rooms;

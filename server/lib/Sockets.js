@@ -3,9 +3,10 @@ var io = require('socket.io');
 
 var handleData = require('./Handlers').handleData;
 var empty = require('./Helpers').empty;
+var global = require('./Global');
 var User = require('./User');
-var users = new require('./Global').users; // First port of call
-var count = 0; // Serves as the cumulative count of connections made
+var users = global.users; // First port of call
+var count = users.count = 0; // Serves as the cumulative count of connections made
 
 var servers = {tcp:{},io:{}};
 

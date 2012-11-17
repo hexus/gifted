@@ -6,7 +6,8 @@ var config = require('./Config');
 var global = require('./Global');
 var helpers = require('./Helpers');
 var User = require('./User');
-var users = require('./Users');
+var rooms = global.rooms;
+var users = global.users;
 var empty = helpers.empty;
 var href = helpers.href;
 var php = helpers.php;
@@ -31,6 +32,12 @@ var server = http.createServer(function(request, response) { // One day this wil
             resp = JSON.stringify(resp);
             response.end(resp);
             break;
+        case "rooms":
+        	response.end(rooms.list());
+        	break;
+        case "global":
+        	response.end(JSON.stringify(global));
+        	break;
         case "env":
             response.writeHead(200, {'Content-Type': 'application/json'});
             response.end(JSON.stringify(config));

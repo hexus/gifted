@@ -38,7 +38,7 @@ c.db = {
     			+ 'USE' + this.database + ';' + readFile('sql/gifted.sql'),
     multipleStatements  : true
 };
-c.worlds = c.static.maps || [
+c.worlds = c.static.worlds || [
 	"Buren"
 ]
 c.clientPath = c.basePath+"index.php";
