@@ -20,6 +20,24 @@ User.prototype = {
     	if(u instanceof User){
     		u.send('/uc ' + this.id + ' ' + this.name);
     	}
+    },
+    sendWorld: function(){
+    	var m = this.room.map;
+    	var p = m.getProperties();
+    	// World send (initial information)
+    	this.send("/ws ".concat(
+    		this.room.name,' ',
+    		p.worldSize.width,' ',
+    		p.worldSize.height,' ',
+    		p.regionSize.width,' ',
+    		p.regionSize.height,' ',
+    		p.tileSize,' ',
+    		p.spawn.x,' ',
+    		p.spawn.y
+    	));
+    	
+    	// World data (flattened map)
+    	this.send("/wd " + m.flat());
     }
 }
 

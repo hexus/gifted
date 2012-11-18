@@ -33,6 +33,7 @@ h.handleData = function(data){ // Called in context of a User
         	break;
         case "/info-request":
             // Early days innit
+            this.sendWorld();
             break;
         case "/c": // Chat
             users.send("/c " + this.id + " " + data.substr(3));

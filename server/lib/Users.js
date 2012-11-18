@@ -19,7 +19,7 @@ var Users = function(){
 var p = Users.prototype;
 
 p.get = function(id){
-	return this.collection[id] || false;
+	return (!id) ? this.collection : this.collection[id] || false;
 }
 
 p.add = function(u){
@@ -30,10 +30,14 @@ p.add = function(u){
 }
 
 p.remove = function(u){
+	var user;
 	if(u instanceof User){
-		delete[this.collection[u.id]];
+		user = u;
 	}else if(typeof(u)=='number'){
-		delete[this.collection[u]];
+		user = this.get(u);
+	}
+	if(user){
+		delete(this.collection[user.id]);
 	}
 }
 

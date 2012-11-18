@@ -26,9 +26,9 @@ var server = http.createServer(function(request, response) { // One day this wil
     switch(req[1]){ // req[0] always empty?
         case "users":
             var resp = {};
-            for(var i in users) // Synchronous because I'm truly lazy
-                if(users[i] instanceof User)
-                    resp[i] = {name:users[i].name,socketType:users[i].socketType}
+            for(var i in users.get()) // Synchronous because I'm truly lazy
+                if(users.get(i) instanceof User)
+                    resp[i] = {name:users.get(i).name,socketType:users.get(i).socketType}
             resp = JSON.stringify(resp);
             response.end(resp);
             break;

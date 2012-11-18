@@ -1,11 +1,12 @@
 var empty = require('./Helpers').empty;
 var User = require('./User');
 var Users = require('./Users');
+var Map = require('./Map');
 
 var Room = function(args){
 	this.id = args.id;
     this.name = args.name;
-    this.map = args.map || new require('./Map');
+    this.map = args.map || new Map(this.name);
     this.lobbyUsers = new Users(); // Users in room lobby
     this.users = new Users(); // Users in room world
 }
@@ -37,12 +38,18 @@ Room.prototype.joinUser = function(u,lobby){
 	}
 }
 
-Room.prototype.leaveUser = function(u,lobby){
-	lobby = !lobby ? false : true;
-	var space = lobby ? this.lobbyUsers : this.users;
+Room.prototype.leaveUser = function(u){
 	if(u instanceof User){
-		u.room = null;
-		space.remove(u);
-		space.send('/ud ' + u.id);
+		var space;
+		if(this.lobbyUsers.get(u.id)){
+			space = this.lobbyUsers;
+		}else if(this.users.get(u.id)){
+			space = this.users;
+		}
+		if(space){
+			u.room = null;
+			space.remove(u);
+			space.send('/ud ' + u.id);
+		}
 	}
 }

@@ -3,15 +3,13 @@ var db = require('./DB');
 
 var Map = function(name){
 	var that = this;
-	this.name = name || "Buren";
-	
+	this.name = name || 'Buren';
 	var worldSize = {width:8,height:4}
 	var regionSize = {width:64,height:64}
 	var tileSize = 40;
 	var spawn = {x:0,y:0}
 	
 	var regions = [];
-	
 	
 	db.connection.query("SELECT * FROM worlds WHERE name='"+this.name+"'",function(err,rows){
 		if(rows){
@@ -22,6 +20,9 @@ var Map = function(name){
 				tileSize = world.size * 10;
 				spawn.x = world.spawnX;
 				spawn.y = world.spawnY;
+				console.log('Loaded world \''+that.name+'\'');
+			}else{
+				that.generate();
 			}
 		}else{
 			console.log(err);
@@ -80,7 +81,7 @@ m.test = function(){
 }
 
 m.generate = function(){
-	console.log('Generating world');
+	console.log('Generating world \'' + this.name + '\'');
 	
 	var fullWidth = this.getWorldSize().width * this.getRegionSize().width;
 	var fullHeight = this.getWorldSize().height * this.getRegionSize().height;
@@ -88,7 +89,7 @@ m.generate = function(){
 	var smoothWidth = 20;
 	var smooth = 3;
 	
-	console.log("Size: " + fullWidth + ":" + fullHeight);
+	//console.log("Size: " + fullWidth + ":" + fullHeight);
 	
 	for(i=0;i<fullWidth;i++){
 		heights[i] = (fullHeight/2 - fullHeight/6) + (Math.random() * (fullHeight/2 + fullHeight/6));
@@ -128,6 +129,27 @@ m.generate = function(){
 	}
 	
 	// Done
+}
+
+m.flat = function(){
+	var str = '';
+	for(ry=0;ry<this.getWorldSize().height;ry++){
+		//out[ry] = [];
+		for(rx=0;rx<this.getWorldSize().width;rx++){
+			//out[ry][rx] = [];
+			for(y=0;y<this.getRegionSize().height;y++){
+				//out[ry][rx][y] = [];
+				for(x=0;x<this.getRegionSize().width;x++){
+					str += this.getTile(ry,rx,y,x)+',';
+				}
+			}
+		}
+	}
+	return str;
+}
+
+m.expand = function(str){
+	
 }
 
 m.print = function(){

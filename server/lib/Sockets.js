@@ -86,8 +86,10 @@ servers.io.start = function(ioPort){
             handleData.call(user,data);
         });
         socket.on('disconnect',function(){
-            users.remove(user.id);
-            users.send(user.id);
+        	if(user.room){
+        		user.room.leaveUser(user);
+        	}
+            users.remove(user);
             console.log("Socket.io client '"+user.name+"' disconnected");
         });
     });
