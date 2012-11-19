@@ -20,6 +20,7 @@ var Map = function(name){
 				tileSize = world.size * 10;
 				spawn.x = world.spawnX;
 				spawn.y = world.spawnY;
+				that.expand(world.map);
 				console.log('Loaded world \''+that.name+'\'');
 			}else{
 				that.generate();
@@ -42,30 +43,30 @@ var Map = function(name){
 	this.getTileSize = function(){return tileSize;}
 	this.getSpawn = function(){return spawn;}
 	this.getRegions = function(){return regions;}
-	this.validCoords = function(rY,rX,tY,tX){
+	this.validCoords = function(rX,rY,tX,tY){
 		return (rX>=0 && rX<worldSize.width &&
 				rY>=0 && rY<worldSize.height &&
 				tX>=0 && tX<regionSize.width &&
 				tY>=0 && tY<regionSize.height);
 	}
-	this.checkTile = function(rY,rX,tY,tX){ // Creates dimensions if they don't yet exist
-		if(this.validCoords(rY,rX,tY,tX)){
-			if(!regions[rY]){regions[rY] = [];}
-			if(!regions[rY][rX]){regions[rY][rX] = [];}
-			if(!regions[rY][rX][tY]){regions[rY][rX][tY] = [];}
-			if(!regions[rY][rX][tY][tX]){regions[rY][rX][tY][tX] = 0;}
+	this.checkTile = function(rX,rY,tX,tY){ // Creates dimensions if they don't yet exist
+		if(this.validCoords(rX,rY,tX,tY)){
+			if(!regions[rX]){regions[rX] = [];}
+			if(!regions[rX][rY]){regions[rX][rY] = [];}
+			if(!regions[rX][rY][tX]){regions[rX][rY][tX] = [];}
+			if(!regions[rX][rY][tX][tY]){regions[rX][rY][tX][tY] = 0;}
 			return true;
 		}
 		return false;
 	}
-	this.getTile = function(rY,rX,tY,tX){
-		if(this.checkTile(rY,rX,tY,tX)){
-			return regions[rY][rX][tY][tX];
+	this.getTile = function(rX,rY,tX,tY){
+		if(this.checkTile(rX,rY,tX,tY)){
+			return regions[rX][rY][tX][tY];
 		}
 	}
-	this.setTile = function(rY,rX,tY,tX,v){
-		if(this.checkTile(rY,rX,tY,tX)){
-			regions[rY][rX][tY][tX] = v;
+	this.setTile = function(rX,rY,tX,tY,v){
+		if(this.checkTile(rX,rY,tX,tY)){
+			regions[rX][rY][tX][tY] = v;
 		}
 	}
 	
@@ -123,12 +124,25 @@ m.generate = function(){
 			var tileX = x % this.getRegionSize().width;
 			var tileY = y % this.getRegionSize().height;
 			if(y >= fullHeight - heights[x]){
-				this.setTile(regY,regX,tileY,tileX,1);
+				this.setTile(regX,regY,tileX,tileY,1);
 			}
 		}
 	}
 	
 	// Done
+}
+
+m.expand = function(str){
+	var mapflat = str.split(','),
+		wSize = this.getWorldSize(),
+		rSize = this.getRegionSize();
+	for(i=0;i<mapflat.length;i++){
+		var rx = Math.floor(i / (rSize.width * rSize.height)) % wSize.width;
+		var ry = Math.floor(i / (rSize.width * rSize.height * wSize.width)) % wSize.height;
+		var x = i % rSize.width;
+		var y = Math.floor(i / rSize.width) % rSize.height;
+		this.setTile(rx,ry,x,y,mapflat[i]);
+	}
 }
 
 m.flat = function(){
@@ -140,16 +154,12 @@ m.flat = function(){
 			for(y=0;y<this.getRegionSize().height;y++){
 				//out[ry][rx][y] = [];
 				for(x=0;x<this.getRegionSize().width;x++){
-					str += this.getTile(ry,rx,y,x)+',';
+					str += this.getTile(rx,ry,x,y)+',';
 				}
 			}
 		}
 	}
 	return str;
-}
-
-m.expand = function(str){
-	
 }
 
 m.print = function(){
@@ -159,7 +169,7 @@ m.print = function(){
 			str += "Region: " + rx + "," + ry + "\n";
 			for(y=0;y<this.getRegionSize().height;y++){
 				for(x=0;x<this.getRegionSize().width;x++){
-					str += this.getTile(ry,rx,y,x);
+					str += this.getTile(rx,ry,x,y);
 				}
 				str += "\n";
 			}
@@ -180,7 +190,7 @@ m.createHtml = function(){
 			for(y=0;y<this.getRegionSize().height;y++){ // Tile row
 				chunk += '<div class="tilerow">';
 				for(x=0;x<this.getRegionSize().width;x++){ // Tile
-					var val = this.getTile(ry,rx,y,x);
+					var val = this.getTile(rx,ry,x,y);
 					chunk += '<div class="'+((val==1)?'t':'e')+'"></div>';
 				}
 				chunk += '</div>';

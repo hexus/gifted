@@ -18,7 +18,7 @@ p.list = function(){
 	var json = {};
 	for(var r in this.get()){
 		if(this.get(r)){
-			json[r] = {name:this.get(r).name};
+			json[r] = {name:this.get(r).name,mapProperties:this.get(r).map.getProperties()};
 		}
 	}
 	return JSON.stringify(json);

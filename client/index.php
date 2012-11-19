@@ -112,8 +112,12 @@ function init() {
 			case "/ud":
 				delete(users[d[1]]);
 				break;
-			case "/info-request":
-				this.sendWorld();
+			case "/ws": // World send
+				//
+				break;
+			case "/wd": // World data
+				//
+				break;
 			case "/c":
 				d = data.split(" ",2)
 				print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
