@@ -9,12 +9,12 @@ var readJson = function(file){ return JSON.parse(readFile(file)); }
 try{
     env = readJson('/home/dotcloud/environment.json');
     c.live = true;
-    c.basePath = "/home/dotcloud/current/client/";
+    c.basePath = "/home/dotcloud/current/";
     c.static = readJson('/home/dotcloud/current/config.json');
 }catch(e){
 	env = false;
 	c.live = false;
-	c.basePath = "C:/cygwin/home/Hexus/gifted/client/";
+	c.basePath = "C:/cygwin/home/Hexus/gifted/";
 	c.static = readJson('C:/cygwin/home/Hexus/gifted/server/config.json');
     console.log("### Development environment ###");
 }
@@ -41,7 +41,7 @@ c.db = {
 c.worlds = c.static.worlds || [
 	"Buren"
 ]
-c.clientPath = c.basePath+"index.php";
+c.clientPath = c.basePath+"client/index.php";
 c.listenPort = env.PORT_GAME || 7000;
 c.listenPort2 = env.PORT_GAME2 || 7001;
 c.connectUrl = "http://" + (env.DOTCLOUD_CLIENT_HTTP_HOST || "localhost:8080/client/");

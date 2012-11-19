@@ -1,0 +1,13 @@
+db:
+  type: mysql
+server:
+  type: nodejs
+  approot: server
+  config:
+    node_version: v0.8.x
+  ports:
+    game: tcp
+    game2: tcp
+client:
+  type: php
+  approot: client

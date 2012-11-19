@@ -18,7 +18,7 @@ h.php = function(file,callback,base){
                 callback(out);
             }
         }else{
-            readFile(file,callback,base);
+            h.readFile(file,callback,base);
         }
     });
 }
@@ -31,7 +31,7 @@ h.readFile = function(file,callback,base){
             if(!e){
                 callback(data);
             }else{
-                callback(e);
+                callback(JSON.stringify(e));
             }
         });
     }

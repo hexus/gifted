@@ -49,7 +49,7 @@ var server = http.createServer(function(request, response) { // One day this wil
         	break;
         case "map":
         	response.writeHead(200,{'Content-Type':'text/plain'});
-        	response.end(map.createHtml());
+        	response.end(JSON.stringify(rooms.get(1).map.flatLinear()));
         	break;
         case "port":
         	response.end(config.listenPort.toString());
@@ -58,14 +58,16 @@ var server = http.createServer(function(request, response) { // One day this wil
             if(req[2]!=undefined){
                 if(!empty(req[2])){ // if this is a client resource being requested
                     try{
+                        var url = request.url.substr(1);
+                        console.log(url);
                         response.writeHead(200, {'Content-Type': mime.lookup(req[2])});
-                        if(request.url.substr(-4)==".php"){
+                        if(url.substr(-4)==".php"){
                         	response.writeHead(200, {'Content-Type': 'text/html'});
-                        	php(req[2],function(out){
+                        	php(url,function(out){
                         		response.end(out);
                         	},true);
                         }else{
-                        	readFile(req[2], function(data){
+                        	readFile(url, function(data){
                         		response.end(data);
                         	},true);
                         }
@@ -97,7 +99,7 @@ var server = http.createServer(function(request, response) { // One day this wil
         case "favicon.ico":
             try{
                 response.writeHead(200, {'Content-Type': 'image/x-icon'});
-                fs.readFileSync(config.basePath+'favicon.ico',function(e,ico){
+                fs.readFileSync(config.basePath+'client/favicon.ico',function(e,ico){
                 	response.end(ico);
                 });
             }catch(e){

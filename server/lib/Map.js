@@ -162,6 +162,75 @@ m.flat = function(){
 	return str;
 }
 
+m.convertCords = function(xCord,yCord,tiles){
+    if(!tiles){tiles=false;}
+    var wSize = this.getWorldSize(),
+        rSize = this.getRegionSize(),
+        tileSize = this.getTileSize();
+    var xInd, yInd;
+    if(!tiles){
+        xInd = Math.floor(xCord/tileSize); // Divide to
+        yInd = Math.floor(yCord/tileSize); // region index
+    }else{
+        xInd = xCord;
+        yInd = yCord;
+    }
+    
+    var rx,ry,cx,cy;
+    
+    // loop x
+    if(xInd<0){
+        rx = wSize + Math.floor(xInd/rSize.width) % wSize.width;
+        cx = rSize.width + xInd % rSize.width;
+    }else{
+        rx = Math.floor(xInd/rSize.width) % wSize.width;
+        cx = xInd % rSize.width;
+    }   
+    
+    // cutoff top, loop bottom
+    if(yInd<0){
+        ry = 0;
+        cy = 0;
+    }else{
+        ry = Math.floor(yInd/rSize.height) % wSize.height;
+        cy = yInd % rSize.height;
+    }
+    
+    var rObj = {};
+    rObj["rx"] = rx; // Region
+    rObj["ry"] = ry;
+    rObj["x"] = cx; // Tile
+    rObj["y"] = cy;
+    return rObj;
+}
+
+m.flatLinear = function(){
+    var byteArr = [];
+    
+    var wSize = this.getWorldSize(),
+        rSize = this.getRegionSize();
+    
+    var dX1 = 0,
+        dY1 = 0,
+        dX2 = wSize.width * rSize.width,
+        dY2 = wSize.height * rSize.height;
+        
+    // Loop through view bounds, append tiles
+    var rx,ry,cx,cy,cord;
+    for(y=dY1;y<dY2;y++){
+        for(x=dX1;x<dX2;x++){
+            cord = this.convertCords(x,y,true);
+            rx = cord["rx"];
+            ry = cord["ry"];
+            cx = cord["x"];
+            cy = cord["y"];
+            var tileGet = this.getTile(rx,ry,cx,cy);
+            byteArr[x+y*(dX2)] = tileGet;
+        }
+    }
+    return byteArr;
+}
+
 m.print = function(){
 	var str = "";
 	for(ry=0;ry<this.getWorldSize().height;ry++){
@@ -205,4 +274,3 @@ m.createHtml = function(){
 }
 
 module.exports = Map;
-
