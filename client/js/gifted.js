@@ -14,21 +14,21 @@ requirejs.config({
                 return this.io;
             }
         },
-        'createjs':{
-            deps:['easeljs','tweenjs','movieclip'],
-            exports:'createjs',
-            init:function(){
-                return this.createjs;
-            }
-        },
-        'movieclip':['easeljs','tweenjs'],
-        'assets':{
-            deps:['createjs'],
-            exports:'lib',
-            init:function(){
-                return this.lib;
-            }
-        }
+		'createjs':{
+		    deps:['easeljs','tweenjs','movieclip'],
+		    exports:'createjs',
+		    init:function(){
+		        return this.createjs;
+		    }
+		},
+		'movieclip':['easeljs','tweenjs'],
+		'assets':{
+		    deps:['createjs'],
+		    exports:'lib',
+		    init:function(){
+		        return this.lib;
+		    }
+		}
     }
 });
 
@@ -42,12 +42,24 @@ function($,io,createjs,lib,Player){
     player.x = 90;
     player.y = 180;
     player.scaleX = player.scaleY = 3;
+    player.char.gotoAndStop(0);
 
     player.onClick = function(){
         player.char.gotoAndPlay("running");
     };
     
+    function center(domele,ele){
+    	domele.regX = parseInt($(ele).css('width'),10)/2;
+    	domele.regY = parseInt($(ele).css('height'),10)/2;
+    	domele.x = canvas.width/2-15;
+    	domele.y = canvas.height/2;
+    }
+    
     dom = {};
+    
+    dom.worldList = new createjs.DOMElement($('#worldList')[0]);
+    center(dom.worldList,'#worldList');
+    
     dom.head_prev = new createjs.DOMElement($("#headwear_prev")[0]);
     dom.head_next = new createjs.DOMElement($("#headwear_next")[0]);
     dom.head_prev.regX = dom.head_prev.regY = 0;
@@ -84,6 +96,7 @@ function($,io,createjs,lib,Player){
     
     stage = new createjs.Stage(canvas);
     stage.addChild(player);
+    stage.addChild(dom.worldList);
     stage.addChild(dom.head_prev);
     stage.addChild(dom.head_next);
     stage.addChild(dom.chat);
@@ -109,7 +122,15 @@ function($,io,createjs,lib,Player){
         var d = data.split(" ");
         switch(d[0]){
             case "/login-request":
-                this.send("/whoami");
+            	var worlds = JSON.parse(data.substr(d[0].length+1));
+            	var html = '';
+            	for(w in worlds){
+            		$('<input>').attr({
+            			type: 'button',
+            			value: worlds[w].name
+            		}).appendTo($('#worldList'));
+            	}
+                //this.send("/whoami");
                 break;
             case "/youare":
                 id = d[1];

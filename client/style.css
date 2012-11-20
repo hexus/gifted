@@ -1,5 +1,5 @@
 html,body{margin:0;padding:0;overflow:hidden;background-color:#111;}
-input,textarea{background-color:#ccc;color:#fff;border:none;resize:none;}
+input,textarea{background-color:#aaa;color:#eee;border:none;resize:none;}
 input[type=text]{padding:0 2px;}
 
 #wrap{}
@@ -12,7 +12,8 @@ input[type=text]{padding:0 2px;}
     margin-left: -423px; /* Negative half of width. */
     margin-top: -180px; /* Negative half of height. */
 }
-#canvas{background-color:#eee;}
-#chat{display:block;}
-#msg{width:80%;}
-#buffer{width:540px;height:200px;}
+#canvas{background-color:#ccc;}
+#worldList{width:100px;height:200px;background-color:#e0e0e0;z-index:1337;text-align:center;}
+#lobby #chat{display:block;}
+#lobby #msg{width:80%;}
+#lobby #buffer{width:540px;height:200px;}

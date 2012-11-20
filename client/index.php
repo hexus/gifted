@@ -16,18 +16,24 @@
 	<script src="<?=$url?>/socket.io/socket.io.js"></script>
 	<script src="assets.js"></script>
 	<script src="gifted.js"></script>
-	<!---->
+	<!-- -->
 </head>
 
 <body>
 	<div id="wrap">
 		<div id="client">
-			<input id="headwear_prev" type="button" value="<"/>
-			<input id="headwear_next" type="button" value=">"/>
-			<div id="chat">
-				<textarea id="buffer" readonly></textarea><br/>
-				<input id="msg" type="text" value=""/> <input id="send" type="button" value="Send"/>
+			<div id="worldList">
+				<h2>Worlds:</h2>
 			</div>
+			<div id="lobby">
+				<input id="headwear_prev" type="button" value="<"/>
+				<input id="headwear_next" type="button" value=">"/>
+				<div id="chat">
+					<textarea id="buffer" readonly></textarea><br/>
+					<input id="msg" type="text" value=""/> <input id="send" type="button" value="Send"/>
+				</div>
+			</div>
+			
 			<canvas id="canvas" width="846" height="360"></canvas>
 		</div>
 	</div>
