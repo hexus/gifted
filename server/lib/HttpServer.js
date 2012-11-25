@@ -5,6 +5,7 @@ var zlib = require('zlib');
 var config = require('./Config');
 var global = require('./Global');
 var helpers = require('./Helpers');
+var Room = require('./Room');
 var User = require('./User');
 var rooms = global.rooms;
 var users = global.users;
@@ -26,9 +27,13 @@ var server = http.createServer(function(request, response) { // One day this wil
     switch(req[1]){ // req[0] always empty?
         case "users":
             var resp = {};
-            for(var i in users.get()) // Synchronous because I'm truly lazy
-                if(users.get(i) instanceof User)
-                    resp[i] = {name:users.get(i).name,socketType:users.get(i).socketType}
+            for(var i in users.get()){ // Synchronous because I'm truly lazy
+                if(users.get(i) instanceof User){
+                	var u = users.get(i);
+                	var r = (u.room instanceof Room) ? u.room.name : '';
+                    resp[i] = {name:u.name,socketType:u.socketType,room:r}
+                }
+            }
             resp = JSON.stringify(resp);
             response.end(resp);
             break;
@@ -49,7 +54,22 @@ var server = http.createServer(function(request, response) { // One day this wil
         	break;
         case "map":
         	response.writeHead(200,{'Content-Type':'text/plain'});
-        	response.end(JSON.stringify(rooms.get(1).map.flatLinear()));
+        	var r = rooms.get();
+        	var resp = {};
+        	for(i in r){
+        		var m = r[i].map;
+        		resp[i] = {
+        			name: m.name,
+        			width: m.getWorldSize().width * m.getRegionSize().width,
+        			height: m.getWorldSize().height * m.getRegionSize().height,
+        			spawn: {
+        				x: m.getSpawn().x,
+        				y: m.getSpawn().y
+        			},
+        			flat: m.flatLinear()
+        		};
+        	}
+        	response.end(JSON.stringify(resp));
         	break;
         case "port":
         	response.end(config.listenPort.toString());

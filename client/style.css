@@ -1,8 +1,8 @@
-html,body{margin:0;padding:0;overflow:hidden;background-color:#111;}
+html,body{margin:0;padding:0;overflow:hidden;background-color:#111;font-family:"Trebuchet MS";color:#AAA;}
 input,textarea{background-color:#aaa;color:#eee;border:none;resize:none;}
 input[type=text]{padding:0 2px;}
 
-#wrap{}
+#wrap{opacity:0;}
 #client{
 	position: absolute;
     width: 846px;

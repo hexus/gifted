@@ -1,11 +1,11 @@
 requirejs.config({
     paths: {
        'jquery':'//code.jquery.com/jquery-1.8.2',
-       'socket.io':'http://localhost:7001/socket.io/socket.io',
-       'easeljs':'http://code.createjs.com/easeljs-0.5.0.min',
-       'tweenjs':'http://code.createjs.com/tweenjs-0.3.0.min',
-       'movieclip':'http://code.createjs.com/movieclip-0.5.0.min',
-       'preloadjs':'http://code.createjs.com/preloadjs-0.2.0.min'
+       'socket.io':'//localhost:7001/socket.io/socket.io',
+       'easeljs':'//code.createjs.com/easeljs-0.5.0.min',
+       'tweenjs':'//code.createjs.com/tweenjs-0.3.0.min',
+       'movieclip':'//code.createjs.com/movieclip-0.5.0.min',
+       'preloadjs':'//code.createjs.com/preloadjs-0.2.0.min'
     },
     shim: {
         'socket.io':{
@@ -34,6 +34,7 @@ requirejs.config({
 
 requirejs(['jquery','socket.io','createjs','assets','lib/player'],
 function($,io,createjs,lib,Player){
+$(function(){
     var canvas, stage, socket, player, id, users, dom, aspect=2.35;
 
     canvas = document.getElementById("canvas");
@@ -106,7 +107,10 @@ function($,io,createjs,lib,Player){
     
     
     // 
-    function print(str){$('#buffer').append(str+"\n");}
+    function print(){
+    	for(i=0;i<arguments.length;i++)
+    	$('#buffer').append(arguments[i]+"\n");
+    }
     users = {};
     
     socket = io.connect('http://localhost:7001');
@@ -120,15 +124,19 @@ function($,io,createjs,lib,Player){
     socket.on('message',function(data){
         console.log("Data: " + data);
         var d = data.split(" ");
+        var dstr = data.substr(d[0].length+1);
         switch(d[0]){
             case "/login-request":
             	var worlds = JSON.parse(data.substr(d[0].length+1));
             	var html = '';
             	for(w in worlds){
             		$('<input>').attr({
+            			'data-id':w,
             			type: 'button',
             			value: worlds[w].name
-            		}).appendTo($('#worldList'));
+            		}).appendTo($('#worldList')).click(function(){
+            			socket.send('/whoami ' + $(this).attr('data-id'));
+            		});
             	}
                 //this.send("/whoami");
                 break;
@@ -137,12 +145,17 @@ function($,io,createjs,lib,Player){
                 users[d[1]] = {name:d[2]};
                 break;
             case "/login-accept":
+            	$('#worldList').fadeOut('fast');
+            	$('#lobby').fadeIn('fast');
                 $('#buffer').empty();
                 $('#msg').focus();
                 break;
             case "/motd":
-                print(data.substr(d[0].length+1));
+                print(dstr);
                 break;
+            case "/sm":
+            	print('Server: '+dstr);
+            	break;
             case "/uc":
                 if(d[1]!=id){
                     users[d[1]] = {name:d[2]};
@@ -185,5 +198,11 @@ function($,io,createjs,lib,Player){
             msg();
         }
     });
+    
+    $('#wrap').fadeTo('fast',1);
+    $('#worldList').show();
+    $('#lobby').hide();
 
-});
+    
+
+})});

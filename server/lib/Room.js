@@ -27,7 +27,7 @@ Room.prototype.joinUser = function(u,lobby){
 	if(u instanceof User){
 		if(!empty(u.room)){
 			if(u.room instanceof Room){
-				u.room.leave(u);
+				u.room.leaveUser(u);
 			}
 		}
 		u.room = this;

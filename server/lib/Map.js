@@ -4,7 +4,7 @@ var db = require('./DB');
 var Map = function(name){
 	var that = this;
 	this.name = name || 'Buren';
-	var worldSize = {width:8,height:4}
+	var worldSize = {width:16,height:4}
 	var regionSize = {width:64,height:64}
 	var tileSize = 40;
 	var spawn = {x:0,y:0}
@@ -17,13 +17,14 @@ var Map = function(name){
 				var world = rows[0];
 				worldSize.width = world.width;
 				worldSize.height = world.height;
-				tileSize = world.size * 10;
+				tileSize = world.size;
 				spawn.x = world.spawnX;
 				spawn.y = world.spawnY;
-				that.expand(world.map);
+				that.expand(world.map); // Needs to be LONGTEXT in MySQL
 				console.log('Loaded world \''+that.name+'\'');
 			}else{
 				that.generate();
+				that.save();
 			}
 		}else{
 			console.log(err);
@@ -69,6 +70,10 @@ var Map = function(name){
 			regions[rX][rY][tX][tY] = v;
 		}
 	}
+	this.setSpawn = function(x,y){
+		spawn.x = x;
+		spawn.y = y;
+	}
 	
 };
 
@@ -79,6 +84,13 @@ m.test = function(){
 	return [
 		this.getWorldSize(), this.getRegionSize(), this.getTileSize(), this.getSpawn()
 	]
+}
+
+m.save = function(){ // swag
+	var values = [this.name, this.getTileSize(), this.getWorldSize().width, this.getWorldSize().height, this.flat(), this.getSpawn().x, this.getSpawn().y];
+	var values_sql = "'" + values.join("','") + "'";
+	db.connection.query("REPLACE INTO worlds (name,size,width,height,map,spawnX,spawnY) "+
+						"VALUES ("+values_sql+")");
 }
 
 m.generate = function(){
@@ -112,10 +124,11 @@ m.generate = function(){
 		heights = newHeights;
 	}
 	
-	this.spawn = {
+	var spawn = {
 		x : Math.round(fullWidth*0.5),
-		y : heights.length - heights[Math.round(heights.length*0.5)] - 2
+		y : Math.round(heights.length - heights[Math.round(heights.length*0.5)]) - 2
 	};
+	this.setSpawn(spawn.x,spawn.y);
 	
 	for(var y=0;y<fullHeight;y++){
 		for(var x=0;x<fullWidth;x++){
@@ -159,6 +172,7 @@ m.flat = function(){
 			}
 		}
 	}
+	
 	return str;
 }
 
@@ -225,7 +239,7 @@ m.flatLinear = function(){
             cx = cord["x"];
             cy = cord["y"];
             var tileGet = this.getTile(rx,ry,cx,cy);
-            byteArr[x+y*(dX2)] = tileGet;
+            byteArr[x+y*(dX2)] = parseInt(tileGet,10);
         }
     }
     return byteArr;

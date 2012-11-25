@@ -1,6 +1,6 @@
 <?php
 	try{ // Check for dotCloud environment
-		$env = file_get_contents("/home/dotcloud/environment.json");
+		$env = @file_get_contents("/home/dotcloud/environment.json");
 	}catch(Exception $e){} // Handled below
 	
 	if(empty($env)){ // Local

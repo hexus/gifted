@@ -11,22 +11,23 @@ h.handleData = function(data){ // Called in context of a User
     switch(d[0]){
     	// Lobby handlers
         case "<policy-file-request/>": // Flash policy
-            this.send("<cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\"/></cross-domain-policy>");
+            this.send('<cross-domain-policy><allow-access-from domain="*" to-ports="*"/></cross-domain-policy>');
             break;
         case "/login-pls": // Client is ready to log in
             this.send('/login-request ' + rooms.list());
             break;
         case "/whoami": case "login":
+        	var room = rooms.get(1);
         	if(d[0]=="/whoami"){
         		this.send("/youare " + this.id + " " + this.name);
+        		if(d[1])
+        			room = rooms.get(d[1]) || room;
         	}else{ // login req
         		if(d[1]!=""){this.name = d[1];}
         	}
             this.send("/login-accept");
             this.send("/motd " + config.motd);
-            rooms.get(1).joinUser(users.get(this.id),true);
-            this.room.lobbyUsers.send("/uc " + this.id + " " + this.name);
-            this.room.lobbyUsers.sendTo(this);
+            room.joinUser(users.get(this.id),true);
             break;
         case "/r":
         	
@@ -36,7 +37,7 @@ h.handleData = function(data){ // Called in context of a User
             this.sendWorld();
             break;
         case "/c": // Chat
-            users.send("/c " + this.id + " " + data.substr(3));
+            this.room.send("/c " + this.id + " " + data.substr(3),true);
             break;
         default:
           console.log("Unrecognised data: " + data);
