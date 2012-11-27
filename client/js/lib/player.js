@@ -1,5 +1,5 @@
-define(['createjs','assets'],function(createjs,lib){
-    // Classes
+define(['createjs','assets'],
+function(createjs,lib){
     var Player = function(){
         this.char = this.addChild(new lib.mcPlayer_char());
         //this.char.gotoAndStop("static");

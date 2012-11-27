@@ -49,7 +49,7 @@ Room.prototype.leaveUser = function(u){
 		if(space){
 			u.room = null;
 			space.remove(u);
-			space.send('/ud ' + u.id);
+			//space.send('/ud ' + u.id);
 		}
 	}
 }

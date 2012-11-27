@@ -24,19 +24,24 @@ p.get = function(id){
 
 p.add = function(u){
 	if(u instanceof User){
-		u.id = u.id || ++count;
-		this.collection[u.id] = u;
+        u.id = u.id || ++count;
+        if(!this.collection[u.id]){
+    		this.collection[u.id] = u;
+		}else{
+		    error('User already exists in this collection with id ' + u.id);
+		}
 	}
 }
 
 p.remove = function(u){
 	var user;
-	if(u instanceof User){
+	if(u instanceof User){ // ref
 		user = u;
-	}else if(typeof(u)=='number'){
+	}else if(typeof(u)=='number'){ // id
 		user = this.get(u);
 	}
 	if(user){
+	    this.send('/ud ' + user.id);
 		delete(this.collection[user.id]);
 	}
 }

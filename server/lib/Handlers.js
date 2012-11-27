@@ -1,5 +1,6 @@
 var config = require('./Config');
 var global = require('./Global');
+var Room = require('./Room');
 var rooms = global.rooms;
 var users = global.users;
 
@@ -18,16 +19,23 @@ h.handleData = function(data){ // Called in context of a User
             break;
         case "/whoami": case "login":
         	var room = rooms.get(1);
-        	if(d[0]=="/whoami"){
-        		this.send("/youare " + this.id + " " + this.name);
-        		if(d[1])
-        			room = rooms.get(d[1]) || room;
-        	}else{ // login req
-        		if(d[1]!=""){this.name = d[1];}
-        	}
-            this.send("/login-accept");
-            this.send("/motd " + config.motd);
-            room.joinUser(users.get(this.id),true);
+    	    switch(d[0]){
+                case '/whoami':
+                    this.send("/youare " + this.id + " " + this.name);
+                    if(d[1])
+                        room = rooms.get(d[1]) || room;        	        
+                    break;
+                case '/login':
+                    if(d[1]!=""){this.name = d[1];}
+                    break;
+    	    }
+            if(room instanceof Room){
+                this.send("/login-accept " + room.id);
+                this.send("/motd " + config.motd);
+                room.joinUser(users.get(this.id),true);
+            }else{
+                this.send("/login-reject Invalid room");
+            }
             break;
         case "/r":
         	

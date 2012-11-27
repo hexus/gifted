@@ -33,7 +33,9 @@
 					<input id="msg" type="text" value=""/> <input id="send" type="button" value="Send"/>
 				</div>
 			</div>
-			
+			<div id="world">
+				
+			</div>
 			<canvas id="canvas" width="846" height="360"></canvas>
 		</div>
 	</div>
