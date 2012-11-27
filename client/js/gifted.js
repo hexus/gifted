@@ -1,4 +1,5 @@
-socketUrl = '//192.168.0.2:7001';
+socketUrl = '//localhost:7001';
+//socketUrl = '//192.168.0.2:7001';
 
 requirejs.config({
     paths: {
@@ -43,19 +44,21 @@ function($,io,createjs,lib,Player,World,Tile){
         canvas = document.getElementById("canvas");
         
         player = new Player();
-        player.x = 90;
-        player.y = 180;
-        player.scaleX = player.scaleY = 3;
-        player.char.gotoAndStop(0);
     
         player.onClick = function(){
             player.char.gotoAndPlay("running");
         };
         
-        var world = new World();
-        var tile = window.tile = new Tile();
-        tile.frame = 10;
-        world.addChild(tile);
+        var world = window.world = new World();
+        for(var i=0;i<11;i++){
+	        var tile = world.addChild(new Tile());
+	        tile.frame = i;
+	        tile.x = i*62; // FIX SCOPE WTF IS GOING ON
+	        tile.y = 10;
+	        
+        }
+        window.Tile = Tile;
+        console.log(world);
         
         function center(domele,ele){
         	domele.regX = parseInt($(ele).css('width'),10)/2;
@@ -155,10 +158,8 @@ function($,io,createjs,lib,Player,World,Tile){
                     users[d[1]] = {name:d[2]};
                     break;
                 case "/login-accept":
-                	$('#worldList').fadeOut('fast');
-                	$('#lobby').fadeIn('fast');
-                    $('#buffer').empty();
-                    $('#msg').focus();
+                	showLobby();
+					$('#buffer').empty();
                     break;
                 case "/motd":
                     print(dstr);
@@ -200,9 +201,12 @@ function($,io,createjs,lib,Player,World,Tile){
                 var cstr = data.substr(c[0].length+1);
                 if(data.substr(0,1)=='/'){ // Command
                     switch(c[0]){
-                        case '/world':
+                        case '/worlds':
                             selectWorld();
                             break;
+						case '/play':
+							showWorld();
+							break;
                     }
                 }else{ // Chat
                     socket.send("/c " + data);
@@ -224,8 +228,10 @@ function($,io,createjs,lib,Player,World,Tile){
         
         
         function hideAll(){
-            $('#worldList').hide();
+        	$('#worldList').hide();
             $('#lobby').hide();
+            player.visible = false;
+            world.visible = false;
         }
         
         function selectWorld(){
@@ -233,14 +239,28 @@ function($,io,createjs,lib,Player,World,Tile){
             $('#worldList').remove('input').show();
             socket.send('/login-pls');
         }
-        function lobby(){
+        function showLobby(){
             hideAll();
+	        player.x = 90;
+	        player.y = 180;
+	        player.scaleX = player.scaleY = 3;
+	        player.char.gotoAndStop(0);
+	        player.visible = true;
             $('#lobby').show();
+            $('#msg').focus();
+        }
+        function showWorld(){
+        	hideAll();
+        	player.x = player.y = 200;
+        	player.scaleX = player.scaleY = 1;
+        	player.char.gotoAndStop(0);
+        	player.visible = true;
+        	world.visible = true;
         }
         
+        hideAll();
         $('#wrap').fadeTo('fast',1);
         $('#worldList').show();
-        $('#lobby').hide();
     }
     
     $(function(){

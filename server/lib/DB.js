@@ -25,6 +25,10 @@ db.init = function(listen){
 			});
         }
     });
+    
+    db.connection.on('error',function(err){
+    	console.log('Database Fatal ' + err);
+    });
 }
 
 db.test = function(callback){

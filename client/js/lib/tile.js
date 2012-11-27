@@ -1,20 +1,23 @@
-define(['assets'],function(lib){
+define(['createjs','assets'],
+function(createjs,lib){
     var Tile = function(frame){
-        var _frame = 0;
-        this.clip = new lib.giftedclienttiles();
+    	this.initialize(); 
+    	var that = this;
+        var _f = 0;
+        
+    	this.clip = new lib.giftedclienttiles();
+		this.addChild(this.clip);
+        this.clip.gotoAndStop(0);
         
         this.__defineGetter__('frame',function(){ // Testing getters and setters
-            return _frame;
+            return _f;
         });
         this.__defineSetter__('frame',function(f){
-            _frame = f || 0;
-            this.clip.gotoAndStop(_frame);
+            _f = f || 0;
+            that.clip.gotoAndStop(_f);
         });
-        
-        this.addChild(this.clip);
-        this.clip.gotoAndStop(0);
     }
     
-    var p = Tile.prototype = new createjs.Container;
+    var p = Tile.prototype = new createjs.Container();
     return Tile;
 });

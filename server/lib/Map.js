@@ -172,7 +172,6 @@ m.flat = function(){
 			}
 		}
 	}
-	
 	return str;
 }
 

@@ -17,6 +17,6 @@ function(createjs,lib){
         this.char.scaleX = 1;
         this.char.scaleY = 1;
     }
-    var p = Player.prototype = new createjs.MovieClip();;
+    var p = Player.prototype = new createjs.MovieClip();
     return Player;
 });
