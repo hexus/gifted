@@ -53,9 +53,8 @@ function($,io,createjs,lib,Player,World,Tile){
         for(var i=0;i<11;i++){
 	        var tile = world.addChild(new Tile());
 	        tile.frame = i;
-	        tile.x = i*62; // FIX SCOPE WTF IS GOING ON
+	        tile.x = i*62;
 	        tile.y = 10;
-	        
         }
         window.Tile = Tile;
         console.log(world);
@@ -165,7 +164,7 @@ function($,io,createjs,lib,Player,World,Tile){
                     print(dstr);
                     break;
                 case "/sm":
-                	print('Server: '+dstr);
+                	print('Server: ' + dstr);
                 	break;
                 case "/uc":
                     if(d[1]!=id){
@@ -179,6 +178,11 @@ function($,io,createjs,lib,Player,World,Tile){
                         delete(users[d[1]]);
                     }
                     break;
+                case "/ur":
+                	if(d[1]&&d[2]){
+                		// todo
+                	}
+                	break;
                 case "/ws": // World send
                     //
                     break;
@@ -218,7 +222,7 @@ function($,io,createjs,lib,Player,World,Tile){
             msg();
         });
         
-        $('#send').parent().keydown(function(event) {
+        $('#send').parent().keydown(function(event){
             if(event.which == 13) {
                 //event.preventDefault();
                 msg($('#msg').val());

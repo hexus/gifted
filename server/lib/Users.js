@@ -2,15 +2,10 @@ var async = require('async');
 var empty = require('./Helpers').empty;
 var User = require('./User');
 
+var warning = function(w){console.log("User collection warning: "  + w);}
+var error = function(e){if(e){console.log("User collection error: " + e);}}
+
 var count = 0;
-
-var warning = function(w){
-    console.log("User collection warning: "  + w);
-}
-
-var error = function(e){
-    if(e){console.log("User collection error: " + e);}
-}
 
 var Users = function(){
 	this.collection = [];
@@ -20,6 +15,18 @@ var p = Users.prototype;
 
 p.get = function(id){
 	return (!id) ? this.collection : this.collection[id] || false;
+}
+
+p.resolve = function(u){
+	var user;
+	if(u instanceof User){ // ref
+		user = u;
+	}else if(typeof(u)=='number'){ // id
+		user = this.get(u);
+	}else{
+		user = false;
+	}
+	return user;
 }
 
 p.add = function(u){
@@ -34,12 +41,7 @@ p.add = function(u){
 }
 
 p.remove = function(u){
-	var user;
-	if(u instanceof User){ // ref
-		user = u;
-	}else if(typeof(u)=='number'){ // id
-		user = this.get(u);
-	}
+	var user = this.resolve(u);
 	if(user){
 	    this.send('/ud ' + user.id);
 		delete(this.collection[user.id]);
@@ -51,7 +53,7 @@ p.send = function(str,ex){
     if(!empty(str)){
         async.forEach(this.collection,function(i,c){ // Parallel baby (only takes arrays >:/)
             if(i instanceof User){
-            	if(ex==null || i!=ex){
+            	if(!ex || i!=ex){
                 	i.send(str);
                	}
             }else{
@@ -71,6 +73,7 @@ p.send = function(str,ex){
 }
 
 p.sendUser = function(u){
+	u = this.resolve(u);
 	this.send('/uc ' + u.id + ' ' + u.name, u); // Send user to all excluding self
 }
 

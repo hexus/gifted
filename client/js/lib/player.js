@@ -1,6 +1,7 @@
 define(['createjs','assets'],
 function(createjs,lib){
     var Player = function(){
+    	this.initialize();
         this.char = this.addChild(new lib.mcPlayer_char());
         //this.char.gotoAndStop("static");
         this.char.head.wear.gotoAndStop(0);

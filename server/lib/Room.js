@@ -21,6 +21,15 @@ Room.prototype.send = function(str,lobby){
 		this.users.send(str);
 }
 
+Room.prototype.resolveUser = function(u){
+	return this.lobbyUsers.resolve(u) || this.users.resolve(u);
+}
+
+Room.prototype.space = function(u){
+	u = this.resolveUser(u);
+	return (this.lobbyUsers[u.id]) ? this.lobbyUsers : this.users;
+}
+
 Room.prototype.joinUser = function(u,lobby){
 	lobby = !lobby ? false : true;
 	var space = lobby ? this.lobbyUsers : this.users;
@@ -38,7 +47,21 @@ Room.prototype.joinUser = function(u,lobby){
 	}
 }
 
+Room.prototype.swapUser = function(u){
+	u = this.resolveUser(u);
+	if(u instanceof User){
+		var from = this.space(u);
+		var to = (from==lobbyUsers) ? this.users : this.lobbyUsers;
+		delete(from[u.id]);
+		to[u.id] = u;
+		u.inLobby = (to==this.lobbyUsers);
+		from.send('/ur ' + u.id + ' 0');
+		to.send('/ur ' + u.id + ' 1');
+	}
+}
+
 Room.prototype.leaveUser = function(u){
+	u = this.resolveUser(u);
 	if(u instanceof User){
 		var space;
 		if(this.lobbyUsers.get(u.id)){
