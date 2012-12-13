@@ -43,7 +43,7 @@ p.add = function(u){
 p.remove = function(u){
 	var user = this.resolve(u);
 	if(user){
-	    this.send('/ud ' + user.id);
+	    //this.send('/ud ' + user.id);
 		delete(this.collection[user.id]);
 	}
 }

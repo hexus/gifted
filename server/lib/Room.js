@@ -4,16 +4,31 @@ var Users = require('./Users');
 var Map = require('./Map');
 
 var Room = function(args){
+    var that = this;
+    
 	this.id = args.id;
     this.name = args.name;
     this.map = args.map || new Map(this.name);
     this.lobbyUsers = new Users(); // Users in room lobby
     this.users = new Users(); // Users in room world
+    
+    this.fps = args.fps;
+    this.step = 0;
+    this.tickSpeed = 1/this.fps*1000;
+    this.timer = setInterval(function(){that.tick();},this.tickSpeed);
+    this.ontick = function(){}
 }
+
+var p = Room.prototype;
 
 module.exports = Room;
 
-Room.prototype.send = function(str,lobby){
+p.tick = function(){
+    this.step++;
+    this.ontick.call(this);
+}
+
+p.send = function(str,lobby){
 	lobby = !lobby ? false : true;
 	if(lobby)
 		this.lobbyUsers.send(str);
@@ -21,16 +36,16 @@ Room.prototype.send = function(str,lobby){
 		this.users.send(str);
 }
 
-Room.prototype.resolveUser = function(u){
+p.resolveUser = function(u){
 	return this.lobbyUsers.resolve(u) || this.users.resolve(u);
 }
 
-Room.prototype.space = function(u){
+p.space = function(u){
 	u = this.resolveUser(u);
-	return (this.lobbyUsers[u.id]) ? this.lobbyUsers : this.users;
+	return (this.lobbyUsers.get(u.id)) ? this.lobbyUsers : this.users;
 }
 
-Room.prototype.joinUser = function(u,lobby){
+p.joinUser = function(u,lobby){
 	lobby = !lobby ? false : true;
 	var space = lobby ? this.lobbyUsers : this.users;
 	if(u instanceof User){
@@ -47,7 +62,7 @@ Room.prototype.joinUser = function(u,lobby){
 	}
 }
 
-Room.prototype.swapUser = function(u){
+p.swapUser = function(u){
 	u = this.resolveUser(u);
 	if(u instanceof User){
 		var from = this.space(u);
@@ -55,12 +70,12 @@ Room.prototype.swapUser = function(u){
 		delete(from[u.id]);
 		to[u.id] = u;
 		u.inLobby = (to==this.lobbyUsers);
-		from.send('/ur ' + u.id + ' 0');
-		to.send('/ur ' + u.id + ' 1');
+		from.send('/ud ' + u.id);
+		to.sendUser(u);
 	}
 }
 
-Room.prototype.leaveUser = function(u){
+p.leaveUser = function(u){
 	u = this.resolveUser(u);
 	if(u instanceof User){
 		var space;
@@ -72,7 +87,7 @@ Room.prototype.leaveUser = function(u){
 		if(space){
 			u.room = null;
 			space.remove(u);
-			//space.send('/ud ' + u.id);
+			space.send('/ud ' + u.id);
 		}
 	}
 }

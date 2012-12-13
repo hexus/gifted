@@ -16,14 +16,22 @@ var httpServer, tcpServer, ioServer;
 var boot = function(){
 	for(var m in config.worlds){
 		rooms.add(new Room({
-			name:config.worlds[m]
+			name:config.worlds[m],
+			fps:config.fps
 		}));
+		if(m==1){
+		    rooms.get(1).ontick = function(){
+                var sec = this.step/this.fps;
+                if(sec%600==0)
+                    console.log('World tick: ' + sec/60 + ' minutes (step ' + this.step + ')');
+            }
+		}
 	}
     httpServer = http.start(config.httpPort);
     tcpServer = sockets.tcp.start(config.listenPort);
     ioServer = sockets.io.start(config.listenPort2);
 }
 
-// Database (listens on success, terminates on failure)
+// Database (boots on success, terminates on failure)
 console.log("Connecting to database server");
 db.init(boot);

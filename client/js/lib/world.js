@@ -1,8 +1,19 @@
-define(['createjs','assets'],function(createjs,lib){
-    var World = function(){
-        this.initialize(); // The necessity of this call is not clear ANYWHERE in the docs >:/
-        //this.name = '';
+define(['createjs','assets','node/Map'],function(createjs,lib,Map){
+    var World = function(map){
+        if(map instanceof Map){ 
+            this.initialize();
+            
+            this.id = 0;
+            this.name = '';
+            
+            this.map = map;
+        }
     }
     var p = World.prototype = new createjs.Container();
+
+    p.tick = function(){
+        
+    }
+    
     return World;
 });

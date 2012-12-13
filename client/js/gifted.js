@@ -19,6 +19,7 @@ requirejs.config({
         
         // Dynamic libs
         'socket.io':socketUrl+'/socket.io/socket.io',
+        'node':'/client/node',
     },
     shim: {
         'socket.io':{
@@ -36,8 +37,10 @@ requirejs.config({
     }
 });
 
-requirejs(['jquery','socket.io','createjs','assets','lib/player','lib/world','lib/tile'],
-function($,io,createjs,lib,Player,World,Tile){
+requirejs(['jquery','socket.io','createjs','assets','lib/player','lib/world','lib/tile','node/Map'],
+function($,io,createjs,lib,Player,World,Tile,Map){
+
+
     function init(){
         var canvas, stage, socket, player, id, users, dom, aspect=2.35;
         
@@ -49,7 +52,7 @@ function($,io,createjs,lib,Player,World,Tile){
             player.char.gotoAndPlay("running");
         };
         
-        var world = window.world = new World();
+        var world = window.world = new World(new Map());
         for(var i=0;i<11;i++){
 	        var tile = world.addChild(new Tile());
 	        tile.frame = i;
@@ -178,7 +181,7 @@ function($,io,createjs,lib,Player,World,Tile){
                         delete(users[d[1]]);
                     }
                     break;
-                case "/ur":
+                case "/uw":
                 	if(d[1]&&d[2]){
                 		// todo
                 	}
@@ -260,6 +263,7 @@ function($,io,createjs,lib,Player,World,Tile){
         	player.char.gotoAndStop(0);
         	player.visible = true;
         	world.visible = true;
+        	socket.send('/info-request');
         }
         
         hideAll();

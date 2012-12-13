@@ -67,7 +67,7 @@ var server = http.createServer(function(request, response) { // One day this wil
         				y: m.getSpawn().y
         			},
         			flat: m.flatLinear()
-        		};
+        		}
         	}
         	response.end(JSON.stringify(resp));
         	break;
@@ -77,22 +77,34 @@ var server = http.createServer(function(request, response) { // One day this wil
         case "client":
             if(req[2]!=undefined){
                 if(!empty(req[2])){ // if this is a client resource being requested
-                    try{
-                        var url = request.url.substr(1);
-                        console.log(url);
-                        response.writeHead(200, {'Content-Type': mime.lookup(req[2])});
-                        if(url.substr(-4)==".php"){
-                        	response.writeHead(200, {'Content-Type': 'text/html'});
-                        	php(url,function(out){
-                        		response.end(out);
-                        	},true);
+                    if(req[2]=='node'){ // shared module request
+                        var shared = ['Map.js'];
+                        if(shared.indexOf(req[3])>-1){
+                            response.writeHead(200,{'Content-Type':mime.lookup(req[3])});
+                            readFile('server/lib/'+req[3], function(data){
+                                response.end(data);
+                            },true);
                         }else{
-                        	readFile(url, function(data){
-                        		response.end(data);
-                        	},true);
+                            response.writeHead(404);
+                            response.end();
                         }
-                    }catch(e){
-                        response.writeHead(404); response.end();
+                    }else{ // normal http request
+                        try{
+                            var url = request.url.substr(1);
+                            response.writeHead(200, {'Content-Type': mime.lookup(req[2])});
+                            if(url.substr(-4)==".php"){
+                            	response.writeHead(200, {'Content-Type': 'text/html'});
+                            	php(url,function(out){
+                            		response.end(out);
+                            	},true);
+                            }else{
+                            	readFile(url, function(data){
+                            		response.end(data);
+                            	},true);
+                            }
+                        }catch(e){
+                            response.writeHead(404); response.end();
+                        }
                     }
                 }else{
                     try{

@@ -11,6 +11,7 @@ try{
     c.live = true;
     c.basePath = "/home/dotcloud/current/";
     c.static = readJson('/home/dotcloud/current/config.json');
+    console.log('### Live environment ###');
 }catch(e){
 	env = false;
 	c.live = false;
@@ -18,12 +19,7 @@ try{
 	c.static = readJson('C:/cygwin/home/Hexus/gifted/server/config.json');
     console.log("### Development environment ###");
 }
-// Static config
-try{
-	var s = readJson('/home/dotcloud')
-}catch(e){
-	
-}
+
 env = (env) ? env : ((process.env)?process.env:false);
 c.version = readJson('./package.json').version  || "Unknown"; 
 c.httpPort = c.static.httpPort || 8080;
@@ -40,11 +36,12 @@ c.db = {
 };
 c.worlds = c.static.worlds || [
 	"Buren"
-]
+];
 c.clientPath = c.basePath+"client/index.php";
 c.listenPort = env.PORT_GAME || 7000;
 c.listenPort2 = env.PORT_GAME2 || 7001;
 c.connectUrl = "http://" + (env.DOTCLOUD_CLIENT_HTTP_HOST || "localhost:8080/client/");
 c.motd = "Welcome to the new Gifted Server v" + c.version + "! Thanks for testing.";
+c.fps = 32;
 
 c.env = env;
