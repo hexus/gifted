@@ -37,106 +37,42 @@ requirejs.config({
     }
 });
 
-requirejs(['jquery','socket.io','createjs','assets','lib/player','lib/world','lib/tile','node/Map'],
-function($,io,createjs,lib,Player,World,Tile,Map){
-
-
+requirejs(['jquery','socket.io','createjs','assets','lib/global','lib/ui','lib/player','lib/world','lib/tile','node/Map'],
+function($,io,createjs,lib,Global,Ui,Player,World,Tile,Map){
     function init(){
-        var canvas, stage, socket, player, id, users, dom, aspect=2.35;
+        var canvas, stage, socket, player, id, users, world, aspect=2.35;
+        
+        window.gifted = Global; // Expose global object for debugging
+        
+        tileSheetBuilder = new createjs.SpriteSheetBuilder();
+        tileSheetBuilder.addMovieClip(new lib.giftedclienttiles(),new createjs.Rectangle(-4,-4,72,72));
+        tileSheetBuilder.build();
+        tiles = Global.tiles = tileSheetBuilder.spriteSheet;
         
         canvas = document.getElementById("canvas");
+        player = Global.player = new Player();
+        users = Global.users = {};
+        stage = Global.stage = new createjs.Stage(canvas);
+        world = Global.world = new World(new Map());
+        socket = Global.socket = io.connect(socketUrl);
         
-        player = new Player();
-    
-        player.onClick = function(){
-            player.char.gotoAndPlay("running");
-        };
-        
-        var world = window.world = new World(new Map());
-        for(var i=0;i<11;i++){
-	        var tile = world.addChild(new Tile());
-	        tile.frame = i;
-	        tile.x = i*62;
-	        tile.y = 10;
-        }
-        window.Tile = Tile;
-        console.log(world);
-        
-        function center(domele,ele){
-        	domele.regX = parseInt($(ele).css('width'),10)/2;
-        	domele.regY = parseInt($(ele).css('height'),10)/2;
-        	domele.x = canvas.width/2-15;
-        	domele.y = canvas.height/2;
-        }
-        
-        dom = {};
-        
-        dom.worldList = new createjs.DOMElement($('#worldList')[0]);
-        center(dom.worldList,'#worldList');
-        
-        dom.head_prev = new createjs.DOMElement($("#headwear_prev")[0]);
-        dom.head_next = new createjs.DOMElement($("#headwear_next")[0]);
-        dom.head_prev.regX = dom.head_prev.regY = 0;
-        dom.head_prev.x = 20;
-        dom.head_prev.y = 80;
-        dom.head_next.x = 140;
-        dom.head_next.y = 80;
-        
-        dom.chat = new createjs.DOMElement($('#chat')[0]);
-        dom.chat.regX = parseInt($('#chat').css('width'),10);
-        dom.chat.x = canvas.width-20; // Right aligned
-        dom.chat.regY = parseInt($('#chat').css('height'),10)/2;
-        dom.chat.y = canvas.height/2;
-        
-        dom.head_frame = 0;
-        
-        $("#headwear_prev").click(function(){
-            if(dom.head_frame>0){
-                dom.head_frame--;
-            }else{
-                dom.head_frame = player.char.head.wear.timeline.duration-1;
-            }
-            player.char.head.wear.gotoAndStop(dom.head_frame);
-        });
-        
-        $("#headwear_next").click(function(){
-            if(dom.head_frame<player.char.head.wear.timeline.duration-1){
-                dom.head_frame++;
-            }else{
-                dom.head_frame = 0;
-            }
-            player.char.head.wear.gotoAndStop(dom.head_frame);
-        });
-        
-        stage = new createjs.Stage(canvas);
-        stage.addChild(player);
         stage.addChild(world);
-        stage.addChild(dom.worldList);
-        stage.addChild(dom.head_prev);
-        stage.addChild(dom.head_next);
-        stage.addChild(dom.chat);
+        stage.addChild(player);
         
         createjs.Ticker.setFPS(32);
         createjs.Ticker.addListener(stage);
+        createjs.Ticker.addListener(world.tick);
         
-        
-        // 
-        function print(){
-        	for(i=0;i<arguments.length;i++)
-        	$('#buffer').append(arguments[i]+"\n");
-        }
-        users = {};
-        
-        window.socket = socket = io.connect(socketUrl);
-        $('#buffer').empty().text('Connecting...\n');
+        Ui.init();
+        Ui.lobbyClear('Connecting...\n');
         
         socket.on('connect',function(){
             console.log("Socket.io connected!");
-            selectWorld();
+            Ui.selectWorld();
         });
         
         socket.on('message',function(data){
-            console.log("Data: " + data);
+            var logData = true;
             var d = data.split(" ");
             var dstr = data.substr(d[0].length+1);
             switch(d[0]){
@@ -153,122 +89,60 @@ function($,io,createjs,lib,Player,World,Tile,Map){
                 			socket.send('/whoami ' + $(this).attr('data-id'));
                 		});
                 	}
-                    //this.send("/whoami");
                     break;
                 case "/youare":
                     id = d[1];
                     users[d[1]] = {name:d[2]};
                     break;
                 case "/login-accept":
-                	showLobby();
+                	Ui.showLobby();
 					$('#buffer').empty();
                     break;
                 case "/motd":
-                    print(dstr);
+                    Ui.print(dstr);
                     break;
                 case "/sm":
-                	print('Server: ' + dstr);
+                	Ui.print('Server: ' + dstr);
                 	break;
                 case "/uc":
                     if(d[1]!=id){
                         users[d[1]] = {name:d[2]};
-                        print(users[d[1]].name + ' connected');
+                        Ui.print(users[d[1]].name + ' connected');
                     }
                     break;
                 case "/ud":
                     if(d[1]!=id){
-                        print(users[d[1]].name + ' disconnected');
+                        Ui.print(users[d[1]].name + ' disconnected');
                         delete(users[d[1]]);
                     }
                     break;
-                case "/uw":
-                	if(d[1]&&d[2]){
+                case "/uw": // other user moving to lobby or world
+                	if(d[1]&&d[2]){ // id && 0/1 (ie lobby/world)
                 		// todo
                 	}
                 	break;
-                case "/ws": // World send
-                    //
+                case "/ws": // World send (properties)
+                    world.map.setProperties(JSON.parse(dstr));
                     break;
-                case "/wd": // World data
-                    //
+                case "/wd": // World data (map)
+                    world.map.expand(dstr);
+                    var p = world.map.getProperties();
+                    world.scrollTo(p.spawn.x * p.tileSize, p.spawn.y * p.tileSize);
+                    logData = false;
                     break;
                 case "/c":
                     d = data.split(" ",2)
-                    print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
+                    Ui.print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
                     break;
                 default:
-                    console.log("^ Unrecognised");
+                    console.log("Unrecognised data: ");
+                    logData = true;
+            }
+            if(logData){
+                console.log("Data: " + data);
             }
         });
-        
-        function msg(data){
-            data = data || '';
-            if(data!=''){
-                var c = data.split(' ');
-                var cstr = data.substr(c[0].length+1);
-                if(data.substr(0,1)=='/'){ // Command
-                    switch(c[0]){
-                        case '/worlds':
-                            selectWorld();
-                            break;
-						case '/play':
-							showWorld();
-							break;
-                    }
-                }else{ // Chat
-                    socket.send("/c " + data);
-                }
-            }
-        }
-        
-        $('#send').click(function(){
-            msg();
-        });
-        
-        $('#send').parent().keydown(function(event){
-            if(event.which == 13) {
-                //event.preventDefault();
-                msg($('#msg').val());
-                $('#msg').val('');
-            }
-        });
-        
-        
-        function hideAll(){
-        	$('#worldList').hide();
-            $('#lobby').hide();
-            player.visible = false;
-            world.visible = false;
-        }
-        
-        function selectWorld(){
-            hideAll();
-            $('#worldList').remove('input').show();
-            socket.send('/login-pls');
-        }
-        function showLobby(){
-            hideAll();
-	        player.x = 90;
-	        player.y = 180;
-	        player.scaleX = player.scaleY = 3;
-	        player.char.gotoAndStop(0);
-	        player.visible = true;
-            $('#lobby').show();
-            $('#msg').focus();
-        }
-        function showWorld(){
-        	hideAll();
-        	player.x = player.y = 200;
-        	player.scaleX = player.scaleY = 1;
-        	player.char.gotoAndStop(0);
-        	player.visible = true;
-        	world.visible = true;
-        	socket.send('/info-request');
-        }
-        
-        hideAll();
-        $('#wrap').fadeTo('fast',1);
-        $('#worldList').show();
+
     }
     
     $(function(){

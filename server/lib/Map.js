@@ -55,7 +55,9 @@ var init = function(){
     			if(!regions[rX]){regions[rX] = [];}
     			if(!regions[rX][rY]){regions[rX][rY] = [];}
     			if(!regions[rX][rY][tX]){regions[rX][rY][tX] = [];}
-    			if(!regions[rX][rY][tX][tY]){regions[rX][rY][tX][tY] = 0;}
+    			if(!regions[rX][rY][tX][tY]){
+                    regions[rX][rY][tX][tY] = 0;
+    			}
     			return true;
     		}
     		return false;
@@ -67,7 +69,7 @@ var init = function(){
     	}
     	this.setTile = function(rX,rY,tX,tY,v){
     		if(this.checkTile(rX,rY,tX,tY)){
-    			regions[rX][rY][tX][tY] = v;
+    		    regions[rX][rY][tX][tY] = v;
     		}
     	}
     	this.setWorldSize = function(w,h){
@@ -171,8 +173,8 @@ var init = function(){
     	}
     	
     	var spawn = {
-    		x : Math.round(fullWidth*0.5),
-    		y : Math.round(heights.length - heights[Math.round(heights.length*0.5)]) - 2
+    		x : Math.round(fullWidth * 0.5),
+    		y : Math.round(fullHeight - heights[Math.round(heights.length*0.5)]) - 2
     	};
     	this.setSpawn(spawn.x,spawn.y);
     	

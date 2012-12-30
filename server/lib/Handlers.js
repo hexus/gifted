@@ -41,8 +41,8 @@ h.handleData = function(data){ // Called in context of a User
         	
         	break;
         case "/info-request":
-            // Early days innit
-            this.sendWorld();
+            var format = d[1] || null;
+            this.sendWorld(format);
             break;
         case "/c": // Chat
             this.room.send("/c " + this.id + " " + data.substr(3),true);

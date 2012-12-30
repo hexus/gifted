@@ -1,0 +1,9 @@
+html,body{
+    background-color:#111;
+    font-family:"Trebuchet MS";
+    color:#aaa;
+}
+input,textarea{background-color:#aaa;color:#eee;border:none;}
+
+#canvas{background-color:#ccc;}
+#worldList{background-color:#ddd;text-align:center;}

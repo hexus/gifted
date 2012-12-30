@@ -1,9 +1,17 @@
-html,body{margin:0;padding:0;overflow:hidden;background-color:#111;font-family:"Trebuchet MS";color:#AAA;}
-input,textarea{background-color:#aaa;color:#eee;border:none;resize:none;}
+html,body{
+    margin:0;
+    padding:0;
+    overflow:hidden;
+}
+textarea{resize:none;padding:0;}
 input[type=text]{padding:0 2px;}
 
-#wrap{opacity:0;}
+#wrap{}
+.screen{width:100%;}
+.screen div {float:left;}
+
 #client{
+    opacity:0;
 	position: absolute;
     width: 846px;
     height: 360px;
@@ -12,8 +20,15 @@ input[type=text]{padding:0 2px;}
     margin-left: -423px; /* Negative half of width. */
     margin-top: -180px; /* Negative half of height. */
 }
-#canvas{background-color:#ccc;}
-#worldList{width:100px;height:200px;background-color:#e0e0e0;z-index:1337;text-align:center;}
-#lobby #chat{display:block;}
-#lobby #msg{width:80%;}
-#lobby #buffer{width:540px;height:200px;}
+#canvas{}
+#worldList{z-index:1337;height:50%;top:25%;}
+#lobby{height:100%;}
+    #chat{position:relative;width:63%;height:95%;left:35%;}
+    #chat #msg{width:80%;}
+    #chat #send{width:10%;}
+    #chat #buffer{width:100%;height:85%;}
+    .outfit{position:absolute;}
+    #headwear_prev{left:20px;top:80px;}
+    #headwear_next{left:140px;top:80px;}
+    #chat_top{padding:6px;}
+#world{}

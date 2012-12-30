@@ -131,7 +131,7 @@ var server = http.createServer(function(request, response) { // One day this wil
         case "favicon.ico":
             try{
                 response.writeHead(200, {'Content-Type': 'image/x-icon'});
-                fs.readFileSync(config.basePath+'client/favicon.ico',function(e,ico){
+                fs.readFile(config.basePath+'client/favicon.ico',function(e,ico){
                 	response.end(ico);
                 });
             }catch(e){
