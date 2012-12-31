@@ -53,7 +53,7 @@ function(createjs,lib,Global){
         
         this.x = x || 0;
         this.y = y || 0;
-        this.frame = frame || 0;
+        if(frame){this.frame = frame;}
         this.scale = _scale;
         
     }

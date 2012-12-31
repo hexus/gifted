@@ -61,8 +61,13 @@ function($,io,createjs,lib,Global,Ui,Player,World,Tile,Map){
         
         createjs.Ticker.setFPS(32);
         createjs.Ticker.addListener(stage);
-        createjs.Ticker.addListener(world.tick);
+        createjs.Ticker.addListener(function(){
+            if(Ui.selected()=='world'){
+                world.tick();
+            }
+        });
         
+        Global.ui = Ui;
         Ui.init();
         Ui.lobbyClear('Connecting...\n');
         
@@ -127,7 +132,10 @@ function($,io,createjs,lib,Global,Ui,Player,World,Tile,Map){
                 case "/wd": // World data (map)
                     world.map.expand(dstr);
                     var p = world.map.getProperties();
+                    player.x = p.spawn.x * p.tileSize;
+                    player.y = p.spawn.y * p.tileSize;
                     world.scrollTo(p.spawn.x * p.tileSize, p.spawn.y * p.tileSize);
+                    world.focusOn(player);
                     logData = false;
                     break;
                 case "/c":

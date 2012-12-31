@@ -1,7 +1,7 @@
 define(['jquery','createjs','lib/global'],
 function($,createjs,Global){
     
-    var Ui = {}, dom,stage,socket,player,world;
+    var Ui = {}, dom,stage,socket,player,world,selected;
     
     Ui.init = function(){
         
@@ -61,7 +61,28 @@ function($,createjs,Global){
         Ui.hideAll();
         //$('#wrap').fadeTo('fast',1);
         $('#client').fadeTo('slow',1);
-        $('#worldList').show();
+        //$('#worldList').show();
+        
+        $(window).keydown(function(e){
+            var k = e.keyCode || e.which;
+            console.log(k);
+            if(selected=='world'){
+                switch(k){
+                    case 87: 
+                        player.y-=5;
+                        break;
+                    case 65: 
+                        player.x-=4;
+                        break;
+                    case 83: 
+                        player.y+=5;
+                        break;
+                    case 68: 
+                        player.x+=4; 
+                        break;
+                }
+            }
+        });
         
     }
     
@@ -74,12 +95,14 @@ function($,createjs,Global){
     }
     
     Ui.selectWorld = function(){
+        selected = 'worldList';
         Ui.hideAll();
         $('#worldList').remove('input').show();
         socket.send('/login-pls');
     }
     
     Ui.showLobby = function(){
+        selected = 'lobby';
         Ui.hideAll();
         stage.addChild(player);
         player.x = 90;
@@ -92,6 +115,7 @@ function($,createjs,Global){
     }
     
     Ui.showWorld = function(){
+        selected = 'world';
         Ui.hideAll();
         //createjs.Ticker.addListener(world);
         world.addChild(player);
@@ -118,7 +142,12 @@ function($,createjs,Global){
         Ui.lobbyPrint.apply(Ui,arguments);
     }
     
-    Ui.msg = function(data){ // Chat is always controlled by Ui, it seems to fit in here
+    Ui.selected = function(){
+        return selected;
+    }
+    
+    // Chat is always controlled by Ui, it seems to fit in here
+    Ui.msg = function(data){ 
         data = data || '';
         if(data!=''){
             var c = data.split(' ');

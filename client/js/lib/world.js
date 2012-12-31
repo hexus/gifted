@@ -8,43 +8,97 @@ function(createjs,lib,Global,Tile,Map){
             this.users = {};
             
             this.map = map;
-            this.tilePool = [];
-            this.outerMargin = 0;
+            this.tilePool = {};
+            this.tileRefs = {};
+            this.outerMargin = -1;
             this.tileScale = this.map.getTileSize()/62;
             this.mapContainer = new createjs.Container();
             
             this.view = {x:0,y:0,scale:1};
             this.lastUpdated = {x:0,y:0,scale:1};
-            this.target = {};
+            this.scrollTarget = null;
+            this.scrollSensitivity = 0.36;
+            this.update = {rate:10,count:0}
             
             this.addChild(this.mapContainer);
             this.testTiles();
+            
+            
+            
         }
     }
     
     var p = World.prototype = new createjs.Container();
 
     p.tick = function(timeElapsed,paused){
-        
+        this.iScroll();
     }
     
-    // Test function (draws all tiles in a row at top-left of game world)
-    p.testTiles = function(){
-        for(var i=0;i<Global.tiles.getNumFrames();i++){
-            this.mapContainer.addChild(
-                new Tile(i, i*this.map.getTileSize(), 10, this.tileScale)
-            );
-           //this.addTile(i*this.map.getTileSize(), 10, i);
+    p.focusOn = function(target,lock){
+        if(this.contains(target)){
+            if(lock){ // Snap to target immediately
+                
+            }
+            this.scrollTarget = target;
+        }else{
+            scrollTarget = null;
+        }
+        return scrollTarget;
+    }
+    
+    p.iScroll = function(){
+        this.focusOn(this.scrollTarget);
+        var t = this.scrollTarget;
+        var sens = this.scrollSensitivity;
+        
+        if(t){
+            for(var i=0;i<2;i++){
+                var affect,targetCord,screenSpan,scale;
+                if(i==0){
+                    affect = 'x';
+                    scale = this.scaleX;
+                    targetCord = t.x;
+                    screenSpan = Global.stage.canvas.width / scale;
+                }else if(i==1){
+                    affect = 'y';
+                    scale = this.scaleY;
+                    targetCord = t.y;
+                    screenSpan = Global.stage.canvas.height / scale;
+                }
+                
+                //console.log(t,Global.player,targetCord,this.view[affect]);
+                var dif = targetCord - this.view[affect];
+                
+                if(Math.abs(dif*sens)>1){
+                    this.view[affect] += dif*sens;
+                }else{
+                    this.view[affect] = targetCord;
+                }
+                
+            }
+            
+            this.x = Math.floor(Global.stage.canvas.width*0.5) - this.view.x;
+            this.y = Math.floor(Global.stage.canvas.height*0.5) - this.view.y;
+            if(this.update.count>this.update.rate){
+                this.updateDisplay(this.view.x,this.view.y);
+                this.update.count = 0;
+            }
+            this.update.count++;
+            
+            //this.scrollTo(this.view.x,this.view.y);
         }
     }
     
     p.scrollTo = function(x,y,clear){
-        Global.player.x = this.view.x = x;
-        Global.player.y = this.view.y = y;
-        this.x = Math.floor(Global.stage.canvas.width*0.5) - this.view.x;
-        this.y = Math.floor(Global.stage.canvas.height*0.5) - this.view.y;
-        if(clear){this.clearDisplay();}
-        this.updateDisplay(this.view.x,this.view.y);
+        //if(x&&y){
+            this.view.x = x;
+            this.view.y = y;
+            this.x = Math.floor(Global.stage.canvas.width*0.5) - this.view.x ;
+            this.y = Math.floor(Global.stage.canvas.height*0.5) - this.view.y;
+            
+            if(clear){this.clearDisplay();}
+
+        //}
     }
     
     p.scrollDelta = function(x,y){
@@ -53,24 +107,43 @@ function(createjs,lib,Global,Tile,Map){
         this.scrollTo(this.view.x+x,this.view.y+y,true);
     }
     
+    // Test function (draws all tiles in a row at top-left of game world)
+    p.testTiles = function(){
+        for(var i=0;i<Global.tiles.getNumFrames();i++){
+            this.mapContainer.addChild(
+                new Tile(i, i*this.map.getTileSize(), 10, this.tileScale)
+            );
+        }
+    }
+    
     p.addTile = function(cx,cy,v){
         var cords = this.map.convertCords(cx,cy,true),
             rx = cords['rx'],
             ry = cords['ry'],
-            dx = cords['dx'],
-            dy = cords['dy'],
+            dx = cords['x'],
+            dy = cords['y'];
+        var newtile = this.map.getTile(rx,ry,dx,dy);
+        if(newtile instanceof Tile){
+            if(!this.mapContainer.contains(newtile)){
+                this.mapContainer.addChild(newtile);
+            }
+        }else{
             newtile = new Tile();
+            newtile = this.mapContainer.addChild(newtile);
+            this.map.setTile(rx,ry,dx,dy,newtile);
+        }
         newtile.x = cx * this.map.getTileSize();
         newtile.y = cy * this.map.getTileSize();
         newtile.frame = v;
         newtile.scale = this.tileScale;
-        this.mapContainer.addChild(newtile);
     }
     
     p.removeTile = function(t){
         if(t.clip){
             if(t.parent){
-                this.mapContainer.removeChild(t);
+                var oldTile = this.mapContainer.removeChild(t);
+                var cords = this.map.convertCords(oldTile.x,oldTile.y);
+                this.map.setTile(cords['rx'],cords['ry'],cords['x'],cords['y'],oldTile.frame);
             }
         }
     }
