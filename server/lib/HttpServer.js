@@ -74,14 +74,13 @@ var server = http.createServer(function(request, response) { // One day this wil
         case "client":
             if(req[2]!=undefined){
                 if(!empty(req[2])){ // if this is a client resource being requested
-                    if(req[2]=='node'){ // shared module request
-                        var shared = ['Map.js'];
-                        if(shared.indexOf(req[3])>-1){
-                            response.writeHead(200,{'Content-Type':mime.lookup(req[3])});
-                            readFile('server/lib/shared/'+req[3], function(data){
+                    if(req[3]=='shared'){ // shared module request
+                        try{
+                            response.writeHead(200,{'Content-Type':mime.lookup(req[4])});
+                            readFile('server/lib/shared/'+req[4], function(data){
                                 response.end(data);
                             },true);
-                        }else{
+                        }catch(e){
                             response.writeHead(404);
                             response.end();
                         }

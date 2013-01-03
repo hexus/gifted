@@ -1,6 +1,6 @@
 {
 	"name": "gifted-server",
-	"version": "0.1.1",
+	"version": "0.1.02",
 	"main": "gifted.js",
 	"dependencies":	{
 		"async" 	: "*",

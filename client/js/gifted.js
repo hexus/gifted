@@ -19,7 +19,7 @@ requirejs.config({
         
         // Dynamic libs
         'socket.io':socketUrl+'/socket.io/socket.io',
-        'node':'/client/node',
+        'shared':'/client/js/shared',
     },
     shim: {
         'socket.io':{
@@ -37,8 +37,8 @@ requirejs.config({
     }
 });
 
-requirejs(['jquery','socket.io','createjs','assets','lib/global','lib/ui','lib/player','lib/world','lib/tile','node/Map','lib/entity'],
-function($,io,createjs,lib,Global,Ui,Player,World,Tile,Map,derp){
+requirejs(['jquery','socket.io','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world','lib/tile','shared/Map','shared/Entity'],
+function($,io,createjs,lib,Global,Ui,Controls,Player,World,Tile,Map,Entity){
     function init(){
         var canvas, stage, socket, player, id, users, world, aspect=2.35;
         
@@ -70,6 +70,7 @@ function($,io,createjs,lib,Global,Ui,Player,World,Tile,Map,derp){
         Global.ui = Ui;
         Ui.init();
         Ui.lobbyClear('Connecting...\n');
+        Controls.init();
         
         socket.on('connect',function(){
             console.log("Socket.io connected!");
@@ -132,9 +133,9 @@ function($,io,createjs,lib,Global,Ui,Player,World,Tile,Map,derp){
                 case "/wd": // World data (map)
                     world.map.expand(dstr);
                     var p = world.map.getProperties();
-                    player.x = p.spawn.x * p.tileSize;
-                    player.y = p.spawn.y * p.tileSize;
-                    world.scrollTo(p.spawn.x * p.tileSize, p.spawn.y * p.tileSize);
+                    world.removeChild(player);
+                    player = world.users[0] = Global.player = new Player();
+                    player.spawn();
                     world.focusOn(player);
                     logData = false;
                     break;

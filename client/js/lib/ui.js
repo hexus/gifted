@@ -63,27 +63,6 @@ function($,createjs,Global){
         $('#client').fadeTo('slow',1);
         //$('#worldList').show();
         
-        $(window).keydown(function(e){
-            var k = e.keyCode || e.which;
-            //console.log(k);
-            if(selected=='world'){
-                switch(k){
-                    case 87: 
-                        player.y-=5;
-                        break;
-                    case 65: 
-                        player.x-=4;
-                        break;
-                    case 83: 
-                        player.y+=5;
-                        break;
-                    case 68: 
-                        player.x+=4; 
-                        break;
-                }
-            }
-        });
-        
     }
     
     Ui.hideAll = function(){

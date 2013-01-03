@@ -1,6 +1,6 @@
 var node = typeof window === 'undefined';
-var deps = ['lib/global']; // RequireJS dependencies
-var init = function(Global){
+var deps = ['createjs','lib/global']; // RequireJS dependencies
+var init = function(createjs,Global){
     
     if(node){
         Global = require('../Global');
@@ -20,6 +20,9 @@ var init = function(Global){
         } || args.hitbox || null;
         this.world = Global.world || args.world || null;
         this.get('map',function(){return this.world.map;});
+        
+        this.x = 0;
+        this.y = 0;
         
         this.state = {
             x : 0,
@@ -42,13 +45,36 @@ var init = function(Global){
         
         this.effects = {}
         
+        this.get('x',function(){return that.state.x;});
+        this.set('x',function(v){that.state.x=v;});
+        this.get('y',function(){return that.state.y;});
+        this.set('y',function(v){that.state.y=v;});
         this.get('tileH',function(){return that.map.getTileSize();});
         this.get('tileW',function(){return that.map.getTileSize();});
         this.get('gravity',function(){return gravity;});
         this.get('gravSpeed',function(){return gravSpeed;});
     }
     
-    var p = Entity.prototype;
+    if(node){
+        var p = Entity.prototype;
+    }else{
+        var p = Entity.prototype = new createjs.Container();
+        p.constructor = Entity;
+    }
+    
+    p.spawn = function(x,y){
+        if(!this.world.contains(this)){
+            this.world.addChild(this);
+        }
+        
+        if(!(x&&y)){
+            this.x = this.map.getSpawn().x * this.map.getTileSize();
+            this.y = this.map.getSpawn().y * this.map.getTileSize(); 
+        }else{
+            this.x = x;
+            this.y = y;
+        }
+    }
     
     p.c2 = function(v, Y){ // Returns uncollided coordinate (ie coordinate of tile)
         var tSize = this.tileW; if(Y){tSize=this.tileH;}
@@ -62,14 +88,21 @@ var init = function(Global){
             rx = cords["rx"],
             ry = cords["ry"];
                 
-        if((ry==0 && cy<=0) || (ry>this.map.wSize && cy>=this.map.rSize)){// Prevent Y looping
+        if((ry==0 && cy<=0) || ry>this.map.getWorldSize().height && cy>=this.map.getRegionSize().height){// Prevent Y looping
             return true;
         }
-        if((cx>=0 && cy>=0 && cx<this.map.rSize && cy<this.map.rSize) &&
-           (ry>=0 && ry<this.map.wSize)){
-            var leTile = this.map.world[ry][rx][cy][cx]; // Check map array for tile
-            if(leTile!=null){
-                if(this.map.getSolidArr().indexOf(leTile.val)>-1){ // Check map's solid array
+        if((cx>=0 && cy>=0 && cx<this.map.getRegionSize().width && cy<this.map.getRegionSize().height) &&
+           (ry>=0 && ry<this.map.getWorldSize().height)){
+            var leTile = this.map.getTile(rx,ry,cx,cy); // Check map array for tile
+            
+            if(typeof leTile == 'object'){
+                leTile = leTile.frame;
+            }else{ // Typing problems going on here, only tile objects working
+                parseInt(leTile);
+            }
+            
+            if(leTile!=null && leTile>0){
+                if(this.map.getSolidArr().indexOf(leTile)>-1){ // Check map's solid array
                     return true;
                 }else{
                     return false;
@@ -78,7 +111,7 @@ var init = function(Global){
                 return false;
             }
         }else{
-            trace("Collision prevented: " + cx + " " + cy + " " + rx + " " + ry);
+            console.log("Collision prevented: " + rx + " " + ry + " " + cx + " " + cy);
             return true;
         }
     }
@@ -96,8 +129,8 @@ var init = function(Global){
             var Rx = Math.round(x + (this.hitbox.width  * 0.5));
             /*  These variables predict which tile the character would be in were it to start or
                 continue moving. They are used for checking ahead with the axis in question. */
-            var pTy;
-            var pBy;
+            var pTy=0;
+            var pBy=0;
             if(ySpeed!=0){
                 pTy = Ty+ySpeed;
                 pBy = By+ySpeed;
@@ -109,8 +142,8 @@ var init = function(Global){
                     pBy = By+Accel; // flySpeed
                 }
             }
-            var pLx;
-            var pRx;
+            var pLx=0;
+            var pRx=0;
             if(xSpeed!=0){
                 pLx = Lx+xSpeed;
                 pRx = Rx+xSpeed;
@@ -155,11 +188,11 @@ var init = function(Global){
                 if(ySpeed<=0){ // if travellin upwards and there's shit above, stop dis shit
                     if( !(this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && !this.chkSolid(Cx,pTy) ){
                         // nudge character a bit if there ain't that much shit above
-                        if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(c2(Rx) - hw) - 1; }
-                        if(this.chkSolid(Lx,Ty) && !this.chkSolid(Rx,Ty)){ x = Math.floor(c2(Lx) + tileW + hw); }
+                        if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw) - 1; }
+                        if(this.chkSolid(Lx,Ty) && !this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Lx) + this.tileW + hw); }
                     }else{
                         ySpeed = 0;
-                        y = Math.floor(c2(pTy) + tileH + hh);                      
+                        y = Math.floor(this.c2(pTy) + this.tileH + hh);
                     }
                 }
             }else{ // On a surface
@@ -201,9 +234,9 @@ var init = function(Global){
                 if(!doMove){ // If there is a collision
                     var c = this.c2(pDx);
                     if(xSpeed<0){ 
-                        c = c + hw + tileW; // Position sums
+                        c = c + hw + this.tileW; // Position sums
                     }else if(xSpeed>0){
-                        c = c - hw - 1; // -1 works because of rounding 
+                        c = c - hw - 2; // -1 works because of rounding 
                     } 
                     x = Math.round(c); // Move next to collided object
                     xSpeed = 0;
@@ -254,8 +287,11 @@ var init = function(Global){
                 x += xSpeed;
                 y += ySpeed;
         }
+        
+        this.x = this.state.x;
+        this.y = this.state.y;
     }
-    
+
     return Entity;
     
 };

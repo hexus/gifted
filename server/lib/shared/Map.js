@@ -136,9 +136,9 @@ var init = function(){
     }
     
     m.save = function(){ // swag
-    	var values = [this.name, this.getTileSize(), this.getWorldSize().width, this.getWorldSize().height, this.flat(), this.getSpawn().x, this.getSpawn().y];
-    	var values_sql = "'" + values.join("','") + "'";
     	if(node){
+            var values = [this.name, this.getTileSize(), this.getWorldSize().width, this.getWorldSize().height, this.flat(), this.getSpawn().x, this.getSpawn().y];
+            var values_sql = "'" + values.join("','") + "'";
         	db.connection.query("REPLACE INTO worlds (name,size,width,height,map,spawnX,spawnY) "+
         						"VALUES ("+values_sql+")");
         }

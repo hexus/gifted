@@ -1,4 +1,4 @@
-define(['createjs','assets','lib/global','lib/tile','node/Map'],
+define(['createjs','assets','lib/global','lib/tile','shared/Map'],
 function(createjs,lib,Global,Tile,Map){
     var World = function(map){
         if(map instanceof Map){
@@ -18,13 +18,10 @@ function(createjs,lib,Global,Tile,Map){
             this.lastUpdated = {x:0,y:0,scale:1};
             this.scrollTarget = null;
             this.scrollSensitivity = 0.36;
-            this.update = {rate:10,count:0}
+            this.update = {rate:5,count:0}
             
             this.addChild(this.mapContainer);
             this.testTiles();
-            
-            
-            
         }
     }
     
@@ -32,6 +29,9 @@ function(createjs,lib,Global,Tile,Map){
 
     p.tick = function(timeElapsed,paused){
         this.iScroll();
+        for(u in this.users){
+            this.users[u].tick();
+        }
     }
     
     p.focusOn = function(target,lock){
@@ -185,7 +185,7 @@ function(createjs,lib,Global,Tile,Map){
                     var tile = this.map.getTile(rx,ry,cx,cy);
                     //console.log(cord,tile);
                     if(tile>0){
-                        tile = 8;
+                        tile = 9;
                         /*
                         this.mapContainer.addChild(
                             new Tile(tile,x*tSize,y*tSize,this.tileScale)
