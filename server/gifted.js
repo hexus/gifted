@@ -5,7 +5,7 @@ var http = require('./lib/HttpServer');
 var sockets = require('./lib/Sockets');
 var global = require('./lib/Global');
 var Room = require('./lib/Room');
-var Map = require('./lib/Map');
+var Map = require('./lib/shared/Map');
 var rooms = require('./lib/Global').rooms;
 
 // Initial output

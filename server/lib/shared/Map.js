@@ -1,9 +1,12 @@
 var node = typeof window === 'undefined';
+var deps = [];
 var init = function(){
 
     if(node){
-        var db = require('./DB');
+        var db = require('../DB');
     }
+    
+    var solidarr = [3, 4, 5, 6, 7, 8, 9, 10];
     
     var Map = function(name){
     	var that = this;
@@ -39,9 +42,11 @@ var init = function(){
     	        }
     	    }
     	}
+    	
     	this.getWorldSize = function(){return worldSize;}
     	this.getRegionSize = function(){return regionSize;}
     	this.getTileSize = function(){return tileSize;}
+    	this.getSolidArr = function(){return solidarr;}
     	this.getSpawn = function(){return spawn;}
     	this.getRegions = function(){return regions;}
     	this.validCoords = function(rX,rY,tX,tY){

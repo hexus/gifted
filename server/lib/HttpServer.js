@@ -6,6 +6,7 @@ var config = require('./Config');
 var global = require('./Global');
 var helpers = require('./Helpers');
 var Room = require('./Room');
+var Map = require('./shared/Map');
 var User = require('./User');
 var rooms = global.rooms;
 var users = global.users;
@@ -13,10 +14,6 @@ var empty = helpers.empty;
 var href = helpers.href;
 var php = helpers.php;
 var readFile = helpers.readFile;
-
-var Map = require('./Map');
-//var map = new Map();
-//map.generate();
 
 // Simple http server that responds with server information and client files
 
@@ -81,7 +78,7 @@ var server = http.createServer(function(request, response) { // One day this wil
                         var shared = ['Map.js'];
                         if(shared.indexOf(req[3])>-1){
                             response.writeHead(200,{'Content-Type':mime.lookup(req[3])});
-                            readFile('server/lib/'+req[3], function(data){
+                            readFile('server/lib/shared/'+req[3], function(data){
                                 response.end(data);
                             },true);
                         }else{

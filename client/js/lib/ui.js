@@ -65,7 +65,7 @@ function($,createjs,Global){
         
         $(window).keydown(function(e){
             var k = e.keyCode || e.which;
-            console.log(k);
+            //console.log(k);
             if(selected=='world'){
                 switch(k){
                     case 87: 

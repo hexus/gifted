@@ -1,7 +1,7 @@
 var empty = require('./Helpers').empty;
 var User = require('./User');
 var Users = require('./Users');
-var Map = require('./Map');
+var Map = require('./shared/Map');
 
 var Room = function(args){
     var that = this;
@@ -12,7 +12,7 @@ var Room = function(args){
     this.lobbyUsers = new Users(); // Users in room lobby
     this.users = new Users(); // Users in room world
     
-    this.fps = args.fps;
+    this.fps = args.fps || 32;
     this.step = 0;
     this.tickSpeed = 1/this.fps*1000;
     this.timer = setInterval(function(){that.tick();},this.tickSpeed);

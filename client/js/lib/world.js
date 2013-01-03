@@ -10,7 +10,7 @@ function(createjs,lib,Global,Tile,Map){
             this.map = map;
             this.tilePool = {};
             this.tileRefs = {};
-            this.outerMargin = -1;
+            this.outerMargin = 2;
             this.tileScale = this.map.getTileSize()/62;
             this.mapContainer = new createjs.Container();
             

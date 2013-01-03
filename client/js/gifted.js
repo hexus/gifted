@@ -37,8 +37,8 @@ requirejs.config({
     }
 });
 
-requirejs(['jquery','socket.io','createjs','assets','lib/global','lib/ui','lib/player','lib/world','lib/tile','node/Map'],
-function($,io,createjs,lib,Global,Ui,Player,World,Tile,Map){
+requirejs(['jquery','socket.io','createjs','assets','lib/global','lib/ui','lib/player','lib/world','lib/tile','node/Map','lib/entity'],
+function($,io,createjs,lib,Global,Ui,Player,World,Tile,Map,derp){
     function init(){
         var canvas, stage, socket, player, id, users, world, aspect=2.35;
         
