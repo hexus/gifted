@@ -18,7 +18,7 @@ function(createjs,lib,Global,Tile,Map){
             this.lastUpdated = {x:0,y:0,scale:1};
             this.scrollTarget = null;
             this.scrollSensitivity = 0.36;
-            this.update = {rate:5,count:0}
+            this.update = {rate:1,count:0}
             
             this.addChild(this.mapContainer);
             this.testTiles();
@@ -28,10 +28,10 @@ function(createjs,lib,Global,Tile,Map){
     var p = World.prototype = new createjs.Container();
 
     p.tick = function(timeElapsed,paused){
-        this.iScroll();
         for(u in this.users){
             this.users[u].tick();
         }
+        this.iScroll();
     }
     
     p.focusOn = function(target,lock){
@@ -41,9 +41,9 @@ function(createjs,lib,Global,Tile,Map){
             }
             this.scrollTarget = target;
         }else{
-            scrollTarget = null;
+            this.scrollTarget = null;
         }
-        return scrollTarget;
+        return this.scrollTarget;
     }
     
     p.iScroll = function(){
@@ -141,9 +141,12 @@ function(createjs,lib,Global,Tile,Map){
     p.removeTile = function(t){
         if(t.clip){
             if(t.parent){
-                var oldTile = this.mapContainer.removeChild(t);
-                var cords = this.map.convertCords(oldTile.x,oldTile.y);
-                this.map.setTile(cords['rx'],cords['ry'],cords['x'],cords['y'],oldTile.frame);
+                var removed = this.mapContainer.removeChild(t);
+                if(removed){
+                    var cords = this.map.convertCords(t.x,t.y);
+                    //console.log(cords,t.frame);
+                    this.map.setTile(cords['rx'],cords['ry'],cords['x'],cords['y'],t.frame);
+                }
             }
         }
     }

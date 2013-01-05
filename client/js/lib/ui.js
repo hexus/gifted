@@ -12,13 +12,30 @@ function($,createjs,Global){
         world = Global.world;
         
         $('.screen').each(function(k,v){
-            console.log(k,v);
             dom[v.id] = new createjs.DOMElement($('#'+v.id)[0]);
             dom[v.id].regX = dom[v.id].regY = dom[v.id].x = dom[v.id].y = 0;
             stage.addChild(dom[v.id]);
         });
         
         dom.headwear_frame = 0;
+        
+        $("#sp").click(function(){
+            if(world){
+                world.map.generate();
+                var p = world.map.getProperties();
+                player = world.users[0] = Global.player;
+                player.world = world;
+                player.spawn();
+                world.focusOn(player);
+                Ui.showWorld();
+            }
+        });
+        
+        $("#mp").click(function(){
+            if(socket){
+                Ui.selectWorld();
+            }
+        })
         
         $("#headwear_prev").click(function(){
             if(dom.headwear_frame>0){
@@ -59,18 +76,23 @@ function($,createjs,Global){
         });
         
         Ui.hideAll();
-        //$('#wrap').fadeTo('fast',1);
         $('#client').fadeTo('slow',1);
-        //$('#worldList').show();
-        
+        Ui.showMain();
     }
     
     Ui.hideAll = function(){
+        $('#mainMenu').hide();
         $('#worldList').hide();
         $('#lobby').hide();
         player.visible = false;
         world.visible = false;
         //createjs.Ticker.removeListener(world);
+    }
+    
+    Ui.showMain = function(){
+        selected = 'main';
+        Ui.hideAll();
+        $('#mainMenu').show();
     }
     
     Ui.selectWorld = function(){
@@ -94,16 +116,19 @@ function($,createjs,Global){
     }
     
     Ui.showWorld = function(){
+        if(selected=='lobby'){
+            world.addChild(player);
+            player.x = player.y = 200;
+        }
         selected = 'world';
         Ui.hideAll();
-        //createjs.Ticker.addListener(world);
-        world.addChild(player);
-        player.x = player.y = 200;
         player.scaleX = player.scaleY = 1;
         player.char.gotoAndStop(0);
         player.visible = true;
         world.visible = true;
-        socket.send('/info-request json');
+        if(socket){
+            socket.send('/info-request json');
+        }
     }
     
     Ui.lobbyClear = function(){

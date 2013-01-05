@@ -1,9 +1,13 @@
 html,body{
     background-color:#111;
     font-family:"Trebuchet MS";
-    color:#aaa;
+    color:#999;
 }
 input,textarea{background-color:#aaa;color:#eee;border:none;}
+input:hover{background-color:#afafaf;}
+input:active{background-color:#aaa;color:#dfdfdf;}
+input[disabled]{background-color:#aaa;color:#ccc;}
 
 #canvas{background-color:#ccc;}
-#worldList{background-color:#ddd;text-align:center;}
+#mainMenu{}
+#worldList{background-color:#ddd;}

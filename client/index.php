@@ -11,6 +11,11 @@
 	<body>
 		<div id="wrap">
 			<div id="client">
+				<div id="mainMenu" class="screen">
+					<h2>Gifted</h2>
+					<input type="button" id="sp" value="Singleplayer">
+					<input type="button" id="mp" value="Multiplayer" disabled>
+				</div>
 				<div id="worldList" class="screen">
 					<h2>Choose a world</h2>
 				</div>

@@ -21,7 +21,7 @@ input[type=text]{padding:0 2px;}
     margin-top: -180px; /* Negative half of height. */
 }
 #canvas{}
-#worldList{z-index:1337;height:50%;top:25%;}
+#mainMenu,#worldList{z-index:1337;height:50%;top:25%;text-align:center;}
 #lobby{height:100%;}
     #chat{position:relative;width:63%;height:95%;left:35%;}
     #chat #msg{width:80%;}
@@ -31,4 +31,4 @@ input[type=text]{padding:0 2px;}
     #headwear_prev{left:20px;top:80px;}
     #headwear_next{left:140px;top:80px;}
     #chat_top{padding:6px;}
-#world{}
+#world{width:0%;}

@@ -82,8 +82,8 @@ var init = function(createjs,Global){
     }
     
     p.chkSolid = function(xCord,yCord){
-        var cords = this.map.convertCords(xCord,yCord), // Check and Region coords
-            cx = cords["x"],
+        var cords = this.map.convertCords(xCord,yCord); // Check and Region coords
+        var cx = cords["x"],
             cy = cords["y"],
             rx = cords["rx"],
             ry = cords["ry"];
@@ -98,10 +98,13 @@ var init = function(createjs,Global){
             if(typeof leTile == 'object'){
                 leTile = leTile.frame;
             }else{ // Typing problems going on here, only tile objects working
-                parseInt(leTile);
+                leTile = parseInt(leTile);
+                if(leTile==1){ // temporary
+                    leTile = 9;
+                }
             }
             
-            if(leTile!=null && leTile>0){
+            if(leTile!=null){
                 if(this.map.getSolidArr().indexOf(leTile)>-1){ // Check map's solid array
                     return true;
                 }else{

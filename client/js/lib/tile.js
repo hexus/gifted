@@ -32,7 +32,7 @@ function(createjs,lib,Global){
                     
                     that.clip2 = that.clip.clone(); // Clone because vector drawing is a bit holey with CreateJS
                     that.clip2.sourceRect = getFrame.rect;
-                    that.addChild(that.clip2);
+                    //that.addChild(that.clip2);
                     that.clip2.scaleX = that.clip2.scaleY = that.scale;
                 }
             }
