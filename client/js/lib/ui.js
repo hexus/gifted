@@ -25,7 +25,7 @@ function($,createjs,Global){
                 var p = world.map.getProperties();
                 player = world.users[0] = Global.player;
                 player.world = world;
-                player.spawn();
+                player.spawn(20,3000);
                 world.focusOn(player);
                 Ui.showWorld();
             }

@@ -233,7 +233,7 @@ var init = function(){
         var wSize = this.getWorldSize(),
             rSize = this.getRegionSize(),
             tileSize = this.getTileSize();
-        var xInd, yInd;
+        var xInd, yInd, rObj = {};
         if(!tiles){
             xInd = Math.floor(xCord/tileSize); // Divide to
             yInd = Math.floor(yCord/tileSize); // region index
@@ -246,8 +246,8 @@ var init = function(){
         
         // loop x
         if(xInd<0){
-            rx = wSize + Math.floor(xInd/rSize.width) % wSize.width;
-            cx = rSize.width + xInd % rSize.width;
+            rx = ((Math.floor(xInd/rSize.width) % wSize.width) + wSize.width) % wSize.width;
+            cx = ((xInd % rSize.width) + rSize.width) % rSize.width ;
         }else{
             rx = Math.floor(xInd/rSize.width) % wSize.width;
             cx = xInd % rSize.width;
@@ -262,7 +262,6 @@ var init = function(){
             cy = yInd % rSize.height;
         }
         
-        var rObj = {};
         rObj["rx"] = rx; // Region
         rObj["ry"] = ry;
         rObj["x"] = cx; // Tile

@@ -10,7 +10,7 @@ function(createjs,lib,Global,Tile,Map){
             this.map = map;
             this.tilePool = {};
             this.tileRefs = {};
-            this.outerMargin = 2;
+            this.outerMargin = 3;
             this.tileScale = this.map.getTileSize()/62;
             this.mapContainer = new createjs.Container();
             
@@ -18,7 +18,7 @@ function(createjs,lib,Global,Tile,Map){
             this.lastUpdated = {x:0,y:0,scale:1};
             this.scrollTarget = null;
             this.scrollSensitivity = 0.36;
-            this.update = {rate:1,count:0}
+            this.update = {rate:4,count:0}
             
             this.addChild(this.mapContainer);
             this.testTiles();

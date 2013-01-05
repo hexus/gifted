@@ -1,7 +1,6 @@
-var node = typeof window === 'undefined';
+var node = window === undefined;
 var deps = ['createjs','lib/global']; // RequireJS dependencies
 var init = function(createjs,Global){
-    
     if(node){
         Global = require('../Global');
     }
@@ -9,7 +8,7 @@ var init = function(createjs,Global){
     var gravity = 1, gravSpeed = 1;
     
     var Entity = function(args){
-        if(!args){args={}};
+        if(!args){args={};}
         this.get = this.__defineGetter__;
         this.set = this.__defineSetter__;
         var that = this;
@@ -27,7 +26,7 @@ var init = function(createjs,Global){
         this.state = {
             x : 0,
             xSpeed : 0,
-            xLimit : 20,
+            xLimit : 12,
             xOffset : 0,
             y : 0,
             ySpeed : 0,
@@ -35,15 +34,15 @@ var init = function(createjs,Global){
             yOffset : 0,
             Accel : 1,
             direction : 1,
-            jumpStr : 15,
+            jumpStr : 12,
             onFloor : false,
             isFlying : false,
             flySpeed : 10,
             flyDir : -1,
-            gravCount : 0,
-        }
+            gravCount : 0
+        };
         
-        this.effects = {}
+        this.effects = {};
         
         this.get('x',function(){return that.state.x;});
         this.set('x',function(v){that.state.x=v;});
@@ -55,10 +54,9 @@ var init = function(createjs,Global){
         this.get('gravSpeed',function(){return gravSpeed;});
     }
     
-    if(node){
-        var p = Entity.prototype;
-    }else{
-        var p = Entity.prototype = new createjs.Container();
+    var p = Entity.prototype;
+    if(!node){
+        p = Entity.prototype = new createjs.Container();
         p.constructor = Entity;
     }
     

@@ -30,10 +30,10 @@ function(createjs,lib,Global){
                     that.addChild(that.clip);
                     that.clip.scaleX = that.clip.scaleY = that.scale;
                     
-                    that.clip2 = that.clip.clone(); // Clone because vector drawing is a bit holey with CreateJS
-                    that.clip2.sourceRect = getFrame.rect;
+                    //that.clip2 = that.clip.clone(); // Clone because vector drawing is a bit holey with CreateJS
+                    //that.clip2.sourceRect = getFrame.rect;
                     //that.addChild(that.clip2);
-                    that.clip2.scaleX = that.clip2.scaleY = that.scale;
+                    //that.clip2.scaleX = that.clip2.scaleY = that.scale;
                 }
             }
         });
@@ -46,13 +46,14 @@ function(createjs,lib,Global){
                 _scale = s;
                 if(that.clip){
                     that.clip.scaleX = that.clip.scaleY = that.scale;
-                    that.clip2.scaleX = that.clip2.scaleY = that.scale;
+                    //that.clip2.scaleX = that.clip2.scaleY = that.scale;
                 }
             }
         });
         
         this.x = x || 0;
         this.y = y || 0;
+        this.regX = this.regY = 4;
         if(frame){this.frame = frame;}
         this.scale = _scale;
         
