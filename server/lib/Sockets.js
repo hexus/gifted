@@ -44,7 +44,7 @@ servers.tcp.start = function(tcpPort){
         });
         socket.addListener('close',function(e){
             users.remove[user.id];
-            users.send("/ud " + user.id);
+            //users.send("/ud " + user.id);
             console.log("TCP client disconnected from " + local.remoteAddress);
             if(e){console.log(", transmission error");}
         });

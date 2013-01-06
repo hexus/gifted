@@ -10,13 +10,13 @@ try{
     env = readJson('/home/dotcloud/environment.json');
     c.live = true;
     c.basePath = "/home/dotcloud/current/";
-    c.static = readJson('/home/dotcloud/current/config.json');
+    c.static = readJson(c.basePath+'server/config.json');
     console.log('### Live environment ###');
 }catch(e){
 	env = false;
 	c.live = false;
 	c.basePath = "C:/cygwin/home/Hexus/gifted/";
-	c.static = readJson('C:/cygwin/home/Hexus/gifted/server/config.json');
+	c.static = readJson(c.basePath+'server/config.json');
     console.log("### Development environment ###");
 }
 
@@ -31,13 +31,13 @@ c.db = {
     database    : 'gifted_test',
     flags       : '-CONNECT_WITH_DB', // Prevents immediate connection to database (it might not exist)
     sql         : 'CREATE DATABASE IF NOT EXISTS ' + this.database + '; '
-    			+ 'USE' + this.database + ';' + readFile('sql/gifted.sql'),
+    			+ 'USE' + this.database + ';' + readFile(c.basePath+'server/sql/gifted.sql'),
     multipleStatements  : true
 };
 c.worlds = c.static.worlds || [
 	"Buren"
 ];
-c.clientPath = c.basePath+"client/index.php";
+c.clientPath = c.basePath+"client/index.html";
 c.listenPort = env.PORT_GAME || 7000;
 c.listenPort2 = env.PORT_GAME2 || 7001;
 c.connectUrl = "http://" + (env.DOTCLOUD_CLIENT_HTTP_HOST || "localhost:8080/client/");

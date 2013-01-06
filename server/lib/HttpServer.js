@@ -106,14 +106,14 @@ var server = http.createServer(function(request, response) { // One day this wil
                     try{
                         response.writeHead(200, {'Content-Type': 'text/html'});
                         //var clientHtml = fs.readFileSync(config.basePath+'index.php', 'utf-8'); // no php execution obv
-                        if(!config.live){
-	                        php(config.clientPath,function(out){
+                        //if(!config.live){
+	                        readFile(config.clientPath,function(out){
 	                        	response.end(out);
 	                        },false);
-                        }else{
-                        	response.writeHead(301,{'Location':config.connectUrl});
-                        	response.end("Redirecting to live client");
-                        }
+                        //}else{
+                        //	response.writeHead(301,{'Location':config.connectUrl});
+                        //	response.end("Redirecting to live client");
+                        //}
                     }catch(e){
                         response.writeHead(404, {'Content-Type': 'text/html'});
                         response.end("Sorry, we couldn't find the client.<br/>"+e);

@@ -2,12 +2,9 @@ db:
   type: mysql
 server:
   type: nodejs
-  approot: server
+  approot: ./
   config:
     node_version: v0.8.x
   ports:
     game: tcp
     game2: tcp
-client:
-  type: php
-  approot: client

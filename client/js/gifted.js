@@ -19,7 +19,7 @@ requirejs.config({
         
         // Dynamic libs
         'socket.io':socketUrl+'/socket.io/socket.io',
-        'shared':'/client/js/shared',
+        'shared':['/client/js/shared'],
     },
     shim: {
         'socket.io':{
@@ -37,8 +37,8 @@ requirejs.config({
     }
 });
 
-requirejs(['jquery','socket.io','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world','lib/tile','shared/Map','shared/Entity'],
-function($,io,createjs,lib,Global,Ui,Controls,Player,World,Tile,Map,Entity){
+requirejs(['jquery','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world','lib/tile','shared/Map','shared/Entity'],
+function($,createjs,lib,Global,Ui,Controls,Player,World,Tile,Map,Entity){
     function init(){
         var canvas, stage, socket, player, id, users, world, aspect=2.35;
         
@@ -54,7 +54,6 @@ function($,io,createjs,lib,Global,Ui,Controls,Player,World,Tile,Map,Entity){
         users = Global.users = {};
         stage = Global.stage = new createjs.Stage(canvas);
         world = Global.world = new World(new Map());
-        
         
         stage.addChild(world);
         stage.addChild(player);
