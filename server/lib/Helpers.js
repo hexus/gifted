@@ -37,6 +37,11 @@ h.readFile = function(file,callback,base){
     }
 }
 
+h.readStream = function(url,base){
+    if(base!=true){base=false;}
+    return fs.createReadStream(((base)?config.basePath:'')+url);
+}
+
 // Synchronously read a file
 h.readFileSync = function(file,base){
     if(base!=false){base=false;}

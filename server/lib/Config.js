@@ -40,7 +40,7 @@ c.worlds = c.static.worlds || [
 c.clientPath = c.basePath+"client/index.html";
 c.listenPort = env.PORT_GAME || 7000;
 c.listenPort2 = env.PORT_GAME2 || 7001;
-c.connectUrl = "http://" + (env.DOTCLOUD_CLIENT_HTTP_HOST || "localhost:8080/client/");
+c.connectUrl = "http://" + (env.DOTCLOUD_SERVER_HTTP_HOST || "localhost:8080") + "/client/";
 c.motd = "Welcome to the new Gifted Server v" + c.version + "! Thanks for testing.";
 c.fps = 32;
 

@@ -4,7 +4,7 @@ var mime = require('mime');
 var zlib = require('zlib');
 var config = require('./Config');
 var global = require('./Global');
-var helpers = require('./Helpers');
+var helpers = h = require('./Helpers');
 var Room = require('./Room');
 var Map = require('./shared/Map');
 var User = require('./User');
@@ -14,6 +14,7 @@ var empty = helpers.empty;
 var href = helpers.href;
 var php = helpers.php;
 var readFile = helpers.readFile;
+var readStream = helpers.readStream;
 
 // Simple http server that responds with server information and client files
 
@@ -74,46 +75,41 @@ var server = http.createServer(function(request, response) { // One day this wil
         case "client":
             if(req[2]!=undefined){
                 if(!empty(req[2])){ // if this is a client resource being requested
+                    var url = request.url.substr(1);
+                    var type = mime.lookup(req[req.length-1]);
+                    var acceptEncoding = request.headers['accept-encoding'] || '';
+                    
                     if(req[3]=='shared'){ // shared module request
-                        try{
-                            response.writeHead(200,{'Content-Type':mime.lookup(req[4])});
-                            readFile('server/lib/shared/'+req[4], function(data){
+                        url = 'server/lib/shared/'+req[req.length-1];
+                    }
+                    
+                    try{
+                        if(acceptEncoding.match(/\bgzip\b/)){
+                            response.writeHead(200, { 'Content-Type': type, 'Content-Encoding': 'gzip' });
+                            var file = readStream(url,true);
+                            file.on('open',function(){ // if found, stream
+                                file.pipe(zlib.createGzip()).pipe(response);    
+                            });
+                            file.on('error',function(err){ // otherwise 404
+                                response.writeHead(404);
+                                response.end();
+                            });
+                        }else{
+                            response.writeHead(200, {'Content-Type': type});
+                            readFile(url,function(data){
                                 response.end(data);
                             },true);
-                        }catch(e){
-                            response.writeHead(404);
-                            response.end();
                         }
-                    }else{ // normal http request
-                        try{
-                            var url = request.url.substr(1);
-                            response.writeHead(200, {'Content-Type': mime.lookup(req[2])});
-                            if(url.substr(-4)==".php"){
-                            	response.writeHead(200, {'Content-Type': 'text/html'});
-                            	php(url,function(out){
-                            		response.end(out);
-                            	},true);
-                            }else{
-                            	readFile(url, function(data){
-                            		response.end(data);
-                            	},true);
-                            }
-                        }catch(e){
-                            response.writeHead(404); response.end();
-                        }
+                    }catch(e){
+                        response.writeHead(404); 
+                        response.end();
                     }
                 }else{
                     try{
                         response.writeHead(200, {'Content-Type': 'text/html'});
-                        //var clientHtml = fs.readFileSync(config.basePath+'index.php', 'utf-8'); // no php execution obv
-                        //if(!config.live){
-	                        readFile(config.clientPath,function(out){
-	                        	response.end(out);
-	                        },false);
-                        //}else{
-                        //	response.writeHead(301,{'Location':config.connectUrl});
-                        //	response.end("Redirecting to live client");
-                        //}
+                        readFile(config.clientPath,function(out){
+                        	response.end(out);
+                        },false);
                     }catch(e){
                         response.writeHead(404, {'Content-Type': 'text/html'});
                         response.end("Sorry, we couldn't find the client.<br/>"+e);
@@ -141,11 +137,16 @@ var server = http.createServer(function(request, response) { // One day this wil
             break;
     }
 });
+
 server.start = function(port){
     if(!port){port=8080};
     server.listen(port, function(){
         console.log("HTTP listening on " + port);
     });
+}
+
+server.handleRequest = function(){
+    
 }
 
 module.exports = server;
