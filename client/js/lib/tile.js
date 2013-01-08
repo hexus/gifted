@@ -24,20 +24,23 @@ function(createjs,lib,Global){
             return _f;
         });
         this.set('frame',function(f){
-            if(_f!=f){
-                _f = f || 0;
-                var getFrame = Global.tiles.getFrame(_f);
-                if(getFrame){
-                    that.clip = new createjs.Bitmap(getFrame.image); // This is very fast
-                    that.clip.sourceRect = getFrame.rect;
-                    that.addChild(that.clip);
-                    that.clip.scaleX = that.clip.scaleY = that.scale;
-                    
-                    //that.clip2 = that.clip.clone(); // Clone because vector drawing is a bit holey with CreateJS
-                    //that.clip2.sourceRect = getFrame.rect;
-                    //that.addChild(that.clip2);
-                    //that.clip2.scaleX = that.clip2.scaleY = that.scale;
+            _f = f || 0;
+            var getFrame = Global.tiles.getFrame(_f);
+            if(getFrame){
+                if(that.clip){
+                    if(that.clip.parent){
+                        that.clip.parent.removeChild(that.clip);
+                    }
                 }
+                that.clip = new createjs.Bitmap(getFrame.image); // This is very fast
+                that.clip.sourceRect = getFrame.rect;
+                that.addChild(that.clip);
+                that.clip.scaleX = that.clip.scaleY = that.scale;
+                
+                //that.clip2 = that.clip.clone(); // Clone because vector drawing is a bit holey with CreateJS
+                //that.clip2.sourceRect = getFrame.rect;
+                //that.addChild(that.clip2);
+                //that.clip2.scaleX = that.clip2.scaleY = that.scale;
             }
         });
         

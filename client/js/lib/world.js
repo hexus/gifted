@@ -81,7 +81,6 @@ function(createjs,lib,Global,Tile,Map){
                     affect2 = 'height';
                     scale = this.scaleY;
                     targetCord = t.y;
-                    
                 }
                 
                 screenSpan = Global.stage.canvas[affect2] / scale;
@@ -94,19 +93,14 @@ function(createjs,lib,Global,Tile,Map){
                 }
                 
                 this[affect] = (screenSpan*0.5 - this.view[affect]) * scale;
-                
             }
-            
-            
-            //this[affect].y = (Math.floor(Global.stage.canvas.height*0.5) - this.view.y) / this.view.scale;
-            if(this.update.count>this.update.rate){
-                this.updateDisplay(this.view.x, this.view.y, this.view.scale, 1, dist > Math.floor(Global.stage.canvas.width*0.5));
-                this.update.count = 0;
-            }
-            this.update.count++;
-            
-            //this.scrollTo(this.view.x,this.view.y);
         }
+        
+        if(this.update.count>this.update.rate){
+            this.updateDisplay(this.view.x, this.view.y, this.view.scale, 1, dist > Math.floor(Global.stage.canvas.width*0.5));
+            this.update.count = 0;
+        }
+        this.update.count++;
     }
     
     p.scrollTo = function(x,y,clear){
@@ -161,6 +155,7 @@ function(createjs,lib,Global,Tile,Map){
         if(t instanceof Tile){
             var cords = this.map.convertCords(t.x,t.y);
             this.map.setTile(cords['rx'],cords['ry'],cords['x'],cords['y'],t.frame);
+            t.frame = 0;
             this.mapContainer.removeChild(t);
         }
     }
@@ -169,7 +164,7 @@ function(createjs,lib,Global,Tile,Map){
         for(d=0;d<this.mapContainer.children.length;d++){
             this.removeTile(this.mapContainer.getChildAt(d));
         }
-        //this.mapContainer.removeAllChildren();
+        this.mapContainer.removeAllChildren();
     }
     
     p.updateDisplay = function(x,y,scale,times,full){

@@ -57,9 +57,9 @@ function($,createjs,lib,Global,Ui,Controls,Player,World){
         
         ticker.setFPS(32);
         ticker.addListener(stage);
-        ticker.addListener(function(){
+        ticker.addListener(function(timeElapsed,paused){
             if(Ui.selected()=='world'){
-                Global.world.tick();
+                Global.world.tick(timeElapsed,paused);
             }
         });
         
