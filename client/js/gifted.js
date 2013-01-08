@@ -2,6 +2,7 @@ socketUrl = '//localhost:7001';
 //socketUrl = '//192.168.0.2:7001';
 
 requirejs.config({
+    waitSeconds: 10,
     paths: {
         // CDN libs
         //'jquery':'//code.jquery.com/jquery-1.8.2',
@@ -37,30 +38,26 @@ requirejs.config({
     }
 });
 
-requirejs(['jquery','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world','lib/tile','shared/Map','shared/Entity'],
-function($,createjs,lib,Global,Ui,Controls,Player,World,Tile,Map,Entity){
+require(['jquery','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world'],
+function($,createjs,lib,Global,Ui,Controls,Player,World){
     function init(){
         var canvas, stage, socket, player, id, users, world, aspect=2.35;
         
         window.gifted = Global; // Expose global object for debugging
         
-        tileSheetBuilder = new createjs.SpriteSheetBuilder();
-        tileSheetBuilder.addMovieClip(new lib.giftedclienttiles(),new createjs.Rectangle(-4,-4,72,72));
-        tileSheetBuilder.build();
-        tiles = Global.tiles = tileSheetBuilder.spriteSheet;
-        
         canvas = document.getElementById("canvas");
+        ticker = Global.ticker = createjs.Ticker;
+        stage = Global.stage = new createjs.Stage(canvas);
+        world = Global.world = new World();
         player = Global.player = new Player();
         users = Global.users = {};
-        stage = Global.stage = new createjs.Stage(canvas);
-        world = Global.world = new World(new Map());
         
         stage.addChild(world);
         stage.addChild(player);
         
-        createjs.Ticker.setFPS(32);
-        createjs.Ticker.addListener(stage);
-        createjs.Ticker.addListener(function(){
+        ticker.setFPS(32);
+        ticker.addListener(stage);
+        ticker.addListener(function(){
             if(Ui.selected()=='world'){
                 Global.world.tick();
             }

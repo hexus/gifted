@@ -9,5 +9,6 @@ input:active{background-color:#aaa;color:#dfdfdf;}
 input[disabled]{background-color:#aaa;color:#ccc;}
 
 #canvas{background-color:#ccc;}
+#fps{color:#f00;}
 #mainMenu{}
 #worldList{background-color:#ddd;}

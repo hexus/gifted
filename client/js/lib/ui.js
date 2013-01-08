@@ -131,6 +131,10 @@ function($,createjs,Global){
         }
     }
     
+    Ui.selected = function(){
+        return selected;
+    }
+    
     Ui.lobbyClear = function(){
         $('#buffer').empty();
         Ui.lobbyPrint.apply(Ui,arguments);
@@ -144,10 +148,6 @@ function($,createjs,Global){
     
     Ui.print = function(){
         Ui.lobbyPrint.apply(Ui,arguments);
-    }
-    
-    Ui.selected = function(){
-        return selected;
     }
     
     // Chat is always controlled by Ui, it seems to fit in here
@@ -169,6 +169,10 @@ function($,createjs,Global){
                 socket.send("/c " + data);
             }
         }
+    }
+    
+    Ui.updateFPS = function(fps){
+        $('#fps').html(fps);
     }
     
     return Ui;

@@ -1,6 +1,8 @@
 define([],
 function(){
     var Global = {
+        debug:true, // Debug mode
+        ticker:null,// CreateJS Ticker
         stage:null, // CreateJS Stage
         dom:null,   // CreateJS DOMElement objects
         socket:null,// Socket.io

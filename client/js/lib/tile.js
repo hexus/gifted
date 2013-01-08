@@ -1,5 +1,8 @@
 define(['createjs','assets','lib/global'],
 function(createjs,lib,Global){
+    
+    var globalScale = 1;
+    
     var Tile = function(frame,x,y,scale){
     	this.initialize();
     	var that = this;
@@ -25,7 +28,7 @@ function(createjs,lib,Global){
                 _f = f || 0;
                 var getFrame = Global.tiles.getFrame(_f);
                 if(getFrame){
-                    that.clip = new createjs.Bitmap(getFrame.image); // This is very, very fast
+                    that.clip = new createjs.Bitmap(getFrame.image); // This is very fast
                     that.clip.sourceRect = getFrame.rect;
                     that.addChild(that.clip);
                     that.clip.scaleX = that.clip.scaleY = that.scale;
@@ -39,7 +42,7 @@ function(createjs,lib,Global){
         });
         
         this.get('scale',function(){
-            return _scale;
+            return _scale / globalScale;
         })
         this.set('scale',function(s){
             if(_scale!=s){
@@ -59,16 +62,22 @@ function(createjs,lib,Global){
         
     }
     
-    var p = Tile.prototype = new createjs.Container();
-    
-    p.cacheTile = function(){ // redundant when using spritesheet
-        this.clip.cache(-4,-4,72,72,1);
-        this.clip.updateCache();
+    Tile.buildSheet = function(scale){ // Static
+        if(!scale){scale = globalScale;}
+        globalScale = scale;
+        var tileSheetBuilder = new createjs.SpriteSheetBuilder();
+        tileSheetBuilder.addMovieClip(new lib.giftedclienttiles(),new createjs.Rectangle(-4,-4,72,72),globalScale);
+        tileSheetBuilder.build();
+        Global.tiles = tileSheetBuilder.spriteSheet;
     }
+    
+    var p = Tile.prototype = new createjs.Container();
     
     p.toString = function(){
         return this.frame;
     }
+    
+    Tile.buildSheet();
     
     return Tile;
 });

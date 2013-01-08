@@ -1,37 +1,53 @@
 define(['createjs','assets','lib/global','lib/tile','shared/Map'],
 function(createjs,lib,Global,Tile,Map){
     var World = function(map){
-        if(map instanceof Map){
-            this.initialize();
-            this.id = 0;
-            this.name = '';
-            this.users = {};
-            
-            this.map = map;
-            this.tilePool = {};
-            this.tileRefs = {};
-            this.outerMargin = 3;
-            this.tileScale = this.map.getTileSize()/62;
-            this.mapContainer = new createjs.Container();
-            
-            this.view = {x:0,y:0,scale:1};
-            this.lastUpdated = {x:0,y:0,scale:1};
-            this.scrollTarget = null;
-            this.scrollSensitivity = 0.36;
-            this.update = {rate:4,count:0}
-            
-            this.addChild(this.mapContainer);
-            this.testTiles();
+        this.initialize();
+        this.get = this.__defineGetter__;
+        this.set = this.__defineSetter__;
+        var that = this;
+        
+        if(!(map instanceof Map)){
+            map = new Map();
         }
+        
+        this.initialize();
+        this.id = 0;
+        this.name = '';
+        this.users = {};
+        
+        this.map = map;
+        this.tilePool = {};
+        this.tileRefs = {};
+        this.outerMargin = 4;
+        this.tileScale = this.map.getTileSize()/62;
+        this.mapContainer = new createjs.Container();
+        
+        this.set('scale',function(v){
+            that.view.scale = that.scaleX = that.scaleY = v;
+        });
+        this.get('scale',function(){
+            return that.view.scale;
+        });
+        this.view = {x:0,y:0,scale:1};
+        this.lastUpdated = {x:0,y:0,scale:1};
+        this.scrollTarget = null;
+        this.scrollSensitivity = 0.36;
+        this.update = {rate:6,count:0}
+        
+        this.addChild(this.mapContainer);
+        this.testTiles();
     }
     
     var p = World.prototype = new createjs.Container();
-
+    
     p.tick = function(timeElapsed,paused){
         for(u in this.users){
             this.users[u].tick();
         }
         this.iScroll();
+        if(Global.debug && Global.ticker.getTicks()%64==0){
+            Global.ui.updateFPS(Math.round(Global.ticker.getMeasuredFPS()));
+        }
     }
     
     p.focusOn = function(target,lock){
@@ -50,37 +66,41 @@ function(createjs,lib,Global,Tile,Map){
         this.focusOn(this.scrollTarget);
         var t = this.scrollTarget;
         var sens = this.scrollSensitivity;
+        var dist = Math.sqrt(((t.x-this.view.x)*(t.x-this.view.x))+((t.y-this.view.y)*(t.y-this.view.y)));
         
         if(t){
             for(var i=0;i<2;i++){
                 var affect,targetCord,screenSpan,scale;
                 if(i==0){
                     affect = 'x';
+                    affect2 = 'width';
                     scale = this.scaleX;
                     targetCord = t.x;
-                    screenSpan = Global.stage.canvas.width / scale;
                 }else if(i==1){
                     affect = 'y';
+                    affect2 = 'height';
                     scale = this.scaleY;
                     targetCord = t.y;
-                    screenSpan = Global.stage.canvas.height / scale;
+                    
                 }
                 
-                //console.log(t,Global.player,targetCord,this.view[affect]);
+                screenSpan = Global.stage.canvas[affect2] / scale;
                 var dif = targetCord - this.view[affect];
                 
-                if(Math.abs(dif*sens)>1){
-                    this.view[affect] += dif*sens;
+                if(Math.abs(dif*sens)>sens){
+                    this.view[affect] += (dif*sens);
                 }else{
-                    this.view[affect] = targetCord;
+                    this.view[affect] = (targetCord);
                 }
+                
+                this[affect] = (screenSpan*0.5 - this.view[affect]) * scale;
                 
             }
             
-            this.x = Math.floor(Global.stage.canvas.width*0.5) - this.view.x;
-            this.y = Math.floor(Global.stage.canvas.height*0.5) - this.view.y;
+            
+            //this[affect].y = (Math.floor(Global.stage.canvas.height*0.5) - this.view.y) / this.view.scale;
             if(this.update.count>this.update.rate){
-                this.updateDisplay(this.view.x,this.view.y);
+                this.updateDisplay(this.view.x, this.view.y, this.view.scale, 1, dist > Math.floor(Global.stage.canvas.width*0.5));
                 this.update.count = 0;
             }
             this.update.count++;
@@ -93,11 +113,9 @@ function(createjs,lib,Global,Tile,Map){
         //if(x&&y){
             this.view.x = x;
             this.view.y = y;
-            this.x = Math.floor(Global.stage.canvas.width*0.5) - this.view.x ;
+            this.x = Math.floor(Global.stage.canvas.width*0.5) - this.view.x;
             this.y = Math.floor(Global.stage.canvas.height*0.5) - this.view.y;
-            
             if(clear){this.clearDisplay();}
-
         //}
     }
     
@@ -128,6 +146,7 @@ function(createjs,lib,Global,Tile,Map){
                 this.mapContainer.addChild(newtile);
             }
         }else{
+            v = (newtile==1) ? 9 : newtile;
             newtile = new Tile();
             newtile = this.mapContainer.addChild(newtile);
             this.map.setTile(rx,ry,dx,dy,newtile);
@@ -139,26 +158,29 @@ function(createjs,lib,Global,Tile,Map){
     }
     
     p.removeTile = function(t){
-        if(t.clip){
-            if(t.parent){
-                var removed = this.mapContainer.removeChild(t);
-                if(removed){
-                    var cords = this.map.convertCords(t.x,t.y);
-                    //console.log(cords,t.frame);
-                    this.map.setTile(cords['rx'],cords['ry'],cords['x'],cords['y'],t.frame);
-                }
-            }
+        if(t instanceof Tile){
+            var cords = this.map.convertCords(t.x,t.y);
+            this.map.setTile(cords['rx'],cords['ry'],cords['x'],cords['y'],t.frame);
+            this.mapContainer.removeChild(t);
         }
     }
     
     p.clearDisplay = function(){
-        this.mapContainer.removeAllChildren();
+        for(d=0;d<this.mapContainer.children.length;d++){
+            this.removeTile(this.mapContainer.getChildAt(d));
+        }
+        //this.mapContainer.removeAllChildren();
     }
     
     p.updateDisplay = function(x,y,scale,times,full){
-        if(!scale){scale=1;} // change to last scale later
-        if(!times){t=1;}
-        if(!full){full=true;}
+        if(!scale){scale=this.lastUpdated.scale || 1;} // change to last scale later
+        if(!times){times=1;}
+        if(!full){full=false;}
+        if(scale!=this.lastUpdated.scale){
+            Tile.buildSheet(scale);
+            this.clearDisplay();
+            full=true;
+        }
         
         var scrW = Global.stage.canvas.width,
             scrH = Global.stage.canvas.height,
@@ -176,7 +198,7 @@ function(createjs,lib,Global,Tile,Map){
         
         
         if(full){
-            // Iterate through view bounds, append tiles
+            // Iterate through entire view bounds to append tiles
             for(var x=dX1;x<dX2;x++){
                 for(var y=dY1;y<dY2;y++){
                     cord = this.map.convertCords(x,y,true);
@@ -186,20 +208,14 @@ function(createjs,lib,Global,Tile,Map){
                     cy = cord['y'];
                     
                     var tile = this.map.getTile(rx,ry,cx,cy);
-                    //console.log(cord,tile);
                     if(tile>0){
                         tile = 9;
-                        /*
-                        this.mapContainer.addChild(
-                            new Tile(tile,x*tSize,y*tSize,this.tileScale)
-                        );
-                        */
-                       this.addTile(x,y,tile);
+                        this.addTile(x,y,tile);
                     }
                 }
             }
             
-            // Remove tiles outside view bounds
+            // Remove all tiles outside view bounds
             for(d=0;d<this.mapContainer.children.length;d++){
                 var tileRem = this.mapContainer.getChildAt(d),
                     tx = tileRem.x / tSize,
@@ -208,8 +224,62 @@ function(createjs,lib,Global,Tile,Map){
                     this.removeTile(tileRem);
                 }
             }
-        }else{
+        }else{ // Iterate over edges of viewport for adding and removing tiles
+            var deltas = this.lastUpdated.deltas || [dX1,dX2,dY1,dY2];
             
+            if(dX1!=deltas[0]){
+                var dx1rel = dX1 - deltas[0];
+                for(var k=0; k<Math.abs(dx1rel); k++){
+                    for(var l=((dY1<deltas[2])?dY1:deltas[2]); l<((dY2>deltas[3])?dY2:deltas[3]); l++){
+                        var addX,remX;
+                        if(dx1rel>0){ // Left
+                            remX = deltas[0]+k;
+                            addX = deltas[1]+k;
+                        }else{ // Right
+                            remX = deltas[1]-k;
+                            addX = deltas[0]-k;
+                        }
+                        cord = this.map.convertCords(remX,l,true);
+                        remTile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
+                        this.removeTile(remTile);
+                        if(l>=dY1 && l<=dY2){
+                            cord = this.map.convertCords(addX,l,true); 
+                            var tile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
+                            if(tile>0){
+                                tile = 9;
+                                this.addTile(addX,l,tile);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if(dY1!=deltas[2]){
+                var dy1rel = dY1 - deltas[2];
+                for(var m=0; m<Math.abs(dy1rel); m++){
+                    for(var n=((dX1<deltas[0])?dX1:deltas[0]); n<((dX2>deltas[1])?dX2:deltas[1]); n++){
+                        var addY,remY;
+                        if(dy1rel>0){ // Left
+                            remY = deltas[2]+m;
+                            addY = deltas[3]+m;
+                        }else{ // Right
+                            remY = deltas[3]-m;
+                            addY = deltas[2]-m;
+                        }
+                        cord = this.map.convertCords(n,remY,true);
+                        remTile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
+                        this.removeTile(remTile);
+                        if(n>=dX1 && n<=dX2){
+                            cord = this.map.convertCords(n,addY,true); 
+                            var tile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
+                            if(tile>0){
+                                tile = 9;
+                                this.addTile(n,addY,tile);
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         this.lastUpdated = {
@@ -218,9 +288,9 @@ function(createjs,lib,Global,Tile,Map){
             deltas:[dX1,dX2,dY1,dY2]
         };
         
-        if(t>1){
-            t--;
-            this.updateDisplay(x,y,scale,t);
+        if(times>1){
+            times--;
+            this.updateDisplay(x,y,scale,times);
         }
         
     }

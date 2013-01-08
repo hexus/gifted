@@ -20,6 +20,10 @@ input[type=text]{padding:0 2px;}
     margin-left: -423px; /* Negative half of width. */
     margin-top: -180px; /* Negative half of height. */
 }
+#fps{
+    position:absolute;
+    top:0;left:4px;
+}
 #canvas{}
 #mainMenu,#worldList{z-index:1337;height:50%;top:25%;text-align:center;}
 #lobby{height:100%;}
