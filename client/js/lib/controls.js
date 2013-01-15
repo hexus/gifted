@@ -5,6 +5,10 @@ function($,Global,Ui){
     
     Controls.init = function(){
         
+        function debugTrace(){
+            //console.log(Global.player.mouseX,Global.player.mouseY,Global.player.state.aimAngle);
+        }
+        
         $(window).keydown(function(e){
             var k = e.keyCode || e.which;
             if(Ui.selected()=='world'){
@@ -24,6 +28,14 @@ function($,Global,Ui){
                     case 68: // D
                         Global.player.moveRight = true;
                         if(!rightDown){rightDown = true;}
+                        break;
+                    case 81: // Q
+                        Global.player.setDynamicPart('arm','l',true);
+                        debugTrace();
+                        break;
+                    case 69: // E
+                        Global.player.setDynamicPart('arm','r',true);
+                        debugTrace();
                         break;
                 }
             }
@@ -49,6 +61,14 @@ function($,Global,Ui){
                     case 68: // D
                         Global.player.moveRight = false;
                         rightDown = false;
+                        break;
+                    case 81: // Q
+                        Global.player.setDynamicPart('arm','l',false);
+                        debugTrace();
+                        break;
+                    case 69: // E
+                        Global.player.setDynamicPart('arm','r',false);
+                        debugTrace();
                         break;
                 }
             }
