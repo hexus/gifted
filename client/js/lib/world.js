@@ -30,7 +30,8 @@ function(createjs,lib,Global,Tile,Map){
         });
         this.view = {x:0,y:0,scale:1};
         this.lastUpdated = {x:0,y:0,scale:1};
-        this.scrollTarget = null;
+        this.defaultTarget = new createjs.Container();
+        this.scrollTarget = this.addChild(this.defaultTarget);
         this.scrollSensitivity = 0.36;
         this.update = {rate:6,count:0}
         
@@ -57,7 +58,7 @@ function(createjs,lib,Global,Tile,Map){
             }
             this.scrollTarget = target;
         }else{
-            this.scrollTarget = null;
+            this.scrollTarget = this.defaultTarget;
         }
         return this.scrollTarget;
     }

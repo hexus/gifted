@@ -1,21 +1,21 @@
-define(['jquery','createjs','lib/global'],
-function($,createjs,Global){
+define(['jquery','createjs','socket.io','lib/global'],
+function($,createjs,io,Global){
+    
     var Socket = {};
     
-    var p = Socket.prototype;
-    
-    p.createSocket = function(socketUrl){
+    Socket.createSocket = function(socketUrl){
         dom = Global.dom = {},
         stage = Global.stage,
+        world = Global.world,
         player = Global.player,
-        world = Global.world;
+        users = Global.users,
+        Ui = Global.ui;
         
         var socket = Global.socket = io.connect(socketUrl);
         
         socket.on('connect',function(){
             console.log("Socket.io connected!");
-            $('#worldList').removeAttr('disabled');
-            Ui.selectWorld();
+            $('#worldList, #mp').removeAttr('disabled');
         });
         
         socket.on('message',function(data){
@@ -81,7 +81,7 @@ function($,createjs,Global){
                     logData = false;
                     break;
                 case "/c":
-                    d = data.split(" ",2)
+                    d = data.split(" ",2);
                     Ui.print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
                     break;
                 default:
@@ -95,4 +95,6 @@ function($,createjs,Global){
         
         return socket;
     }
-}
+    
+    return Socket;
+});

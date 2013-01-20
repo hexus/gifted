@@ -16,7 +16,7 @@ var Room = function(args){
     this.step = 0;
     this.tickSpeed = 1/this.fps*1000;
     this.timer = setInterval(function(){that.tick();},this.tickSpeed);
-    this.ontick = function(){}
+    this.ontick = function(){};
 }
 
 var p = Room.prototype;
@@ -26,6 +26,11 @@ module.exports = Room;
 p.tick = function(){
     this.step++;
     this.ontick.call(this);
+    for(u in this.users){
+        if(this.users[u] instanceof User){
+            this.users[u].tick();
+        }
+    }
 }
 
 p.send = function(str,lobby){

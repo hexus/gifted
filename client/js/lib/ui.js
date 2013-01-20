@@ -32,6 +32,7 @@ function($,createjs,Global){
         });
         
         $("#mp").click(function(){
+            socket = Global.socket;
             if(socket){
                 Ui.selectWorld();
             }

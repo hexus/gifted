@@ -69,6 +69,9 @@ var server = http.createServer(function(request, response) { // One day this wil
         	}
         	response.end(JSON.stringify(resp));
         	break;
+        case "socket":
+            response.end(config.socketUrl);
+            break;
         case "port":
         	response.end(config.listenPort.toString());
         	break;
@@ -133,14 +136,14 @@ var server = http.createServer(function(request, response) { // One day this wil
             break;
         default:
         	response.writeHead(200, {'Content-type':'text/html'});
-            response.end("Welcome. If you'd like to connect, please visit " + href(config.connectUrl));
+            response.end("Welcome. If you'd like to connect, please visit " + href(config.c));
             break;
     }
 });
 
 server.start = function(port){
-    if(!port){port=8080};
-    server.listen(port, function(){
+    port = port || config.httpPort;
+    server.listen(config.httpPort, function(){
         console.log("HTTP listening on " + port);
     });
 }

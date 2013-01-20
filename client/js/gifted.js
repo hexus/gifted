@@ -38,8 +38,8 @@ requirejs.config({
     }
 });
 
-require(['jquery','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world'],
-function($,createjs,lib,Global,Ui,Controls,Player,World){
+require(['jquery','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world','lib/socket'],
+function($,createjs,lib,Global,Ui,Controls,Player,World,Socket){
     function init(){
         var canvas, stage, socket, player, id, users, world, aspect=2.35;
         
@@ -67,6 +67,11 @@ function($,createjs,lib,Global,Ui,Controls,Player,World){
         Ui.init();
         Ui.lobbyClear('Connecting...\n');
         Controls.init();
+        
+        $.get('/socket','',function(d){
+            socketUrl = d;
+            Socket.createSocket(socketUrl);
+        });
         
         // Ajax for socket address
         // then initialise socket and

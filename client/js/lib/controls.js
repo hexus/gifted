@@ -6,11 +6,12 @@ function($,Global,Ui){
     Controls.init = function(){
         
         function debugTrace(){
-            //console.log(Global.player.mouseX,Global.player.mouseY,Global.player.state.aimAngle);
+            //console.log(Global.player.state.isAimingLeft,Global.player.state.isAimingRight);
         }
         
         $(window).keydown(function(e){
             var k = e.keyCode || e.which;
+            console.log(k);
             if(Ui.selected()=='world'){
                 switch(k){
                     case 87: // W
@@ -30,11 +31,15 @@ function($,Global,Ui){
                         if(!rightDown){rightDown = true;}
                         break;
                     case 81: // Q
-                        Global.player.setDynamicPart('arm','l',true);
+                        // hold
+                        //Global.player.state.isAimingLeft = true;
+                        // toggle
+                        Global.player.state.isAimingLeft = !Global.player.state.isAimingLeft;
                         debugTrace();
                         break;
                     case 69: // E
-                        Global.player.setDynamicPart('arm','r',true);
+                        //Global.player.state.isAimingRight = true;
+                        Global.player.state.isAimingRight = !Global.player.state.isAimingRight;
                         debugTrace();
                         break;
                 }
@@ -63,11 +68,11 @@ function($,Global,Ui){
                         rightDown = false;
                         break;
                     case 81: // Q
-                        Global.player.setDynamicPart('arm','l',false);
+                        //Global.player.state.isAimingLeft = false;
                         debugTrace();
                         break;
                     case 69: // E
-                        Global.player.setDynamicPart('arm','r',false);
+                        //Global.player.state.isAimingRight = false;
                         debugTrace();
                         break;
                 }

@@ -1,4 +1,4 @@
-var node = window === undefined;
+var node = typeof window === 'undefined'; // JSLint can suck my balls
 var deps = ['createjs','lib/global']; // RequireJS dependencies
 var init = function(createjs,Global){
     if(node){

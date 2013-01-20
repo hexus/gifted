@@ -37,30 +37,36 @@ function(createjs,lib,Global,Character){
         this.setAnim("static");
         
         this.weapon = {
-            left:0,
-            right:0
+            left:3,
+            right:4
         }
         
         this.get('thisPlayer',function(){
             return Global.player === that;
         });
         this.get('mouseX',function(){
-            return Global.stage.mouseX - (that.world.x + that.x);
+            return Global.stage.mouseX/that.world.scale - (that.world.x/that.world.scale + that.x);
         });
         this.get('mouseY',function(){
-            return Global.stage.mouseY - (that.world.y + that.y) + 10;
+            return Global.stage.mouseY/that.world.scale - (that.world.y/that.world.scale + that.y) + 10;
         });
         
-        var _aimAngle=0,_aimDir=0;
+        var _aimAngle = 0,_aimDir = 0, _isAimingLeft = false, _isAimingRight = false;
         
         this.state.__defineGetter__('isAiming',function(){
             return that.state.isAimingLeft || that.state.isAimingRight;
         });
         this.state.__defineGetter__('isAimingLeft',function(){
-            return that.getPart('arm','l','d').visible;
+            return _isAimingLeft;
+        });
+        this.state.__defineSetter__('isAimingLeft',function(v){
+            _isAimingLeft = v;
         });
         this.state.__defineGetter__('isAimingRight',function(){
-            return that.getPart('arm','r','d').visible;
+            return _isAimingRight;
+        });
+        this.state.__defineSetter__('isAimingRight',function(v){
+            _isAimingRight = v;
         });
         this.state.__defineGetter__('aimAngle',function(){
             return Math.round(_aimAngle);
@@ -101,17 +107,22 @@ function(createjs,lib,Global,Character){
         side = !side ? 'r' : side;
         frame = !frame ? 0 : frame;
         switch(side){
-            case 'l': case 'b':
-                this.char.larm_l.wpnUnder.gotoAndStop(frame);
-                this.char.larm_d.arm.l.wpnUnder.gotoAndStop(frame);
+            case 'b':
+                this.setWeapon('l',frame);
+                this.setWeapon('r',frame);
+                break;
+            case 'l': 
                 this.weapon.left = frame;
                 break;
-            case 'r': case 'b':
-                this.char.rarm_l.wpnUnder.gotoAndStop(frame);
-                this.char.rarm_d.arm.l.wpnOver.gotoAndStop(frame);
+            case 'r':
                 this.weapon.right = frame;
                 break;
         }
+    }
+    
+    p.setWeapons = function(left,right){
+        this.setWeapon('l',left);
+        this.setWeapon('r',right);
     }
     
     p.getPart = function(part,side,type){
@@ -185,26 +196,61 @@ function(createjs,lib,Global,Character){
             }
             
             // Arm rotation
-            if(isAiming){
-                if(this.thisPlayer){
-                    aimAngle = Math.atan2(-this.mouseY,-Math.abs(this.mouseX))/(Math.PI/180);
-                    if(aimAngle<0){aimAngle+=360;}
-                    if(this.mouseX>0){
-                        aimDir = 1;
-                    }else{
-                        aimDir = -1;
-                    }
+            if(this.thisPlayer){
+                aimAngle = Math.atan2(-this.mouseY,-Math.abs(this.mouseX))/(Math.PI/180);
+                if(aimAngle<0){aimAngle+=360;}
+                if(this.mouseX>0){
+                    aimDir = 1;
+                }else{
+                    aimDir = -1;
                 }
-                if(isAimingLeft){
-                    this.char.larm_d.arm.rotation = isAimingRight ? aimAngle + 110 : -aimAngle - 60;
-                }
-                if(isAimingRight){
-                    this.char.rarm_d.arm.rotation = aimAngle + 110;
-                }
-                this.char.scaleX = aimDir;
-            }else{
-                this.char.scaleX = direction;
             }
+            
+            this.char.scaleX = aimDir;
+            
+            var leftArm = aimDir>0 ? 'l' : 'r';
+            var rightArm = aimDir>0 ? 'r' : 'l';
+            
+            if(isAimingRight){
+                this.setDynamicPart('arm',leftArm,true);
+                this.setDynamicPart('arm',rightArm,true);
+                // Arm rotation
+                this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? aimAngle + 110 : -aimAngle + 60;
+                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? 130 - aimAngle*0.1 : 40 + aimAngle*0.1;
+                // Lower arm rotation
+                this.char[leftArm+'arm_d'].arm.l.rotation = -40 - aimAngle*0.1;
+                this.char[rightArm+'arm_d'].arm.l.rotation = -15;
+                // Y Flip
+                this.char[leftArm+'arm_d'].arm.scaleY = -aimDir;
+                this.char[rightArm+'arm_d'].arm.scaleY = aimDir;
+            }else{
+                this.setDynamicPart('arm',leftArm,isAimingLeft);
+                this.setDynamicPart('arm',rightArm,false);
+            }
+            
+            if(isAimingLeft){
+                this.setDynamicPart('arm',leftArm,true);
+                this.setDynamicPart('arm',rightArm,true);
+                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? -aimAngle + 60 : aimAngle + 110;
+                this.char[leftArm+'arm_d'].arm.l.rotation = -15;
+                this.char[leftArm+'arm_d'].arm.scaleY = -aimDir;
+                if(!isAimingRight){
+                    this.char[rightArm+'arm_d'].arm.l.rotation = -40 - aimAngle*0.1;
+                    this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? 40 + aimAngle*0.1 : 130 - aimAngle*0.1;
+                    this.char[rightArm+'arm_d'].arm.scaleY = aimDir;
+                }
+            }else{
+                this.setDynamicPart('arm',leftArm,isAimingRight);
+                this.setDynamicPart('arm',rightArm,isAimingRight);
+            }
+            
+            // Weapon display
+            this.char.larm_l.wpnUnder.gotoAndStop(this.getWeapon(leftArm));
+            this.char.larm_d.arm.l.wpnUnder.gotoAndStop(this.getWeapon(leftArm));
+            
+            this.char.rarm_l.wpnUnder.gotoAndStop(this.getWeapon(rightArm));
+            this.char.rarm_d.arm.l.wpnOver.gotoAndStop(this.getWeapon(rightArm));
+            
         }
     }
     
