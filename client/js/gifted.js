@@ -1,4 +1,4 @@
-socketUrl = '//localhost:7001';
+socketUrl = '//localhost:7001'; // Default socket.io address
 //socketUrl = '//192.168.0.2:7001';
 
 requirejs.config({
@@ -38,48 +38,50 @@ requirejs.config({
     }
 });
 
-require(['jquery','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world'],
-function($,createjs,lib,Global,Ui,Controls,Player,World){
-    function init(){
-        var canvas, stage, socket, player, id, users, world, aspect=2.35;
-        
-        window.gifted = Global; // Expose global object for debugging
-        
-        canvas = document.getElementById("canvas");
-        ticker = Global.ticker = createjs.Ticker;
-        stage = Global.stage = new createjs.Stage(canvas);
-        world = Global.world = new World();
-        player = Global.player = new Player();
-        users = Global.users = {};
-        
-        stage.addChild(world);
-        stage.addChild(player);
-        
-        ticker.setFPS(32);
-        ticker.addListener(stage);
-        ticker.addListener(function(timeElapsed,paused){
-            if(Ui.selected()=='world'){
-                Global.world.tick(timeElapsed,paused);
+require(['jquery','lib/global'],
+function($,Global){
+    $.get('/socket','',function(d){ // Don't require anything else until socket.io address is loaded
+        socketUrl = Global.sUrl = d;
+        requirejs.config({ // Update config
+            paths:{
+             'socket.io':socketUrl+'/socket.io/socket.io'
             }
+        });        
+        require(['createjs','assets','lib/ui','lib/controls','lib/player','lib/world'],
+        function(createjs,lib,Ui,Controls,Player,World){
+            function init(){
+                var canvas, stage, socket, player, id, users, world, aspect=2.35;
+                
+                window.gifted = Global; // Expose global object for debugging
+                
+                canvas = document.getElementById("canvas");
+                ticker = Global.ticker = createjs.Ticker;
+                stage = Global.stage = new createjs.Stage(canvas);
+                world = Global.world = new World();
+                player = Global.player = new Player();
+                users = Global.users = {};
+                
+                stage.addChild(world);
+                stage.addChild(player);
+                
+                ticker.setFPS(32);
+                ticker.addListener(stage);
+                ticker.addListener(function(timeElapsed,paused){
+                    if(Ui.selected()=='world'){
+                        Global.world.tick(timeElapsed,paused);
+                    }
+                });
+                
+                Global.ui = Ui;
+                Ui.init();
+                Ui.lobbyClear('Connecting...\n');
+                Controls.init();
+                $('#worldList, #mp').removeAttr('disabled');
+            }
+            
+            $(function(){
+                init();
+            });
         });
-        
-        Global.ui = Ui;
-        Ui.init();
-        Ui.lobbyClear('Connecting...\n');
-        Controls.init();
-        
-        $.get('/socket','',function(d){
-            socketUrl = Global.sUrl = d;
-            $('#worldList, #mp').removeAttr('disabled');
-        });
-        
-        // Ajax for socket address
-        // then initialise socket and
-        // enable mp button on main menu
-
-    }
-    
-    $(function(){
-        init();
     });
 });

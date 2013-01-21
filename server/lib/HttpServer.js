@@ -136,7 +136,7 @@ var server = http.createServer(function(request, response) { // One day this wil
             break;
         default:
         	response.writeHead(200, {'Content-type':'text/html'});
-            response.end("Welcome. If you'd like to connect, please visit " + href(config.c));
+            response.end("Welcome. If you'd like to connect, please visit " + href(config.clientUrl));
             break;
     }
 });
