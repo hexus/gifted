@@ -1,9 +1,12 @@
 define(['createjs','assets','lib/global','shared/Character'],
 function(createjs,lib,Global,Character){
     var Player = function(args){
+        this.initialize();
         var that = this;
     	this.super2.constructor.call(this,args);
-    	this.initialize();
+    	
+    	this.gid = (args) ? args.id : 0; // Game ID (this.id is used by createjs)
+    	this.name = (args) ? args.name : 'guest';
     	
         this.clip = this.addChild(new lib.giftedclientplayer()); // previously lib.mcPlayer_char()
         
@@ -17,7 +20,7 @@ function(createjs,lib,Global,Character){
         };
         
         this.char = this.clip.playerChar;
-        this.char.head.wear.gotoAndStop(0);
+        this.char.head.wear.stop();
         this.char.larm_l.wpnOver.stop();
         this.char.larm_l.wpnUnder.stop();
         this.char.rarm_l.wpnOver.stop();
@@ -37,8 +40,8 @@ function(createjs,lib,Global,Character){
         this.setAnim("static");
         
         this.weapon = {
-            left:3,
-            right:4
+            left:0,
+            right:0
         }
         
         this.get('thisPlayer',function(){
@@ -51,7 +54,7 @@ function(createjs,lib,Global,Character){
             return Global.stage.mouseY/that.world.scale - (that.world.y/that.world.scale + that.y) + 10;
         });
         
-        var _aimAngle = 0,_aimDir = 0, _isAimingLeft = false, _isAimingRight = false;
+        var _aimAngle = 0,_aimDir = 1, _isAimingLeft = false, _isAimingRight = false;
         
         this.state.__defineGetter__('isAiming',function(){
             return that.state.isAimingLeft || that.state.isAimingRight;

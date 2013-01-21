@@ -7,17 +7,14 @@ var User = function(args){
     this.aid = args.aid; // Account ID
     this.name = args.name; // Selected character name
     this.room = null;
+    this.inLobby = true;
     this.socket = args.socket; // Socket of user
     this.socketType = (!args.socketType) ? "TCP" : args.socketType; // TCP/Socket.io
-    
-    with(this.state){
-        isAimingLeft = false;
-        isAimingRight = false;
-        aimAngle = 0;
-        aimDir = 1;
-    }
-    
-    console.log(this.state);
+
+    this.state.isAimingLeft = false;
+    this.state.isAimingRight = false;
+    this.state.aimAngle = 0;
+    this.state.aimDir = 1;
 }
 
 var p = User.prototype = new Character();

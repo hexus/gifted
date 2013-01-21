@@ -1,5 +1,5 @@
-define(['jquery','createjs','lib/global'],
-function($,createjs,Global){
+define(['jquery','createjs','lib/global','lib/socket'],
+function($,createjs,Global,Socket){
     
     var Ui = {}, dom,stage,socket,player,world,selected;
     
@@ -7,6 +7,7 @@ function($,createjs,Global){
         
         dom = Global.dom = {},
         stage = Global.stage,
+        socketUrl = Global.sUrl,
         socket = Global.socket,
         player = Global.player,
         world = Global.world;
@@ -32,10 +33,9 @@ function($,createjs,Global){
         });
         
         $("#mp").click(function(){
-            socket = Global.socket;
-            if(socket){
+            socket = Global.socket = Socket.createSocket(socketUrl,function(){
                 Ui.selectWorld();
-            }
+            });
         })
         
         $("#headwear_prev").click(function(){
@@ -73,7 +73,7 @@ function($,createjs,Global){
         });
         
         $('#play').click(function(){
-            Ui.showWorld();
+            socket.send('/r 1');
         });
         
         Ui.hideAll();
@@ -118,18 +118,13 @@ function($,createjs,Global){
     
     Ui.showWorld = function(){
         if(selected=='lobby'){
-            world.addChild(player);
-            player.x = player.y = 200;
+            world.addPlayer(player);
         }
         selected = 'world';
         Ui.hideAll();
         player.scaleX = player.scaleY = 1;
-        player.char.gotoAndStop(0);
         player.visible = true;
         world.visible = true;
-        if(socket){
-            socket.send('/info-request json');
-        }
     }
     
     Ui.selected = function(){

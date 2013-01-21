@@ -11,7 +11,7 @@ function($,Global,Ui){
         
         $(window).keydown(function(e){
             var k = e.keyCode || e.which;
-            console.log(k);
+            //console.log(k); // Trace keycode
             if(Ui.selected()=='world'){
                 switch(k){
                     case 87: // W
@@ -31,16 +31,12 @@ function($,Global,Ui){
                         if(!rightDown){rightDown = true;}
                         break;
                     case 81: // Q
-                        // hold
                         //Global.player.state.isAimingLeft = true;
-                        // toggle
                         Global.player.state.isAimingLeft = !Global.player.state.isAimingLeft;
-                        debugTrace();
                         break;
                     case 69: // E
                         //Global.player.state.isAimingRight = true;
                         Global.player.state.isAimingRight = !Global.player.state.isAimingRight;
-                        debugTrace();
                         break;
                 }
             }
@@ -69,11 +65,9 @@ function($,Global,Ui){
                         break;
                     case 81: // Q
                         //Global.player.state.isAimingLeft = false;
-                        debugTrace();
                         break;
                     case 69: // E
                         //Global.player.state.isAimingRight = false;
-                        debugTrace();
                         break;
                 }
             }

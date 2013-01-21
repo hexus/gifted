@@ -1,9 +1,9 @@
-define(['jquery','createjs','socket.io','lib/global'],
-function($,createjs,io,Global){
+define(['jquery','createjs','socket.io','lib/global','lib/player'],
+function($,createjs,io,Global,Player){
     
     var Socket = {};
     
-    Socket.createSocket = function(socketUrl){
+    Socket.createSocket = function(socketUrl,onConnect){
         dom = Global.dom = {},
         stage = Global.stage,
         world = Global.world,
@@ -15,7 +15,9 @@ function($,createjs,io,Global){
         
         socket.on('connect',function(){
             console.log("Socket.io connected!");
-            $('#worldList, #mp').removeAttr('disabled');
+            if(typeof onConnect === 'function'){
+                onConnect();
+            }
         });
         
         socket.on('message',function(data){
@@ -52,20 +54,44 @@ function($,createjs,io,Global){
                     Ui.print('Server: ' + dstr);
                     break;
                 case "/uc":
-                    if(d[1]!=id){
-                        users[d[1]] = {name:d[2]};
-                        Ui.print(users[d[1]].name + ' connected');
+                    users[d[1]] = new Player({id:d[1],name:d[2]});
+                    Ui.print(users[d[1]].name + ' connected');
+                    if(Ui.selected()==='world'){
+                        world.addPlayer(d[1],users[d[1]]);
+                        //world.users[d[1]] = users[d[1]];
+                        //users[d[1]].spawn();
                     }
                     break;
                 case "/ud":
+                    if(Ui.selected()==='world'){
+                        world.removePlayer(d[1]);
+                    }
+                    Ui.print(users[d[1]].name + ' disconnected');
+                    delete(users[d[1]]);
+                    break;
+                case "/us":
                     if(d[1]!=id){
-                        Ui.print(users[d[1]].name + ' disconnected');
-                        delete(users[d[1]]);
+                        var u = users[d[1]];
+                        if(u){
+                            u.spawn();
+                        }
                     }
                     break;
                 case "/uw": // other user moving to lobby or world
                     if(d[1]&&d[2]){ // id && 0/1 (ie lobby/world)
                         // todo
+                    }
+                    break;
+                case "/r": // Approval to move to into world or back to lobby
+                    if(Ui.selected()==='lobby'){
+                        if(d[1]=='1'){
+                            Ui.showWorld();
+                            socket.send('/info-request json');
+                        }
+                    }else if(Ui.selected()==='world'){
+                        if(d[1]=='0'){
+                            Ui.showLobby();
+                        }
                     }
                     break;
                 case "/ws": // World send (properties)
@@ -78,6 +104,7 @@ function($,createjs,io,Global){
                     player = world.users[0] = Global.player;
                     player.spawn();
                     world.focusOn(player);
+                    // Ui.hideLoadingScreen(); // Implement a loading overlay!
                     logData = false;
                     break;
                 case "/c":

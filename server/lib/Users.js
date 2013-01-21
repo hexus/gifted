@@ -49,7 +49,7 @@ p.remove = function(u){
 }
 
 p.send = function(str,ex){
-    if(empty(ex)){ex=null;}
+    if(empty(ex)){ex=null;} // exlusionaa
     if(!empty(str)){
         async.forEach(this.collection,function(i,c){ // Parallel baby (only takes arrays >:/)
             if(i instanceof User){
@@ -82,7 +82,9 @@ p.sendTo = function(u){ // Send users to given user
         // Asynchronous
         async.forEach(this.collection,function(i,c){
             if(i instanceof User){
-                if(i!=u){u.send('/uc ' + i.id + ' ' + i.name)};
+                if(i!=u){
+                    u.send('/uc ' + i.id + ' ' + i.name);
+                }
             }else{
                 delete(this.collection[i.id]);
                 warning("Non-User removed from collection");

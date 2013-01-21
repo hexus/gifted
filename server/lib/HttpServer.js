@@ -29,7 +29,7 @@ var server = http.createServer(function(request, response) { // One day this wil
                 if(users.get(i) instanceof User){
                 	var u = users.get(i);
                 	var r = (u.room instanceof Room) ? u.room.name : '';
-                    resp[i] = {name:u.name,socketType:u.socketType,room:r}
+                    resp[i] = {name:u.name,socketType:u.socketType,room:r,inLobby:u.inLobby}
                 }
             }
             resp = JSON.stringify(resp);

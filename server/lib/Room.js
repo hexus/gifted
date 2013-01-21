@@ -61,13 +61,15 @@ p.joinUser = function(u,lobby){
 		}
 		u.room = this;
 		u.inLobby = lobby;
-		space.sendTo(u);
+		if(lobby){ // Deferred when joining world
+		  space.sendTo(u);
+		}
 		space.add(u);
 		space.sendUser(u);
 	}
 }
 
-p.swapUser = function(u){
+p.swapUser = function(u){ // May go unused
 	u = this.resolveUser(u);
 	if(u instanceof User){
 		var from = this.space(u);

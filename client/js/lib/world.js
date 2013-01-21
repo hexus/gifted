@@ -1,5 +1,5 @@
-define(['createjs','assets','lib/global','lib/tile','shared/Map'],
-function(createjs,lib,Global,Tile,Map){
+define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map'],
+function(createjs,lib,Global,Tile,Player,Map){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -48,6 +48,20 @@ function(createjs,lib,Global,Tile,Map){
         this.iScroll();
         if(Global.debug && Global.ticker.getTicks()%64==0){
             Global.ui.updateFPS(Math.round(Global.ticker.getMeasuredFPS()));
+        }
+    }
+    
+    p.addPlayer = function(id,u){
+        if(u instanceof Player){
+            this.users[id] = u;
+            u.spawn();
+        }
+    }
+    
+    p.removePlayer = function(id){
+        if(this.users[id]){
+            this.users[id].unspawn();
+            delete(this.users[id]);
         }
     }
     

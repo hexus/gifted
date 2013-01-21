@@ -38,11 +38,13 @@ h.handleData = function(data){ // Called in context of a User
             }
             break;
         case "/r":
-        	
+            this.send('/r ' + d[1]); // lazy atm
+            this.room.joinUser(this,(d[1]!=1));
         	break;
         case "/info-request":
             var format = d[1] || null;
             this.sendWorld(format);
+            this.room.users.sendTo(this);
             break;
         case "/c": // Chat
             this.room.send("/c " + this.id + " " + data.substr(3),true);

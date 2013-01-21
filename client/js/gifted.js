@@ -38,8 +38,8 @@ requirejs.config({
     }
 });
 
-require(['jquery','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world','lib/socket'],
-function($,createjs,lib,Global,Ui,Controls,Player,World,Socket){
+require(['jquery','createjs','assets','lib/global','lib/ui','lib/controls','lib/player','lib/world'],
+function($,createjs,lib,Global,Ui,Controls,Player,World){
     function init(){
         var canvas, stage, socket, player, id, users, world, aspect=2.35;
         
@@ -69,8 +69,8 @@ function($,createjs,lib,Global,Ui,Controls,Player,World,Socket){
         Controls.init();
         
         $.get('/socket','',function(d){
-            socketUrl = d;
-            Socket.createSocket(socketUrl);
+            socketUrl = Global.sUrl = d;
+            $('#worldList, #mp').removeAttr('disabled');
         });
         
         // Ajax for socket address

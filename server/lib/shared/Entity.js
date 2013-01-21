@@ -16,7 +16,7 @@ var init = function(createjs,Global){
         this.hitbox = {
             width   : args.width || 32,
             height  : args.height || 32
-        } || args.hitbox || null;
+        };
         this.world = Global.world || args.world || null;
         this.get('map',function(){return this.world.map;});
         
@@ -71,6 +71,12 @@ var init = function(createjs,Global){
         }else{
             this.x = x;
             this.y = y;
+        }
+    }
+    
+    p.unspawn = function(){
+        if(this.world.contains(this)){
+            this.world.removeChild(this);
         }
     }
     

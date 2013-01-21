@@ -5,6 +5,7 @@ function(){
         ticker:null,// CreateJS Ticker
         stage:null, // CreateJS Stage
         dom:null,   // CreateJS DOMElement objects
+        sUrl:null,  // Socket.io URL
         socket:null,// Socket.io
         ui: null,   // Ui object
         world:null, // Current world instance
