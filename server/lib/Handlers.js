@@ -23,7 +23,7 @@ h.handleData = function(data){ // Called in context of a User
                 case '/whoami':
                     this.send("/youare " + this.id + " " + this.name);
                     if(d[1])
-                        room = rooms.get(d[1]) || room;        	        
+                        room = rooms.get(d[1]) || room;
                     break;
                 case '/login':
                     if(d[1]!=""){this.name = d[1];}

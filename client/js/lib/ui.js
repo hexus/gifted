@@ -12,6 +12,29 @@ function($,createjs,Global,Socket){
         player = Global.player,
         world = Global.world;
         
+        var original = {
+            width: parseInt($('#client').css('width')),
+            height:parseInt($('#client').css('height'))
+        };
+        original.aspect = original.width/original.height;
+        
+        $(window).resize(function(){
+            console.log(original.width/original.height);
+            $('#client').css({
+                'width':        ($(window).width())+'px',
+                'height':       Math.round($(window).width()/original.aspect)+'px',
+                'margin-left':  (-$(window).width()/2)+'px',
+                'margin-top':   Math.round(-($(window).width()/original.aspect)/2)+'px'
+            });
+            $('#canvas').attr({
+               'width':$(window).width()+'px',
+               'height':Math.round($(window).width()/original.aspect)+'px'
+            });
+            world.scale = $(window).width()/original.width;
+        });
+        
+        $(window).resize(); // ^ I love you jQuery
+        
         $('.screen').each(function(k,v){
             dom[v.id] = new createjs.DOMElement($('#'+v.id)[0]);
             dom[v.id].regX = dom[v.id].regY = dom[v.id].x = dom[v.id].y = 0;

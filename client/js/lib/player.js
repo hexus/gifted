@@ -164,40 +164,6 @@ function(createjs,lib,Global,Character){
 
         with(this.state){
             
-            // Animation
-            if(onFloor){
-                if(xSpeed!=0){
-                    if((xSpeed>0 && this.char.scaleX>0) || (xSpeed<0 && this.char.scaleX<0)){
-                        this.setAnim("running");
-                    }else{
-                        this.setAnim("running_back");
-                    }
-                }else{
-                    this.setAnim("static");
-                }
-            }else{
-                if(ySpeed!=0){
-                    if(ySpeed<0){
-                        this.setAnim("jumping");
-                    }else if(ySpeed>(yLimit/5) || (ySpeed>0 && isFlying)){
-                        this.setAnim("falling");
-                    }
-                }
-                if(xSpeed!=0){
-                    if(isFlying && ySpeed<flySpeed/2 && ySpeed>-flySpeed/2){
-                        if((xSpeed>flySpeed/4 && this.char.scaleX>0) || (xSpeed<-flySpeed/4 && this.char.scaleX<0)){
-                            this.setAnim("flying");
-                        }else{
-                            this.setAnim("flying_back");
-                        }
-                    }
-                }else{
-                    if(isFlying && ySpeed==0){
-                        this.setAnim("floating");
-                    }
-                }
-            }
-            
             // Arm rotation
             if(this.thisPlayer){
                 aimAngle = Math.atan2(-this.mouseY,-Math.abs(this.mouseX))/(Math.PI/180);
@@ -253,6 +219,40 @@ function(createjs,lib,Global,Character){
             
             this.char.rarm_l.wpnUnder.gotoAndStop(this.getWeapon(rightArm));
             this.char.rarm_d.arm.l.wpnOver.gotoAndStop(this.getWeapon(rightArm));
+            
+            // Animation
+            if(onFloor){
+                if(xSpeed!=0){
+                    if((xSpeed>0 && this.char.scaleX>0) || (xSpeed<0 && this.char.scaleX<0)){
+                        this.setAnim("running");
+                    }else{
+                        this.setAnim("running_back");
+                    }
+                }else{
+                    this.setAnim("static");
+                }
+            }else{
+                if(ySpeed!=0){
+                    if(ySpeed<0){
+                        this.setAnim("jumping");
+                    }else if(ySpeed>(yLimit/5) || (ySpeed>0 && isFlying)){
+                        this.setAnim("falling");
+                    }
+                }
+                if(xSpeed!=0){
+                    if(isFlying && ySpeed<flySpeed/2 && ySpeed>-flySpeed/2){
+                        if((xSpeed>flySpeed/4 && this.char.scaleX>0) || (xSpeed<-flySpeed/4 && this.char.scaleX<0)){
+                            this.setAnim("flying");
+                        }else{
+                            this.setAnim("flying_back");
+                        }
+                    }
+                }else{
+                    if(isFlying && ySpeed==0){
+                        this.setAnim("floating");
+                    }
+                }
+            }
             
         }
     }

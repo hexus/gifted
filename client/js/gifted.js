@@ -42,6 +42,7 @@ require(['jquery','lib/global'],
 function($,Global){
     $.get('/socket','',function(d){ // Don't require anything else until socket.io address is loaded
         socketUrl = Global.sUrl = d;
+        $('#worldList, #mp').removeAttr('disabled');
         requirejs.config({ // Update config
             paths:{
              'socket.io':socketUrl+'/socket.io/socket.io'
@@ -76,7 +77,6 @@ function($,Global){
                 Ui.init();
                 Ui.lobbyClear('Connecting...\n');
                 Controls.init();
-                $('#worldList, #mp').removeAttr('disabled');
             }
             
             $(function(){
