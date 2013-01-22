@@ -68,7 +68,7 @@ function($,Global){
                 ticker.setFPS(32);
                 ticker.addListener(stage);
                 ticker.addListener(function(timeElapsed,paused){
-                    if(Ui.selected()=='world'){
+                    if(Ui.selected()==='world'){
                         Global.world.tick(timeElapsed,paused);
                     }
                 });

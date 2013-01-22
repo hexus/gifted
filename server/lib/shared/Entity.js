@@ -42,6 +42,8 @@ var init = function(createjs,Global){
             gravCount : 0
         };
         
+        this.lastState = {};
+        
         this.effects = {};
         
         this.get('x',function(){return that.state.x;});
@@ -58,6 +60,16 @@ var init = function(createjs,Global){
     if(!node){
         p = Entity.prototype = new createjs.Container();
         p.constructor = Entity;
+    }
+    
+    p.getStateDelta = function(){
+    	var delta = {};
+    	for(i in this.state){
+    		if(this.state[i]!==this.lastState[i]){
+    			delta[i] = this.lastState[i] = this.state[i];
+    		}
+    	}
+    	return delta;
     }
     
     p.spawn = function(x,y){
