@@ -7,6 +7,7 @@ var User = function(args){
     this.id = args.id; // Local ID
     this.aid = args.aid; // Account ID
     this.name = args.name; // Selected character name
+    this.hitbox = {width:25,height:60};
     this.room = null;
     this.inLobby = true;
     this.socket = args.socket; // Socket of user

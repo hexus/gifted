@@ -51,13 +51,13 @@ h.handleData = function(data){ // Called in context of a User
             break;
         case "/m": // Move (state update)
             log = false;
-            this.tick();
             var stateDelta = JSON.parse(data.substr(3));
             for(i in stateDelta){
                 if(typeof stateDelta[i] === typeof this.state[i]){
                     this.state[i] = stateDelta[i];
                 }
             }
+            this.tick();
             break;
         default:
           log = false;
