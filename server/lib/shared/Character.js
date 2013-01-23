@@ -9,21 +9,46 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     var Character = function(args){ // Constructor
         this.super.constructor.call(this,args); // Superclass constructor
+        var that = this;
+        this.state.xLimit = 20;
+        this.state.Accel = 1;
+        this.state.yLimit = 20;
+        this.state.flySpeed = 12;
+        this.state.jumpStr = 13;
+        
         this.upDown = false;
         this.jump = false;
         this.state.moveLeft = false;
         this.state.moveRight = false;
         this.state.moveUp = false;
         this.state.moveDown = false;
-        this.state.xLimit = 20;
-        this.state.Accel = 1;
-        this.state.yLimit = 20;
-        this.state.flySpeed = 12;
-        this.state.jumpStr = 13;
     }
     
     var p = Character.prototype = new Entity(); // Inheritance
     p.super = Entity.prototype; // Superclass reference
+    
+    p.getStateDelta = function(readonly){ // Filter out unnecessary state properties
+        var delta = this.super.getStateDelta.call(this,readonly);
+        var giveashit;
+        for(i in delta){
+            giveashit = true;
+            switch(i){
+                case "aimAngle":
+                    giveashit = this.state.isAiming;
+                    break;
+                case "flyDir":
+                    giveashit = this.state.isFlying;
+                    break;
+                case "gravCount": case "onFloor":
+                    giveashit = false;
+                    break;
+            }
+            if(!giveashit){
+                delete(delta[i]);
+            }
+        }
+        return delta;
+    }
     
     p.fly = function(){ with(this.state){flying = !isFlying; ySpeed %= flySpeed; flyDir = ySpeed>=0 ? 1 : -1;} }
     
@@ -32,6 +57,11 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.tick = function(){
         
         with(this){
+            state.moveUp = !!state.moveUp;
+            state.moveLeft = !!state.moveLeft;
+            state.moveDown = !!state.moveDown;
+            state.moveRight = !!state.moveRight;
+            
             if(state.moveUp && state.onFloor && !upDown){
                 jump = true;
                 upDown = true;

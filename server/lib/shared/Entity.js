@@ -41,7 +41,7 @@ var init = function(createjs,Global){
             isFlying : false,
             flySpeed : 10,
             flyDir : -1,
-            gravCount : 0
+            gravCount : 0,
         };
         
         this.lastState = {};
@@ -67,10 +67,20 @@ var init = function(createjs,Global){
         p.constructor = Entity;
     }
     
+    p.getDelta = function(a,b,readonly){ // Might be useful later
+        var delta = {};
+        for(i in a){
+            if(a[i]!=b[i]){
+                delta[i] = a[i];
+            }
+        }
+        return delta;
+    }
+    
     p.getStateDelta = function(readonly){
     	var delta = {};
     	for(i in this.state){
-    		if(this.state[i]!==this.lastState[i]){
+    		if(this.state[i]!=this.lastState[i]){
     			delta[i] = this.state[i];
     			if(!readonly){
     			    this.lastState[i] = this.state[i];

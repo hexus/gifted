@@ -31,27 +31,17 @@ p.tick = function(){
         if(user instanceof User){
             if(!user.inLobby){
                 user.tick();
-                //if(this.step%3==0){
+                if(this.step%3==0){
                     var delta = user.getStateDelta();
                     var deltaSize = 0;
                     for(i in delta){
-                        var giveashit = true;
-                        switch(i){
-                            case "aimAngle":
-                                giveashit = user.state.isAiming;
-                                break;
-                        }
-                        if(giveashit){
-                            deltaSize++;
-                        }else{
-                            delete(delta[i]);
-                        }
+                        deltaSize++;
                     }
                     if(deltaSize>0){
                         delta.id = user.id;
                         user.room.send('/m '+JSON.stringify(delta),user.inLobby,user);
                     }
-                //}
+                }
             }
         }
     }

@@ -155,6 +155,7 @@ function($,createjs,io,Global,Player){
                                     user.state[i] = s[i];
                                 }
                             }
+                            user.tick(); // Keep physics in check immediately
                         }
                     }
                     break;

@@ -57,6 +57,7 @@ h.handleData = function(data){ // Called in context of a User
                     this.state[i] = stateDelta[i];
                 }
             }
+            this.tick();
             break;
         default:
           log = false;

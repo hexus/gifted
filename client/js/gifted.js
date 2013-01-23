@@ -70,7 +70,7 @@ function($,Global){
                 ticker.addListener(function(timeElapsed,paused){
                     if(Ui.selected()==='world'){
                         Global.world.tick(timeElapsed,paused);
-                        //if(Global.ticker.getTicks()%3==0){
+                        if(Global.ticker.getTicks()%3==0){
                             var newDelta = Global.player.getStateDelta();
                             var deltaSize = 0;
                             for(i in newDelta){
@@ -82,7 +82,7 @@ function($,Global){
                                 }
                             }
                             Global.debugObj.stateDelta = JSON.stringify(newDelta);
-                        //}
+                        }
                         if(Global.debug && Global.ticker.getTicks()%16==0){ // every half second
                             Global.debugObj.fps = Math.round(Global.ticker.getMeasuredFPS());
                             debugStr = '';
