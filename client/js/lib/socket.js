@@ -141,6 +141,9 @@ function($,createjs,io,Global,Player){
                     // Ui.hideLoadingScreen(); // Implement a loading overlay!
                     logData = false;
                     break;
+                case "/ping":
+                    Global.debugObj.ping = d[1];
+                    break;
                 case "/c":
                     d = data.split(" ",2);
                     Ui.print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));

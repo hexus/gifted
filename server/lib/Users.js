@@ -48,6 +48,14 @@ p.remove = function(u){
 	}
 }
 
+p.ping = function(){
+    async.forEach(this.collection,function(i,c){
+        if(i instanceof User){
+            i.ping();
+        }
+    },error);
+}
+
 p.send = function(str,ex){
     if(empty(ex)){ex=null;} // exlusion
     if(!empty(str)){

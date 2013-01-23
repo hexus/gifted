@@ -82,6 +82,11 @@ servers.io.start = function(ioPort){
         users.add(user);
         console.log("Socket.io client connected");
         
+        socket.on('pong',function(){
+            user.pong();
+            user.send('/ping ' + user.getPing());
+        });
+        
         socket.on('message',function(data){
             handleData.call(user,data);
         });

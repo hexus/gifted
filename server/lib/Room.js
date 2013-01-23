@@ -42,6 +42,9 @@ p.tick = function(){
                         user.room.send('/m '+JSON.stringify(delta),user.inLobby,user);
                     }
                 }
+                if(this.step%32==0){
+                    this.ping();
+                }
             }
         }
     }
@@ -66,6 +69,11 @@ p.resolveUser = function(u){
 p.space = function(u){
 	u = this.resolveUser(u);
 	return (this.lobbyUsers.get(u.id)) ? this.lobbyUsers : this.users;
+}
+
+p.ping = function(){
+    this.lobbyUsers.ping();
+    this.users.ping();
 }
 
 p.joinUser = function(u,lobby){

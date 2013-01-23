@@ -12,6 +12,9 @@ var User = function(args){
     this.inLobby = true;
     this.socket = args.socket; // Socket of user
     this.socketType = (!args.socketType) ? "TCP" : args.socketType; // TCP/Socket.io
+
+    this.pingTime = 0;
+    this.pongTime = 0;
     
     this.state.__defineGetter__('isAiming',function(){
         return that.state.isAimingLeft || that.state.isAimingRight;
@@ -29,9 +32,25 @@ p.tick = function(){
     this.super_Character.tick.call(this);
 }
 
+p.getPing = function(){
+    return Math.round((this.pongTime - this.pingTime) / 2);
+}
+
+p.ping = function(){
+    this.pingTime = new Date().getTime();
+    if(this.socketType=='TCP'){
+        this.socket.write('/ping');
+    }else{
+        this.socket.emit('ping');
+    }
+}
+
+p.pong = function(){
+    this.pongTime = new Date().getTime();
+}
+
 p.send = function(str){
     if(this.socketType=="TCP"){
-        console.log(this);
         this.socket.write(str + String.fromCharCode(0));
     }else{ // Assume Socket.io
         this.socket.send(str);
