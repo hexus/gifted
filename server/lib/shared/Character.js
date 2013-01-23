@@ -28,7 +28,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.super = Entity.prototype; // Superclass reference
     
     p.getStateDelta = function(readonly){ // Filter out unnecessary state properties
-        var delta = this.super.getStateDelta.call(this,readonly);
+        var delta = this.super.getStateDelta.call(this);
         var giveashit;
         for(i in delta){
             giveashit = true;
@@ -57,10 +57,10 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.tick = function(){
         
         with(this){
-            state.moveUp = !!state.moveUp;
-            state.moveLeft = !!state.moveLeft;
-            state.moveDown = !!state.moveDown;
-            state.moveRight = !!state.moveRight;
+            if(!state.moveLeft){state.moveLeft = false;}
+            if(!state.moveRight){state.moveRight = false;}
+            if(!state.moveUp){state.moveUp = false;}
+            if(!state.moveDown){state.moveDown = false;}
             
             if(state.moveUp && state.onFloor && !upDown){
                 jump = true;

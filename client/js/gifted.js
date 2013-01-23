@@ -56,6 +56,7 @@ function($,Global){
                 window.gifted = Global; // Expose global object for debugging
                 
                 canvas = document.getElementById("canvas");
+                debugObj = Global.debugObj;
                 ticker = Global.ticker = createjs.Ticker;
                 stage = Global.stage = new createjs.Stage(canvas);
                 world = Global.world = new World();
@@ -70,7 +71,7 @@ function($,Global){
                 ticker.addListener(function(timeElapsed,paused){
                     if(Ui.selected()==='world'){
                         Global.world.tick(timeElapsed,paused);
-                        if(Global.ticker.getTicks()%3==0){
+                        if(ticker.getTicks()%3==0){
                             var newDelta = Global.player.getStateDelta();
                             var deltaSize = 0;
                             for(i in newDelta){
@@ -81,40 +82,37 @@ function($,Global){
                                     Global.socket.send('/m '+JSON.stringify(newDelta));
                                 }
                             }
-                            Global.debugObj.stateDelta = JSON.stringify(newDelta);
                         }
-                        if(Global.debug && Global.ticker.getTicks()%16==0){ // every half second
-                            Global.debugObj.fps = Math.round(Global.ticker.getMeasuredFPS());
+                        if(Global.debug && ticker.getTicks()%16==0){ // every half second
                             debugStr = '';
-                            for(i in Global.debugObj){
+                            debugObj.fps = Math.round(ticker.getMeasuredFPS());
+                            debugObj.x = Global.player.x;
+                            debugObj.y = Global.player.y;
+                            for(i in debugObj){
                                 if(debugStr.length>0){debugStr = debugStr.concat('<br/>');}
-                                debugStr = debugStr.concat(i+' : '+Global.debugObj[i]);
+                                debugStr = debugStr.concat(i+' : '+debugObj[i]);
                             }
-                            Global.ui.updateDebug(debugStr);
+                            Ui.updateDebug(debugStr);
                         }
-                    }else{
-                        
                     }
                 });
                 
                 Global.ui = Ui;
                 Ui.init();
-                Ui.lobbyClear('Connecting...\n');
                 Controls.init();
                 
                 Global.reset = function(){
                     with(Global){
                         stage.removeAllChildren();
-                        world = new World();
-                        player = new Player();
                         users = {};
                         
+                        world = new World();
+                        player = new Player();
                         stage.addChild(world);
                         stage.addChild(player);
                         
                         ui.reset();
                         ui.showMain();
-                        
                         socket.reset();
                     }
                 }

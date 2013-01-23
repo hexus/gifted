@@ -50,14 +50,14 @@ h.handleData = function(data){ // Called in context of a User
             this.room.send("/c " + this.id + " " + data.substr(3),true);
             break;
         case "/m": // Move (state update)
-            //log = false;
+            log = false;
+            this.tick();
             var stateDelta = JSON.parse(data.substr(3));
             for(i in stateDelta){
                 if(typeof stateDelta[i] === typeof this.state[i]){
                     this.state[i] = stateDelta[i];
                 }
             }
-            this.tick();
             break;
         default:
           log = false;

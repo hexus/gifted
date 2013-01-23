@@ -106,6 +106,8 @@ function($,createjs,Global,Socket){
         $(window).resize();
         
         dom.headwear_frame = 0;
+        
+        this.lobbyClear();
     }
     
     Ui.hideAll = function(){

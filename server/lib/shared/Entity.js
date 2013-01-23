@@ -80,10 +80,10 @@ var init = function(createjs,Global){
     p.getStateDelta = function(readonly){
     	var delta = {};
     	for(i in this.state){
-    		if(this.state[i]!=this.lastState[i]){
+    		if(this.state[i]!==this.lastState[i]){
     			delta[i] = this.state[i];
     			if(!readonly){
-    			    this.lastState[i] = this.state[i];
+    			    this.lastState[i] = delta[i];
     			}
     		}
     	}
