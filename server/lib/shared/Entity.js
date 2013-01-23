@@ -1,5 +1,7 @@
+(function(){
 var node = typeof window === 'undefined'; // JSLint can suck my balls
 var deps = ['createjs','lib/global']; // RequireJS dependencies
+
 var init = function(createjs,Global){
     if(node){
         Global = require('../Global');
@@ -44,6 +46,9 @@ var init = function(createjs,Global){
         
         this.lastState = {};
         
+        this.streamStep = 0;
+        this.streamSpeed = 2;
+        
         this.effects = {};
         
         this.get('x',function(){return that.state.x;});
@@ -62,11 +67,16 @@ var init = function(createjs,Global){
         p.constructor = Entity;
     }
     
-    p.getStateDelta = function(){
+    p.getStateDelta = function(readonly){
     	var delta = {};
     	for(i in this.state){
     		if(this.state[i]!==this.lastState[i]){
-    			delta[i] = this.lastState[i] = this.state[i];
+    		    if(!(i=='aimAngle' && !this.state.isAiming)){
+        			delta[i] = this.state[i];
+        			if(!readonly){
+        			    this.lastState[i] = this.state[i];
+        			}
+    			}
     		}
     	}
     	return delta;
@@ -309,6 +319,18 @@ var init = function(createjs,Global){
         
         this.x = this.state.x;
         this.y = this.state.y;
+        
+        this.streamTick();
+    }
+    
+    p.streamTick = function(){
+        with(this){
+            if(streamStep<streamSpeed){
+                streamStep++;
+            }else{
+                streamStep = 0;
+            }
+        }
     }
 
     return Entity;
@@ -320,3 +342,4 @@ if(node){ // Server side
 }else{ // Client side
     define(deps,init);
 }
+})();

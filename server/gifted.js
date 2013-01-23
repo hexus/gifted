@@ -22,8 +22,9 @@ var boot = function(){
 		if(m==1){
 		    rooms.get(1).ontick = function(){
                 var sec = this.step/this.fps;
-                if(sec%600==0)
+                if(sec%600==0){
                     console.log('World tick: ' + sec/60 + ' minutes (step ' + this.step + ')');
+                }
             }
 		}
 	}

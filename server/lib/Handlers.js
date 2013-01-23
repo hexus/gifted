@@ -7,14 +7,14 @@ var users = global.users;
 var h = {};
 
 h.handleData = function(data){ // Called in context of a User
-    console.log("Data: " + data);
+    var log = true;
     var d = data.split(" ");
     switch(d[0]){
     	// Lobby handlers
         case "<policy-file-request/>": // Flash policy
             this.send('<cross-domain-policy><allow-access-from domain="*" to-ports="*"/></cross-domain-policy>');
             break;
-        case "/login-pls": // Client is ready to log in
+        case "/worlds-pls": // Client is ready to log in and wants a list of worlds
             this.send('/login-request ' + rooms.list());
             break;
         case "/whoami": case "login":
@@ -49,9 +49,22 @@ h.handleData = function(data){ // Called in context of a User
         case "/c": // Chat
             this.room.send("/c " + this.id + " " + data.substr(3),true);
             break;
+        case "/m": // Move (state update)
+            //log = false;
+            var stateDelta = JSON.parse(data.substr(3));
+            for(i in stateDelta){
+                if(typeof stateDelta[i] === typeof this.state[i]){
+                    this.state[i] = stateDelta[i];
+                }
+            }
+            break;
         default:
+          log = false;
           console.log("Unrecognised data: " + data);
           break;
+    }
+    if(log){
+        console.log("Data: " + data);
     }
 };
 

@@ -51,7 +51,7 @@ function($,Global){
         require(['createjs','assets','lib/ui','lib/controls','lib/player','lib/world'],
         function(createjs,lib,Ui,Controls,Player,World){
             function init(){
-                var canvas, stage, socket, player, id, users, world, aspect=2.35;
+                var canvas, stage, socket, player, id, users, world, aspect=2.35, debugStr;
                 
                 window.gifted = Global; // Expose global object for debugging
                 
@@ -70,6 +70,28 @@ function($,Global){
                 ticker.addListener(function(timeElapsed,paused){
                     if(Ui.selected()==='world'){
                         Global.world.tick(timeElapsed,paused);
+                        if(Global.ticker.getTicks()%3==0){
+                            var newDelta = Global.player.getStateDelta();
+                            var deltaSize = 0;
+                            for(i in newDelta){
+                                deltaSize++;
+                            }
+                            if(Global.socket.connected && deltaSize>0){
+                                Global.socket.send('/m '+JSON.stringify(newDelta));
+                            }
+                            Global.debugObj.stateDelta = JSON.stringify(newDelta);
+                        }
+                        if(Global.debug && Global.ticker.getTicks()%16==0){ // every half second
+                            Global.debugObj.fps = Math.round(Global.ticker.getMeasuredFPS());
+                            debugStr = '';
+                            for(i in Global.debugObj){
+                                if(debugStr.length>0){debugStr = debugStr.concat('<br/>');}
+                                debugStr = debugStr.concat(i+' : '+Global.debugObj[i]);
+                            }
+                            Global.ui.updateDebug(debugStr);
+                        }
+                    }else{
+                        
                     }
                 });
                 
@@ -77,6 +99,23 @@ function($,Global){
                 Ui.init();
                 Ui.lobbyClear('Connecting...\n');
                 Controls.init();
+                
+                Global.reset = function(){
+                    with(Global){
+                        stage.removeAllChildren();
+                        world = new World();
+                        player = new Player();
+                        users = {};
+                        
+                        stage.addChild(world);
+                        stage.addChild(player);
+                        
+                        ui.reset();
+                        ui.showMain();
+                        
+                        socket.reset();
+                    }
+                }
             }
             
             $(function(){

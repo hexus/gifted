@@ -4,14 +4,7 @@ function($,createjs,Global,Socket){
     var Ui = {}, dom,stage,socket,player,world,selected;
     
     Ui.init = function(){
-        
-        dom = Global.dom = {},
-        stage = Global.stage,
-        socketUrl = Global.sUrl,
-        socket = Global.socket,
-        player = Global.player,
-        world = Global.world;
-        
+
         var original = {
             width: parseInt($('#client').css('width')),
             height:parseInt($('#client').css('height'))
@@ -19,7 +12,6 @@ function($,createjs,Global,Socket){
         original.aspect = original.width/original.height;
         
         $(window).resize(function(){
-            console.log(original.width/original.height);
             $('#client').css({
                 'width':        ($(window).width())+'px',
                 'height':       Math.round($(window).width()/original.aspect)+'px',
@@ -33,32 +25,25 @@ function($,createjs,Global,Socket){
             world.scale = $(window).width()/original.width;
         });
         
-        $(window).resize(); // ^ I love you jQuery
-        
-        $('.screen').each(function(k,v){
-            dom[v.id] = new createjs.DOMElement($('#'+v.id)[0]);
-            dom[v.id].regX = dom[v.id].regY = dom[v.id].x = dom[v.id].y = 0;
-            stage.addChild(dom[v.id]);
-        });
-        
-        dom.headwear_frame = 0;
+        Ui.reset();
         
         $("#sp").click(function(){
             if(world){
                 world.map.generate();
                 var p = world.map.getProperties();
-                player = world.users[0] = Global.player;
-                player.world = world;
-                player.spawn();
-                world.focusOn(player);
+                world.addPlayer(Global.player);
+                world.focusOn(Global.player);
                 Ui.showWorld();
             }
         });
         
         $("#mp").click(function(){
-            socket = Global.socket = Socket.createSocket(socketUrl,function(){
-                Ui.selectWorld();
-            });
+            if(!socket){
+                socket = Global.socket = Socket.createSocket(socketUrl,null,Global.reset);
+            }else{
+                socket.connect();
+            }
+            Ui.selectWorld();
         })
         
         $("#headwear_prev").click(function(){
@@ -104,6 +89,25 @@ function($,createjs,Global,Socket){
         Ui.showMain();
     }
     
+    Ui.reset = function(){ // So very very lazy
+        dom = Global.dom = {},
+        stage = Global.stage,
+        socketUrl = Global.sUrl,
+        socket = Global.socket,
+        player = Global.player,
+        world = Global.world;
+        
+        $('.screen').each(function(k,v){
+            dom[v.id] = new createjs.DOMElement($('#'+v.id)[0]);
+            dom[v.id].regX = dom[v.id].regY = dom[v.id].x = dom[v.id].y = 0;
+            stage.addChild(dom[v.id]);
+        });
+        
+        $(window).resize();
+        
+        dom.headwear_frame = 0;
+    }
+    
     Ui.hideAll = function(){
         $('#mainMenu').hide();
         $('#worldList').hide();
@@ -123,7 +127,6 @@ function($,createjs,Global,Socket){
         selected = 'worldList';
         Ui.hideAll();
         $('#worldList').remove('input').show();
-        socket.send('/login-pls');
     }
     
     Ui.showLobby = function(){
@@ -141,7 +144,7 @@ function($,createjs,Global,Socket){
     
     Ui.showWorld = function(){
         if(selected=='lobby'){
-            world.addPlayer(player);
+            world.addPlayer(player.gid,player);
         }
         selected = 'world';
         Ui.hideAll();
@@ -190,8 +193,8 @@ function($,createjs,Global,Socket){
         }
     }
     
-    Ui.updateFPS = function(fps){
-        $('#fps').html(fps);
+    Ui.updateDebug = function(str){
+        $('#debug').html(str);
     }
     
     return Ui;

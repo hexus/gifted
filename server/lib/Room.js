@@ -26,19 +26,37 @@ module.exports = Room;
 p.tick = function(){
     this.step++;
     this.ontick.call(this);
-    for(u in this.users){
-        if(this.users[u] instanceof User){
-            this.users[u].tick();
+    for(u in this.users.get()){
+        var user = this.users.get(u);
+        if(user instanceof User){
+            if(!user.inLobby){
+                user.tick();
+                if(this.step%3==0){
+                    var delta = user.getStateDelta();
+                    var deltaSize = 0;
+                    for(i in delta){
+                        deltaSize++;
+                    }
+                    if(deltaSize>0){
+                        delta.id = user.id;
+                        user.room.send('/m '+JSON.stringify(delta),user.inLobby,user);
+                    }
+                }
+            }
         }
     }
 }
 
-p.send = function(str,lobby){
+p.send = function(str,lobby,ex){
 	lobby = !lobby ? false : true;
 	if(lobby)
-		this.lobbyUsers.send(str);
+		this.lobbyUsers.send(str,ex);
 	else
-		this.users.send(str);
+		this.users.send(str,ex);
+}
+
+p.contains = function(u){ // for Entity
+    return this.users.resolve(u);
 }
 
 p.resolveUser = function(u){
@@ -60,9 +78,12 @@ p.joinUser = function(u,lobby){
 			}
 		}
 		u.room = this;
+		u.world = this;
 		u.inLobby = lobby;
 		if(lobby){ // Deferred when joining world
-		  space.sendTo(u);
+            space.sendTo(u);
+		}else{
+            u.spawn();
 		}
 		space.add(u);
 		space.sendUser(u);
@@ -93,6 +114,7 @@ p.leaveUser = function(u){
 		}
 		if(space){
 			u.room = null;
+			u.world = null;
 			space.remove(u);
 			space.send('/ud ' + u.id);
 		}

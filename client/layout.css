@@ -20,7 +20,7 @@ input[type=text]{padding:0 2px;}
     margin-left: -423px; /* Negative half of width. */
     margin-top: -180px; /* Negative half of height. */
 }
-#fps{
+#debug{
     position:absolute;
     top:0;left:4px;
 }

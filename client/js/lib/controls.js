@@ -15,19 +15,19 @@ function($,Global,Ui){
             if(Ui.selected()=='world'){
                 switch(k){
                     case 87: // W
-                        Global.player.moveUp = true;
+                        Global.player.state.moveUp = true;
                         if(!upDown){upDown = true;}
                         break;
                     case 65: // A
-                        Global.player.moveLeft = true;
+                        Global.player.state.moveLeft = true;
                         if(!leftDown){leftDown = true;}
                         break;
                     case 83: // S
-                        Global.player.moveDown = true;
+                        Global.player.state.moveDown = true;
                         if(!downDown){downDown = true;}
                         break;
                     case 68: // D
-                        Global.player.moveRight = true;
+                        Global.player.state.moveRight = true;
                         if(!rightDown){rightDown = true;}
                         break;
                     case 81: // Q
@@ -48,19 +48,19 @@ function($,Global,Ui){
             if(Ui.selected()=='world'){
                 switch(k){
                     case 87: // W
-                        Global.player.moveUp = false;
+                        Global.player.state.moveUp = false;
                         upDown = false;
                         break;
                     case 65: // A
-                        Global.player.moveLeft = false;
+                        Global.player.state.moveLeft = false;
                         leftDown = false;
                         break;
                     case 83: // S
-                        Global.player.moveDown = false;
+                        Global.player.state.moveDown = false;
                         downDown = false
                         break;
                     case 68: // D
-                        Global.player.moveRight = false;
+                        Global.player.state.moveRight = false;
                         rightDown = false;
                         break;
                     case 81: // Q

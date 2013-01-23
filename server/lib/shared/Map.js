@@ -1,3 +1,4 @@
+(function(){
 var node = typeof window === 'undefined';
 var deps = [];
 var init = function(){
@@ -365,3 +366,4 @@ if(node){ // Server side
 }else{ // Client side
     define([],init);
 }
+})();

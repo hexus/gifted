@@ -2,6 +2,7 @@ define([],
 function(){
     var Global = {
         debug:true, // Debug mode
+        debugObj:{},// Debug output object 
         ticker:null,// CreateJS Ticker
         stage:null, // CreateJS Stage
         dom:null,   // CreateJS DOMElement objects

@@ -1,3 +1,4 @@
+(function(){
 var node = typeof window === 'undefined';
 var deps = ['shared/Entity']; // RequireJS dependencies
 
@@ -9,18 +10,17 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     var Character = function(args){ // Constructor
         this.super.constructor.call(this,args); // Superclass constructor
         this.upDown = false;
-        this.moveLeft = false;
-        this.moveRight = false;
-        this.moveUp = false;
-        this.moveDown = false;
         this.jump = false;
-        with(this.state){
-            xLimit = 20,
-            Accel = 1,
-            yLimit = 20,
-            flySpeed = 12,
-            jumpStr = 13
-        }
+        this.state.moveLeft = false;
+        this.state.moveRight = false;
+        this.state.moveUp = false;
+        this.state.moveDown = false;
+        this.state.xLimit = 20;
+        this.state.Accel = 1;
+        this.state.yLimit = 20;
+        this.state.flySpeed = 12;
+        this.state.jumpStr = 13;
+        console.log(this.state);
     }
     
     var p = Character.prototype = new Entity(); // Inheritance
@@ -33,21 +33,21 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.tick = function(){
         
         with(this){
-            if(moveUp && state.onFloor && !upDown){
+            if(state.moveUp && state.onFloor && !upDown){
                 jump = true;
                 upDown = true;
             }
             
-            if(upDown && !moveUp){
+            if(upDown && !state.moveUp){
                 upDown = false;
             }
             
             // Movement booleans
-            if((moveLeft && !moveRight) || (moveRight && !moveLeft)){
-                state.direction = moveLeft ? -1 : 1;
+            if((state.moveLeft && !state.moveRight) || (state.moveRight && !state.moveLeft)){
+                state.direction = state.moveLeft ? -1 : 1;
                 state.xSpeed += state.direction*state.Accel;
             }else if(Math.abs(state.xSpeed)>state.Accel){
-                state.xSpeed -= state.direction*state.Accel
+                state.xSpeed -= state.direction*state.Accel;
             }else{
                 state.xSpeed = 0;
             }
@@ -59,8 +59,8 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
                     jump = false;
                 }
             }else{
-                if((moveUp && !moveDown) || (!moveUp && moveDown)){
-                    state.flyDir = (moveUp) ? -1 : 1;
+                if((state.moveUp && !state.moveDown) || (!state.moveUp && state.moveDown)){
+                    state.flyDir = (state.moveUp) ? -1 : 1;
                     state.ySpeed += state.flyDir*state.Accel;
                 }else if(Math.abs(state.ySpeed)>state.Accel){
                     state.ySpeed -= state.flyDir*state.Accel;
@@ -81,3 +81,4 @@ if(node){ // Server side
 }else{ // Client side
     define(deps,init);
 }
+})();

@@ -46,13 +46,6 @@ function(createjs,lib,Global,Tile,Player,Map){
             this.users[u].tick();
         }
         this.iScroll();
-        if(Global.debug && Global.ticker.getTicks()%64==0){
-            Global.ui.updateFPS(Math.round(Global.ticker.getMeasuredFPS()));
-        }
-        var multiplayer = false;
-        if(multiplayer){
-        	Global.socket.send('/m'+JSON.stringify(Global.player.getStateDelta()));
-        }
     }
     
     p.addPlayer = function(id,u){

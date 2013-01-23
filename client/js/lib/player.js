@@ -173,9 +173,10 @@ function(createjs,lib,Global,Character){
                 }else{
                     aimDir = -1;
                 }
+                //this.char.head.rotation = aimAngle;
             }
             
-            this.char.scaleX = aimDir;
+            this.char.scaleX = aimDir>0 ? 1 : -1;
             
             var leftArm = aimDir>0 ? 'l' : 'r';
             var rightArm = aimDir>0 ? 'r' : 'l';

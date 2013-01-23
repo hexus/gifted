@@ -49,7 +49,7 @@ p.remove = function(u){
 }
 
 p.send = function(str,ex){
-    if(empty(ex)){ex=null;} // exlusionaa
+    if(empty(ex)){ex=null;} // exlusion
     if(!empty(str)){
         async.forEach(this.collection,function(i,c){ // Parallel baby (only takes arrays >:/)
             if(i instanceof User){

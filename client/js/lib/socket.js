@@ -1,22 +1,57 @@
 define(['jquery','createjs','socket.io','lib/global','lib/player'],
 function($,createjs,io,Global,Player){
     
-    var Socket = {};
+    var Socket = {}, dom, stage, world, player, users, Ui;
     
-    Socket.createSocket = function(socketUrl,onConnect){
-        dom = Global.dom = {},
-        stage = Global.stage,
-        world = Global.world,
-        player = Global.player,
-        users = Global.users,
-        Ui = Global.ui;
+    Socket.createSocket = function(socketUrl,onConnect,onDisconnect){
         
-        var socket = Global.socket = io.connect(socketUrl);
+        var socket = Global.socket = io.connect(socketUrl,{
+            'reconnect':false,
+            'auto connect':false,
+            'connect timeout':3000,
+            'max reconnection attempts':3
+        });
         
-        socket.on('connect',function(){
+        socket.connect = function(f){ // shortcut
+            this.socket.connect.call(this.socket,f);
+        }
+        
+        socket.__defineGetter__('connected',function(){ // shortcut
+           return this.socket.connected;
+        });
+        
+        socket.reset = function(){ // So lazy
+            stage = Global.stage,
+            world = Global.world,
+            player = Global.player,
+            users = Global.users,
+            Ui = Global.ui;
+        }
+        
+        socket.reset();
+        
+        socket.connect(function(){
             console.log("Socket.io connected!");
+            console.log(socket);
+            socket.send('/worlds-pls');
             if(typeof onConnect === 'function'){
                 onConnect();
+            };
+        });
+        
+        socket.on('connect_failed',function(){
+            console.log('Socket.io failed to connect!');
+        });
+        
+        socket.on('ping',function(){
+            socket.emit('pong');
+        });
+        
+        socket.on('disconnect',function(){
+            socket.disconnect();
+            console.log('Socket.io disconnected!');
+            if(typeof onDisconnect === 'function'){
+                onDisconnect();
             }
         });
         
@@ -40,8 +75,9 @@ function($,createjs,io,Global,Player){
                     }
                     break;
                 case "/youare":
-                    id = d[1];
-                    users[d[1]] = {name:d[2]};
+                    Global.player.gid = d[1] || 0;
+                    Global.player.name = d[2] || 'guest';
+                    users[d[1]] = Global.player;
                     break;
                 case "/login-accept":
                     Ui.showLobby();
@@ -100,9 +136,7 @@ function($,createjs,io,Global,Player){
                 case "/wd": // World data (map)
                     world.map.expand(dstr);
                     var p = world.map.getProperties();
-                    world.removeChild(player);
-                    player = world.users[0] = Global.player;
-                    player.spawn();
+                    world.addPlayer(player.gid,player);
                     world.focusOn(player);
                     // Ui.hideLoadingScreen(); // Implement a loading overlay!
                     logData = false;
@@ -110,6 +144,19 @@ function($,createjs,io,Global,Player){
                 case "/c":
                     d = data.split(" ",2);
                     Ui.print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
+                    break;
+                case "/m":
+                    var s = JSON.parse(dstr);
+                    if(s.id){
+                        if(world.users[s.id]){
+                            var user = world.users[s.id];
+                            for(i in s){
+                                if(user.state[i] && typeof user.state[i] === typeof s[i]){
+                                    user.state[i] = s[i];
+                                }
+                            }
+                        }
+                    }
                     break;
                 default:
                     console.log("Unrecognised data: ");
@@ -121,6 +168,10 @@ function($,createjs,io,Global,Player){
         });
         
         return socket;
+    }
+    
+    Socket.reset = function(){
+
     }
     
     return Socket;

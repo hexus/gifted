@@ -3,6 +3,7 @@ var Character = require('./shared/Character');
 // Class
 var User = function(args){
     this.super_Character.constructor.call(this,args);
+    var that = this
     this.id = args.id; // Local ID
     this.aid = args.aid; // Account ID
     this.name = args.name; // Selected character name
@@ -10,7 +11,10 @@ var User = function(args){
     this.inLobby = true;
     this.socket = args.socket; // Socket of user
     this.socketType = (!args.socketType) ? "TCP" : args.socketType; // TCP/Socket.io
-
+    
+    this.state.__defineGetter__('isAiming',function(){
+        return that.state.isAimingLeft || that.state.isAimingRight;
+    });
     this.state.isAimingLeft = false;
     this.state.isAimingRight = false;
     this.state.aimAngle = 0;
