@@ -31,7 +31,7 @@ function($,createjs,Global,Socket){
             if(world){
                 world.map.generate();
                 var p = world.map.getProperties();
-                world.addPlayer(Global.player);
+                world.addPlayer(Global.player.gid,Global.player);
                 world.focusOn(Global.player);
                 Ui.showWorld();
             }
@@ -44,7 +44,7 @@ function($,createjs,Global,Socket){
                 socket.connect();
             }
             Ui.selectWorld();
-        })
+        });
         
         $("#headwear_prev").click(function(){
             if(dom.headwear_frame>0){

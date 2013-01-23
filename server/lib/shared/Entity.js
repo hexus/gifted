@@ -71,11 +71,9 @@ var init = function(createjs,Global){
     	var delta = {};
     	for(i in this.state){
     		if(this.state[i]!==this.lastState[i]){
-    		    if(!(i=='aimAngle' && !this.state.isAiming)){
-        			delta[i] = this.state[i];
-        			if(!readonly){
-        			    this.lastState[i] = this.state[i];
-        			}
+    			delta[i] = this.state[i];
+    			if(!readonly){
+    			    this.lastState[i] = this.state[i];
     			}
     		}
     	}

@@ -151,7 +151,7 @@ function($,createjs,io,Global,Player){
                         if(world.users[s.id]){
                             var user = world.users[s.id];
                             for(i in s){
-                                if(user.state[i] && typeof user.state[i] === typeof s[i]){
+                                if(user.state[i]!=null && typeof user.state[i] === typeof s[i]){
                                     user.state[i] = s[i];
                                 }
                             }

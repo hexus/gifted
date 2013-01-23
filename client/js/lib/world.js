@@ -51,6 +51,7 @@ function(createjs,lib,Global,Tile,Player,Map){
     p.addPlayer = function(id,u){
         if(u instanceof Player){
             this.users[id] = u;
+            u.world = this;
             u.spawn();
         }
     }

@@ -20,7 +20,6 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.state.yLimit = 20;
         this.state.flySpeed = 12;
         this.state.jumpStr = 13;
-        console.log(this.state);
     }
     
     var p = Character.prototype = new Entity(); // Inheritance
