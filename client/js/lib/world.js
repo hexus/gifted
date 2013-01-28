@@ -14,6 +14,8 @@ function(createjs,lib,Global,Tile,Player,Map){
         this.id = 0;
         this.name = '';
         this.users = {};
+        this.projectiles = {};
+        this.projcount = 0;
         
         this.map = map;
         this.tilePool = {};
@@ -45,6 +47,12 @@ function(createjs,lib,Global,Tile,Player,Map){
         for(u in this.users){
             this.users[u].tick();
         }
+        for(proj in this.projectiles){
+            this.projectiles[proj].tick();
+            if(this.projectiles[proj].state.xSpeed==0 && this.projectiles[proj].state.ySpeed==0){
+                this.removeProjectile(this.projectiles[proj]);
+            }
+        }
         this.iScroll();
     }
     
@@ -61,6 +69,18 @@ function(createjs,lib,Global,Tile,Player,Map){
             this.users[id].unspawn();
             delete(this.users[id]);
         }
+    }
+    
+    p.addProjectile = function(proj){
+        proj.pid = this.projcount;
+        this.projectiles[this.projcount] = proj;
+        this.addChild(proj);
+        this.projcount++;
+    }
+    
+    p.removeProjectile = function(proj){
+        this.removeChild(proj);
+        delete(this.projectiles[proj.pid]);
     }
     
     p.focusOn = function(target,lock){

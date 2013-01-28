@@ -2,7 +2,6 @@ var config = require('./Config');
 var global = require('./Global');
 var Room = require('./Room');
 var rooms = global.rooms;
-var users = global.users;
 
 var h = {};
 
@@ -32,7 +31,7 @@ h.handleData = function(data){ // Called in context of a User
             if(room instanceof Room){
                 this.send("/login-accept " + room.id);
                 this.send("/motd " + config.motd);
-                room.joinUser(users.get(this.id),true);
+                room.joinUser(this,true);
             }else{
                 this.send("/login-reject Invalid room");
             }

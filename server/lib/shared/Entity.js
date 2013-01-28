@@ -26,11 +26,11 @@ var init = function(createjs,Global){
         this.y = 0;
         
         this.state = {
-            x : 0,
+            x : args.x || 0,
             xSpeed : 0,
             xLimit : 12,
             xOffset : 0,
-            y : 0,
+            y : args.y || 0,
             ySpeed : 0,
             yLimit : 20,
             yOffset : 0,
@@ -39,12 +39,14 @@ var init = function(createjs,Global){
             jumpStr : 12,
             onFloor : false,
             isFlying : false,
-            flySpeed : 10,
+            flySpeed : 20,
             flyDir : -1,
             gravCount : 0,
         };
         
         this.lastState = {};
+        
+        this.hasCollided = false;
         
         this.streamStep = 0;
         this.streamSpeed = 2;
@@ -140,6 +142,7 @@ var init = function(createjs,Global){
             
             if(leTile!=null){
                 if(this.map.getSolidArr().indexOf(leTile)>-1){ // Check map's solid array
+                    this.hasCollided = true;
                     return true;
                 }else{
                     return false;
@@ -163,7 +166,7 @@ var init = function(createjs,Global){
             var Ty = Math.round(y - (this.hitbox.height * 0.5));
             var By = Math.round(y + (this.hitbox.height * 0.5));
             var Lx = Math.round(x - (this.hitbox.width  * 0.5));
-            var Rx = Math.round(x + (this.hitbox.width  * 0.5));
+            var Rx = Math.floor(x + (this.hitbox.width  * 0.5));
             /*  These variables predict which tile the character would be in were it to start or
                 continue moving. They are used for checking ahead with the axis in question. */
             var pTy=0;
@@ -225,7 +228,7 @@ var init = function(createjs,Global){
                 if(ySpeed<=0){ // if travellin upwards and there's shit above, stop dis shit
                     if( !(this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && !this.chkSolid(Cx,pTy) ){
                         // nudge character a bit if there ain't that much shit above
-                        if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw) - 1; }
+                        if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw); }
                         if(this.chkSolid(Lx,Ty) && !this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Lx) + this.tileW + hw); }
                     }else{
                         ySpeed = 0;
@@ -273,9 +276,9 @@ var init = function(createjs,Global){
                     if(xSpeed<0){ 
                         c = c + hw + this.tileW; // Position sums
                     }else if(xSpeed>0){
-                        c = c - hw - 2; // -1 works because of rounding 
+                        c = c - hw - 1; // -1 works because of rounding
                     } 
-                    x = Math.round(c); // Move next to collided object
+                    x = c; // Move next to collided object
                     xSpeed = 0;
                 }
             }

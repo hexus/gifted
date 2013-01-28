@@ -1,5 +1,5 @@
-define(['jquery','lib/global','lib/ui'],
-function($,Global,Ui){
+define(['jquery','lib/global','lib/ui','lib/bullet'],
+function($,Global,Ui,Bullet){
     
     var Controls = {},upDown,leftDown,downDown,rightDown;
     
@@ -37,6 +37,17 @@ function($,Global,Ui){
                     case 69: // E
                         //Global.player.state.isAimingRight = true;
                         Global.player.state.isAimingRight = !Global.player.state.isAimingRight;
+                        break;
+                    case 67: // C
+                        var ps = Global.player.state;
+                        var proj = new Bullet({
+                            x:ps.x,
+                            y:ps.y,
+                            direction:ps.aimDir,
+                            angle:ps.aimAngle-90,
+                            speed:26}
+                        );
+                        Global.world.addProjectile(proj);
                         break;
                 }
             }

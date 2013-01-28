@@ -8,13 +8,14 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     }
     
     var Character = function(args){ // Constructor
+        if(!args){args={};}
         this.super.constructor.call(this,args); // Superclass constructor
         var that = this;
-        this.state.xLimit = 20;
+        this.state.xLimit = 10;
         this.state.Accel = 1;
         this.state.yLimit = 20;
-        this.state.flySpeed = 12;
-        this.state.jumpStr = 13;
+        this.state.flySpeed = 20;
+        this.state.jumpStr = 12;
         
         this.upDown = false;
         this.jump = false;
@@ -26,6 +27,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     var p = Character.prototype = new Entity(); // Inheritance
     p.super = Entity.prototype; // Superclass reference
+    p.constructor = Character;
     
     p.getStateDelta = function(readonly){ // Filter out unnecessary state properties
         var delta = this.super.getStateDelta.call(this);
@@ -57,10 +59,10 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.tick = function(){
         
         with(this){
-            if(!state.moveLeft){state.moveLeft = false;}
-            if(!state.moveRight){state.moveRight = false;}
-            if(!state.moveUp){state.moveUp = false;}
-            if(!state.moveDown){state.moveDown = false;}
+            //if(!state.moveLeft){state.moveLeft = false;}
+            //if(!state.moveRight){state.moveRight = false;}
+            //if(!state.moveUp){state.moveUp = false;}
+            //if(!state.moveDown){state.moveDown = false;}
             
             if(state.moveUp && state.onFloor && !upDown){
                 jump = true;

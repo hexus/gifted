@@ -1,3 +1,4 @@
+(function(){ // Closure
 var node = typeof window === 'undefined'; // Node.js test
 var deps = ['lib/foo','lib/bar']; // RequireJS dependencies
 
@@ -9,6 +10,7 @@ var init = function(foo,bar){ // Class definition (RequireJS dependencies as arg
     }
     
     var Class = function(args){ // Constructor
+        if(!args){args={};}
         this.super.constructor.call(this,args); // Superclass constructor
         this.get = this.__defineGetter__; // Getter shortcut
         this.set = this.__defineSetter__; // Setter shortcut
@@ -24,7 +26,8 @@ var init = function(foo,bar){ // Class definition (RequireJS dependencies as arg
     }
 
     var p = Class.prototype = new SuperClass(); // Inheritance
-    var p.super = SuperClass.prototype; // Superclass reference
+    p.super = SuperClass.prototype; // Superclass reference
+    p.constructor = Class;
     
     p.publicMethod = function(){
         console.log(this.privilegedMethod());
@@ -40,3 +43,4 @@ if(node){ // Server side
 }else{ // Client side
     define(deps,init);
 }
+}());

@@ -2,11 +2,12 @@ define(['createjs','assets','lib/global','shared/Character'],
 function(createjs,lib,Global,Character){
     var Player = function(args){
         this.initialize();
+        if(!args){args={};}
         var that = this;
     	this.super2.constructor.call(this,args);
     	
-    	this.gid = (args) ? args.id : 0; // Game ID (this.id is used by createjs)
-    	this.name = (args) ? args.name : 'guest';
+    	this.gid = args.id || 0; // Game ID (this.id is used by createjs)
+    	this.name = args.name || 'guest';
     	
         this.clip = this.addChild(new lib.giftedclientplayer()); // previously lib.mcPlayer_char()
         
@@ -166,14 +167,15 @@ function(createjs,lib,Global,Character){
             
             // Arm rotation
             if(this.thisPlayer){
-                aimAngle = Math.atan2(-this.mouseY,-Math.abs(this.mouseX))/(Math.PI/180);
+                aimAngle = Math.atan2(-this.mouseY,-this.mouseX)/(Math.PI/180) - 90;
                 if(aimAngle<0){aimAngle+=360;}
+                Global.debugObj.aimAngle = aimAngle;
                 if(this.mouseX>0){
                     aimDir = 1;
                 }else{
                     aimDir = -1;
                 }
-                //this.char.head.rotation = aimAngle;
+                //this.char.head.rotation = aimAngle*0.5;
             }
             
             this.char.scaleX = aimDir>0 ? 1 : -1;
@@ -185,8 +187,8 @@ function(createjs,lib,Global,Character){
                 this.setDynamicPart('arm',leftArm,true);
                 this.setDynamicPart('arm',rightArm,true);
                 // Arm rotation
-                this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? aimAngle + 110 : -aimAngle + 60;
-                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? 130 - aimAngle*0.1 : 40 + aimAngle*0.1;
+                this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? aimAngle + 200 : aimAngle - 20;
+                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? 130 - aimAngle*0.1 : 80 - aimAngle*0.05;
                 // Lower arm rotation
                 this.char[leftArm+'arm_d'].arm.l.rotation = -40 - aimAngle*0.1;
                 this.char[rightArm+'arm_d'].arm.l.rotation = -15;
@@ -201,7 +203,7 @@ function(createjs,lib,Global,Character){
             if(isAimingLeft){
                 this.setDynamicPart('arm',leftArm,true);
                 this.setDynamicPart('arm',rightArm,true);
-                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? -aimAngle + 60 : aimAngle + 110;
+                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? -aimAngle - 20 : -aimAngle + 200;
                 this.char[leftArm+'arm_d'].arm.l.rotation = -15;
                 this.char[leftArm+'arm_d'].arm.scaleY = -aimDir;
                 if(!isAimingRight){
