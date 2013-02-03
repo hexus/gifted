@@ -66,10 +66,15 @@ function($,Global){
                 stage.addChild(world);
                 stage.addChild(player);
                 
+                Global.ui = Ui;
+                Ui.init();
+                Controls.init();
+                
                 ticker.setFPS(32);
                 ticker.addListener(stage);
                 ticker.addListener(function(timeElapsed,paused){
                     if(Ui.selected()==='world'){
+                        Controls.tick();
                         Global.world.tick(timeElapsed,paused);
                         if(ticker.getTicks()%3==0){
                             var newDelta = Global.player.getStateDelta();
@@ -88,6 +93,7 @@ function($,Global){
                             debugObj.fps = Math.round(ticker.getMeasuredFPS());
                             debugObj.x = Global.player.x;
                             debugObj.y = Global.player.y;
+                            debugObj.health = Global.player.state.health;
                             for(i in debugObj){
                                 if(debugStr.length>0){debugStr = debugStr.concat('<br/>');}
                                 debugStr = debugStr.concat(i+' : '+debugObj[i]);
@@ -96,10 +102,6 @@ function($,Global){
                         }
                     }
                 });
-                
-                Global.ui = Ui;
-                Ui.init();
-                Controls.init();
                 
                 Global.reset = function(){
                     with(Global){

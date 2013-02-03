@@ -18,8 +18,6 @@ function(createjs,lib,Global,Tile,Player,Map){
         this.projcount = 0;
         
         this.map = map;
-        this.tilePool = {};
-        this.tileRefs = {};
         this.outerMargin = 4;
         this.tileScale = this.map.getTileSize()/62;
         this.mapContainer = new createjs.Container();
@@ -38,7 +36,7 @@ function(createjs,lib,Global,Tile,Player,Map){
         this.update = {rate:6,count:0}
         
         this.addChild(this.mapContainer);
-        this.testTiles();
+        //this.testTiles();
     }
     
     var p = World.prototype = new createjs.Container();
@@ -49,7 +47,7 @@ function(createjs,lib,Global,Tile,Player,Map){
         }
         for(proj in this.projectiles){
             this.projectiles[proj].tick();
-            if(this.projectiles[proj].state.xSpeed==0 && this.projectiles[proj].state.ySpeed==0){
+            if(this.projectiles[proj].isRubbish){
                 this.removeProjectile(this.projectiles[proj]);
             }
         }
@@ -74,8 +72,10 @@ function(createjs,lib,Global,Tile,Player,Map){
     p.addProjectile = function(proj){
         proj.pid = this.projcount;
         this.projectiles[this.projcount] = proj;
-        this.addChild(proj);
+        //var added = this.addChild(proj);
+        proj.spawn();
         this.projcount++;
+        return proj; 
     }
     
     p.removeProjectile = function(proj){
@@ -137,13 +137,13 @@ function(createjs,lib,Global,Tile,Player,Map){
     }
     
     p.scrollTo = function(x,y,clear){
-        //if(x&&y){
+        if(x&&y){
             this.view.x = x;
             this.view.y = y;
             this.x = Math.floor(Global.stage.canvas.width*0.5) - this.view.x;
             this.y = Math.floor(Global.stage.canvas.height*0.5) - this.view.y;
             if(clear){this.clearDisplay();}
-        //}
+        }
     }
     
     p.scrollDelta = function(x,y){

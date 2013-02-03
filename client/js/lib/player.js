@@ -36,6 +36,7 @@ function(createjs,lib,Global,Character){
         this.char.rarm_d.visible = false;
         this.char.scaleX = 1;
         this.char.scaleY = 1;
+        //this.char.shadow = new createjs.Shadow("#000000",0,0,4);
         
         this.lastAnim = "";
         this.setAnim("static");
@@ -84,10 +85,11 @@ function(createjs,lib,Global,Character){
         this.state.__defineSetter__('aimDir',function(d){
             _aimDir = (d>0) ? 1 : -1;
         });
-        
     }
+    
     var p = Player.prototype = new Character();
     p.super2 = Character.prototype;
+    p.constructor = Player;
     
     p.setAnim = function(label){
         with(this){
@@ -97,36 +99,6 @@ function(createjs,lib,Global,Character){
                 //setOutfit();
             }
         }
-    }
-    
-    p.getWeapon = function(side){
-        side = !side ? 'r' : side;
-        switch(side){
-            case 'l': return this.weapon.left; break;
-            case 'r': return this.weapon.right; break;
-        }
-    }
-    
-    p.setWeapon = function(side,frame){
-        side = !side ? 'r' : side;
-        frame = !frame ? 0 : frame;
-        switch(side){
-            case 'b':
-                this.setWeapon('l',frame);
-                this.setWeapon('r',frame);
-                break;
-            case 'l': 
-                this.weapon.left = frame;
-                break;
-            case 'r':
-                this.weapon.right = frame;
-                break;
-        }
-    }
-    
-    p.setWeapons = function(left,right){
-        this.setWeapon('l',left);
-        this.setWeapon('r',right);
     }
     
     p.getPart = function(part,side,type){
@@ -167,7 +139,8 @@ function(createjs,lib,Global,Character){
             
             // Arm rotation
             if(this.thisPlayer){
-                aimAngle = Math.atan2(-this.mouseY,-this.mouseX)/(Math.PI/180) - 90;
+                aimAngle = Math.atan2(this.mouseY,this.mouseX)*180/Math.PI;
+                aimAngle2 = Math.round(Math.atan2(this.mouseY,Math.abs(this.mouseX))*180/Math.PI)+90;
                 if(aimAngle<0){aimAngle+=360;}
                 Global.debugObj.aimAngle = aimAngle;
                 if(this.mouseX>0){
@@ -187,11 +160,11 @@ function(createjs,lib,Global,Character){
                 this.setDynamicPart('arm',leftArm,true);
                 this.setDynamicPart('arm',rightArm,true);
                 // Arm rotation
-                this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? aimAngle + 200 : aimAngle - 20;
-                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? 130 - aimAngle*0.1 : 80 - aimAngle*0.05;
+                this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? aimAngle - 72 : aimAngle + 72;
+                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? (90+36)-aimAngle2*0.1 : (90-36)+aimAngle2*0.1;
                 // Lower arm rotation
-                this.char[leftArm+'arm_d'].arm.l.rotation = -40 - aimAngle*0.1;
-                this.char[rightArm+'arm_d'].arm.l.rotation = -15;
+                this.char[leftArm+'arm_d'].arm.l.rotation = -72 + aimAngle2*0.1;
+                this.char[rightArm+'arm_d'].arm.l.rotation = -16;
                 // Y Flip
                 this.char[leftArm+'arm_d'].arm.scaleY = -aimDir;
                 this.char[rightArm+'arm_d'].arm.scaleY = aimDir;
@@ -203,12 +176,12 @@ function(createjs,lib,Global,Character){
             if(isAimingLeft){
                 this.setDynamicPart('arm',leftArm,true);
                 this.setDynamicPart('arm',rightArm,true);
-                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? -aimAngle - 20 : -aimAngle + 200;
+                this.char[leftArm+'arm_d'].arm.rotation = 180 + (aimDir>0 ? -aimAngle + 72 : -aimAngle - 72);
                 this.char[leftArm+'arm_d'].arm.l.rotation = -15;
                 this.char[leftArm+'arm_d'].arm.scaleY = -aimDir;
                 if(!isAimingRight){
-                    this.char[rightArm+'arm_d'].arm.l.rotation = -40 - aimAngle*0.1;
-                    this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? 40 + aimAngle*0.1 : 130 - aimAngle*0.1;
+                    this.char[rightArm+'arm_d'].arm.l.rotation = -36 - aimAngle2*0.1;
+                    this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? (90-36) + aimAngle2*0.1 : (90+36) - aimAngle2*0.1;
                     this.char[rightArm+'arm_d'].arm.scaleY = aimDir;
                 }
             }else{
@@ -217,11 +190,11 @@ function(createjs,lib,Global,Character){
             }
             
             // Weapon display
-            this.char.larm_l.wpnUnder.gotoAndStop(this.getWeapon(leftArm));
-            this.char.larm_d.arm.l.wpnUnder.gotoAndStop(this.getWeapon(leftArm));
+            this.char.larm_l.wpnUnder.gotoAndStop(this.getItem(leftArm));
+            this.char.larm_d.arm.l.wpnUnder.gotoAndStop(this.getItem(leftArm));
             
-            this.char.rarm_l.wpnUnder.gotoAndStop(this.getWeapon(rightArm));
-            this.char.rarm_d.arm.l.wpnOver.gotoAndStop(this.getWeapon(rightArm));
+            this.char.rarm_l.wpnUnder.gotoAndStop(this.getItem(rightArm));
+            this.char.rarm_d.arm.l.wpnOver.gotoAndStop(this.getItem(rightArm));
             
             // Animation
             if(onFloor){
@@ -244,7 +217,7 @@ function(createjs,lib,Global,Character){
                 }
                 if(xSpeed!=0){
                     if(isFlying && ySpeed<flySpeed/2 && ySpeed>-flySpeed/2){
-                        if((xSpeed>flySpeed/4 && this.char.scaleX>0) || (xSpeed<-flySpeed/4 && this.char.scaleX<0)){
+                        if((xSpeed>flySpeed/4 && this.state.direction>0) || (xSpeed<-flySpeed/4 && this.state.direction<0)){
                             this.setAnim("flying");
                         }else{
                             this.setAnim("flying_back");

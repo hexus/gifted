@@ -1,15 +1,14 @@
 define(['jquery','createjs','socket.io','lib/global','lib/player'],
 function($,createjs,io,Global,Player){
     
-    var Socket = {}, dom, stage, world, player, users, Ui;
+    var Socket = {}, stage, world, player, users, Ui;
     
     Socket.createSocket = function(socketUrl,onConnect,onDisconnect){
         
         var socket = Global.socket = io.connect(socketUrl,{
             'reconnect':false,
             'auto connect':false,
-            'connect timeout':3000,
-            'max reconnection attempts':3
+            'connect timeout':3000
         });
         
         socket.connect = function(f){ // shortcut
@@ -143,6 +142,7 @@ function($,createjs,io,Global,Player){
                     break;
                 case "/ping":
                     Global.debugObj.ping = d[1];
+                    logData = false;
                     break;
                 case "/c":
                     d = data.split(" ",2);
@@ -172,10 +172,6 @@ function($,createjs,io,Global,Player){
         });
         
         return socket;
-    }
-    
-    Socket.reset = function(){
-
     }
     
     return Socket;

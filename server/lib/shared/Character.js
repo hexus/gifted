@@ -11,6 +11,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         if(!args){args={};}
         this.super.constructor.call(this,args); // Superclass constructor
         var that = this;
+        this.state.health = 100;
         this.state.xLimit = 10;
         this.state.Accel = 1;
         this.state.yLimit = 20;
@@ -23,6 +24,11 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.state.moveRight = false;
         this.state.moveUp = false;
         this.state.moveDown = false;
+        
+        this.item = {
+            left:0,
+            right:0
+        }
     }
     
     var p = Character.prototype = new Entity(); // Inheritance
@@ -30,7 +36,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.constructor = Character;
     
     p.getStateDelta = function(readonly){ // Filter out unnecessary state properties
-        var delta = this.super.getStateDelta.call(this);
+        var delta = this.super.getStateDelta.call(this,readonly);
         var giveashit;
         for(i in delta){
             giveashit = true;
@@ -41,7 +47,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
                 case "flyDir":
                     giveashit = this.state.isFlying;
                     break;
-                case "gravCount": case "onFloor":
+                case "gravCount": case "onFloor": case "angle":
                     giveashit = false;
                     break;
             }
@@ -52,55 +58,88 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         return delta;
     }
     
+    p.getItem = function(side){
+        side = !side ? 'r' : side;
+        switch(side){
+            case 'l': return this.item.left; break;
+            case 'r': return this.item.right; break;
+        }
+    }
+    
+    p.setItem = function(side,frame){
+        side = !side ? 'r' : side;
+        frame = !frame ? 0 : frame;
+        switch(side){
+            case 'b': // both
+                this.setItem('l',frame);
+                this.setItem('r',frame);
+                break;
+            case 'l': 
+                this.item.left = frame;
+                break;
+            case 'r':
+                this.item.right = frame;
+                break;
+        }
+    }
+    
+    p.setItems = function(left,right){
+        this.setItem('l',left);
+        this.setItem('r',right);
+    }
+    
+    p.useItem = function(side){
+        side = !side ? 'r' : side;
+        i = this.getItem(side);
+        if(i>0){ // if i instanceof itemSubclass
+
+        }
+    }
+    
     p.fly = function(){ with(this.state){flying = !isFlying; ySpeed %= flySpeed; flyDir = ySpeed>=0 ? 1 : -1;} }
     
     p.jump = function(){ with(this.state){if(onFloor && !isFlying){this.jump = true;}} }
     
     p.tick = function(){
-        
-        with(this){
-            //if(!state.moveLeft){state.moveLeft = false;}
-            //if(!state.moveRight){state.moveRight = false;}
-            //if(!state.moveUp){state.moveUp = false;}
-            //if(!state.moveDown){state.moveDown = false;}
-            
-            if(state.moveUp && state.onFloor && !upDown){
-                jump = true;
-                upDown = true;
-            }
-            
-            if(upDown && !state.moveUp){
-                upDown = false;
-            }
-            
-            // Movement booleans
-            if((state.moveLeft && !state.moveRight) || (state.moveRight && !state.moveLeft)){
-                state.direction = state.moveLeft ? -1 : 1;
-                state.xSpeed += state.direction*state.Accel;
-            }else if(Math.abs(state.xSpeed)>state.Accel){
-                state.xSpeed -= state.direction*state.Accel;
-            }else{
-                state.xSpeed = 0;
-            }
-            
-            // Y Booleans
-            if(!state.isFlying){
-                if(jump){
-                    state.ySpeed = -state.jumpStr;
-                    jump = false;
+        if(this.state.health>0){
+            with(this){
+                if(state.moveUp && state.onFloor && !upDown){
+                    jump = true;
+                    upDown = true;
                 }
-            }else{
-                if((state.moveUp && !state.moveDown) || (!state.moveUp && state.moveDown)){
-                    state.flyDir = (state.moveUp) ? -1 : 1;
-                    state.ySpeed += state.flyDir*state.Accel;
-                }else if(Math.abs(state.ySpeed)>state.Accel){
-                    state.ySpeed -= state.flyDir*state.Accel;
+                
+                if(upDown && !state.moveUp){
+                    upDown = false;
+                }
+                
+                // Movement booleans
+                if((state.moveLeft && !state.moveRight) || (state.moveRight && !state.moveLeft)){
+                    state.direction = state.moveLeft ? -1 : 1;
+                    state.xSpeed += state.direction*state.Accel;
+                }else if(Math.abs(state.xSpeed)>state.Accel){
+                    state.xSpeed -= state.direction*state.Accel;
                 }else{
-                    state.ySpeed = 0;
+                    state.xSpeed = 0;
+                }
+                
+                // Y Booleans
+                if(!state.isFlying){
+                    if(jump){
+                        state.ySpeed = -state.jumpStr;
+                        jump = false;
+                    }
+                }else{
+                    if((state.moveUp && !state.moveDown) || (!state.moveUp && state.moveDown)){
+                        state.flyDir = (state.moveUp) ? -1 : 1;
+                        state.ySpeed += state.flyDir*state.Accel;
+                    }else if(Math.abs(state.ySpeed)>state.Accel){
+                        state.ySpeed -= state.flyDir*state.Accel;
+                    }else{
+                        state.ySpeed = 0;
+                    }
                 }
             }
         }
-        
         this.super.tick.call(this);
     }
     

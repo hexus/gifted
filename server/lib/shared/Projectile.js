@@ -4,46 +4,44 @@ var deps = ['shared/Entity']; // RequireJS dependencies
 
 var init = function(Entity){ // Class definition
 
+    if(node){ // Node dependencies
+        Entity = require('./Entity');
+    }
+
     var Projectile = function(args){
+        if(!args){args={};}
+        if(!node){this.initialize();}
         this.super.constructor.call(this,args); // Superclass constructor
-        this.pid = 0;
+        this.life = -1;
+        this.damage = 10;
+        this.rotateWithSpeed = true;
         this.hitbox.width = 4;
         this.hitbox.height = 4;
-        this.state.isFlying = false;
-        this.state.xLimit = 40;
-        this.state.yLimit = 40;
-        this.updateState(args);
+        this.state.xSpeed = 0;
+        this.state.ySpeed = 0;
+        this.state.xLimit = this.state.yLimit = this.state.flySpeed = 20;
+        this.state.direction = 1;
+        this.state.angle = 0;
+        
+        if(args){
+            this.state.direction = args.direction || this.state.direction;
+            this.state.angle = args.angle || this.state.angle;
+            var rads = this.state.angle * (Math.PI/180);
+            this.state.xLimit = this.state.yLimit = this.state.flySpeed = args.speed || this.state.flySpeed;
+            this.state.xSpeed = (Math.cos(rads) * args.speed) || this.state.xSpeed; // Round these if
+            this.state.ySpeed = (Math.sin(rads) * args.speed) || this.state.ySpeed; // you get problems
+            this.updateRotation();
+        }
     }
     
     var p = Projectile.prototype = new Entity(); // Inheritance
     p.super = Entity.prototype; // Superclass reference
     p.constructor = Projectile;
     
-    p.updateState = function(args){
-        if(args){
-            this.state.direction = args.direction || 1;
-            //this.state.angle = args.angle || 0;
-            var rads = args.angle * (Math.PI/180);
-            this.state.xSpeed = Math.round(Math.cos(rads) * args.speed);
-            this.state.ySpeed = Math.round(Math.sin(rads) * args.speed);
-            this.updateRotation();
-        }
-    }
-    
-    p.updateRotation = function(){
-        var dAngle = Math.atan2(-this.state.ySpeed,-this.state.xSpeed)/(Math.PI/180);
-        this.rotation = dAngle-180;
-        if(this.state.direction<0){this.rotation+=180;}
-    }
-    
     p.tick = function(){
         this.super.tick.call(this);
-        if(this.hasCollided){
-            this.state.xSpeed = 0;
-            this.state.ySpeed = 0;
-            this.state.isFlying = true;
-        }else{
-            this.updateRotation();            
+        if(!node){
+            this.scaleX = this.state.direction>0 ? 1 : -1;
         }
     }
     

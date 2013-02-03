@@ -1,5 +1,5 @@
-define(['jquery','createjs','lib/global','lib/socket'],
-function($,createjs,Global,Socket){
+define(['jquery','createjs','lib/global','lib/socket','shared/Bullet','shared/Weapon'],
+function($,createjs,Global,Socket,Bullet,Weapon){
     
     var Ui = {}, dom,stage,socket,player,world,selected;
     
@@ -33,6 +33,15 @@ function($,createjs,Global,Socket){
                 var p = world.map.getProperties();
                 world.addPlayer(Global.player.gid,Global.player);
                 world.focusOn(Global.player);
+
+                ps = Global.player.state;
+                Global.wtest = Global.world.addProjectile(new Weapon({
+                    wid:1,
+                    x:ps.x,
+                    y:ps.y,
+                    speed:0
+                }));
+                
                 Ui.showWorld();
             }
         });
@@ -146,7 +155,8 @@ function($,createjs,Global,Socket){
     
     Ui.showWorld = function(){
         if(selected=='lobby'){
-            world.addPlayer(player.gid,player);
+            player.state.x = 0;
+            player.state.y = 0;
         }
         selected = 'world';
         Ui.hideAll();
