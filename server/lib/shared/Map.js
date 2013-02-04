@@ -118,11 +118,6 @@ var init = function(){
                            tileSize:world.size,
                            spawn:{x:world.spawnX,y:world.spawnY} 
                         });
-                        //worldSize.width = world.width;
-                        //worldSize.height = world.height;
-                        //tileSize = world.size;
-                        //spawn.x = world.spawnX;
-                        //spawn.y = world.spawnY;
                         that.expand(world.map); // Needs to be LONGTEXT in MySQL
                         console.log('Loaded world \''+that.name+'\'');
                     }else{
@@ -159,7 +154,7 @@ var init = function(){
     	//console.log("Size: " + fullWidth + ":" + fullHeight);
     	
     	for(i=0;i<fullWidth;i++){
-    		heights[i] = (fullHeight/2 - fullHeight/6) + (Math.random() * (fullHeight/2 + fullHeight/6));
+    		heights[i] = (fullHeight/2 - fullHeight/8) + (Math.random() * (fullHeight/2 + fullHeight/8));
     		//heights[i] = Math.random()
     	}
     	
@@ -191,7 +186,7 @@ var init = function(){
     			var tileX = x % rSize.width;
     			var tileY = y % rSize.height;
     			if(y >= fullHeight - heights[x]){
-    				this.setTile(regX,regY,tileX,tileY,1);
+    				this.setTile(regX,regY,tileX,tileY,9);
     			}
     		}
     	}

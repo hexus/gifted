@@ -33,15 +33,6 @@ function($,createjs,Global,Socket,Bullet,Weapon){
                 var p = world.map.getProperties();
                 world.addPlayer(Global.player.gid,Global.player);
                 world.focusOn(Global.player);
-
-                ps = Global.player.state;
-                Global.wtest = Global.world.addProjectile(new Weapon({
-                    wid:1,
-                    x:ps.x,
-                    y:ps.y,
-                    speed:0
-                }));
-                
                 Ui.showWorld();
             }
         });

@@ -20,7 +20,7 @@ function(createjs,lib,Global){
         this.get = this.__defineGetter__;
         this.set = this.__defineSetter__;
         
-        this.get('frame',function(){ // Testing getters and setters
+        this.get('frame',function(){
             return _f;
         });
         this.set('frame',function(f){
@@ -36,11 +36,6 @@ function(createjs,lib,Global){
                 that.clip.sourceRect = getFrame.rect;
                 that.addChild(that.clip);
                 that.clip.scaleX = that.clip.scaleY = that.scale;
-                
-                //that.clip2 = that.clip.clone(); // Clone because vector drawing is a bit holey with CreateJS
-                //that.clip2.sourceRect = getFrame.rect;
-                //that.addChild(that.clip2);
-                //that.clip2.scaleX = that.clip2.scaleY = that.scale;
             }
         });
         
@@ -52,7 +47,6 @@ function(createjs,lib,Global){
                 _scale = s;
                 if(that.clip){
                     that.clip.scaleX = that.clip.scaleY = that.scale;
-                    //that.clip2.scaleX = that.clip2.scaleY = that.scale;
                 }
             }
         });
@@ -72,12 +66,12 @@ function(createjs,lib,Global){
         tileSheetBuilder.addMovieClip(new lib.giftedclienttiles(),new createjs.Rectangle(-4,-4,72,72),globalScale);
         tileSheetBuilder.build();
         Global.tiles = tileSheetBuilder.spriteSheet;
-    }
+    };
     
     var p = Tile.prototype = new createjs.Container();
     
-    p.toString = function(){
-        return this.frame;
+    p.tick = function(){
+        
     }
     
     Tile.buildSheet();

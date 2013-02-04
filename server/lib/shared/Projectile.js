@@ -10,7 +10,6 @@ var init = function(Entity){ // Class definition
 
     var Projectile = function(args){
         if(!args){args={};}
-        if(!node){this.initialize();}
         this.super.constructor.call(this,args); // Superclass constructor
         this.life = -1;
         this.damage = 10;
@@ -28,8 +27,8 @@ var init = function(Entity){ // Class definition
             this.state.angle = args.angle || this.state.angle;
             var rads = this.state.angle * (Math.PI/180);
             this.state.xLimit = this.state.yLimit = this.state.flySpeed = args.speed || this.state.flySpeed;
-            this.state.xSpeed = (Math.cos(rads) * args.speed) || this.state.xSpeed; // Round these if
-            this.state.ySpeed = (Math.sin(rads) * args.speed) || this.state.ySpeed; // you get problems
+            this.state.xSpeed = Math.round(Math.cos(rads) * args.speed) || this.state.xSpeed; // Round these if
+            this.state.ySpeed = Math.round(Math.sin(rads) * args.speed) || this.state.ySpeed; // you get problems
             this.updateRotation();
         }
     }
@@ -40,9 +39,16 @@ var init = function(Entity){ // Class definition
     
     p.tick = function(){
         this.super.tick.call(this);
+        if(this.life===0){
+            this.onDeath();
+        }
         if(!node){
             this.scaleX = this.state.direction>0 ? 1 : -1;
         }
+    }
+    
+    p.onDeath = function(){
+        
     }
     
     return Projectile;

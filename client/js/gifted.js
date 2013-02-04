@@ -47,7 +47,7 @@ function($,Global){
             paths:{
              'socket.io':socketUrl+'/socket.io/socket.io'
             }
-        });        
+        });
         require(['createjs','assets','lib/ui','lib/controls','lib/player','lib/world'],
         function(createjs,lib,Ui,Controls,Player,World){
             function init(){

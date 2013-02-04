@@ -26,8 +26,8 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.state.moveDown = false;
         
         this.item = {
-            left:0,
-            right:0
+            left:false,
+            right:false
         }
     }
     
@@ -68,17 +68,17 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     p.setItem = function(side,frame){
         side = !side ? 'r' : side;
-        frame = !frame ? 0 : frame;
+        item = !item ? false : item;
         switch(side){
             case 'b': // both
-                this.setItem('l',frame);
-                this.setItem('r',frame);
+                this.setItem('l',item);
+                this.setItem('r',item);
                 break;
             case 'l': 
-                this.item.left = frame;
+                this.item.left = item;
                 break;
             case 'r':
-                this.item.right = frame;
+                this.item.right = item;
                 break;
         }
     }
@@ -91,9 +91,22 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.useItem = function(side){
         side = !side ? 'r' : side;
         i = this.getItem(side);
-        if(i>0){ // if i instanceof itemSubclass
-
+        if(i){
+            i.inUse = true;
         }
+    }
+    
+    p.stopUsingItem = function(side){
+        side = !side ? 'r' : side;
+        i = this.getItem(side);
+        if(i){
+            this.inUse = false;
+        }
+    }
+    
+    p.pickUpNearestItem = function(){
+        this.world.getNearestItem(this.state.x,this.state.y);
+        
     }
     
     p.fly = function(){ with(this.state){flying = !isFlying; ySpeed %= flySpeed; flyDir = ySpeed>=0 ? 1 : -1;} }

@@ -11,6 +11,7 @@ var init = function(createjs,Global){
     
     var Entity = function(args){
         if(!args){args={};}
+        if(!node){this.initialize();}
         this.get = this.__defineGetter__;
         this.set = this.__defineSetter__;
         var that = this;
@@ -52,9 +53,6 @@ var init = function(createjs,Global){
         this.hasCollided = false;
         this.isRubbish = false;
         this.isRubbishOnCollide = false;
-        
-        this.streamStep = 0;
-        this.streamSpeed = 2;
         
         this.effects = {};
         
@@ -167,6 +165,18 @@ var init = function(createjs,Global){
     }
     
     p.tick = function(){
+        
+        if(this.life>0){
+            this.life--;
+        }
+        
+        if(this.life===0 || (this.hasCollided && this.isRubbishOnCollide)){
+            this.isRubbish = true;
+            this.state.xSpeed = 0;
+            this.state.ySpeed = 0;
+            this.state.isFlying = true;
+        }
+        
         if(!this.isRubbish){
             with(this.state){
                 var Cx = x; // Center of the object
@@ -334,24 +344,14 @@ var init = function(createjs,Global){
                 // Apply movement based on above calculations
                     x += xSpeed;
                     y += ySpeed;
+                    
+                    if(xSpeed!=0||ySpeed!=0){
+                        this.updateRotation();
+                    }
             }
             
             this.x = this.state.x;
             this.y = this.state.y;
-            if(this.state.xSpeed!=0||this.state.ySpeed!=0){
-                this.updateRotation();
-            }
-        }
-        
-        if(this.life>0){
-            this.life--;
-        }
-        
-        if(this.life===0 || (this.hasCollided && this.isRubbishOnCollide)){
-            this.isRubbish = true;
-            this.state.xSpeed = 0;
-            this.state.ySpeed = 0;
-            this.state.isFlying = true;
         }
         
         //this.streamTick();

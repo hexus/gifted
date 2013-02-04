@@ -58,7 +58,26 @@ function($,Global,Ui,Weapon,Bullet){
             repeat:true,
             down:function(){
                 //Global.player.useItem('r');
-                Global.wtest.use();
+                if(Global.wtest){
+                    Global.wtest.state.inUse = true;
+                }
+            },
+            up:function(){
+                if(Global.wtest){
+                    Global.wtest.state.inUse = false;
+                }
+            }},
+        createGun : {
+            key:71,
+            down:function(){
+                ps = Global.player.state;
+                Global.wtest = Global.world.addProjectile(new Weapon({
+                    wid:0,
+                    x:ps.x,
+                    y:ps.y,
+                    speed:10,
+                    angle:ps.aimAngle
+                }));
             },
             up:function(){
                 
@@ -75,6 +94,7 @@ function($,Global,Ui,Weapon,Bullet){
             var k = e.keyCode || e.which;
             keysLast[k] = keysDown[k];
             keysDown[k] = true;
+            //console.log(k);
         });
         
         $(window).keyup(function(e){

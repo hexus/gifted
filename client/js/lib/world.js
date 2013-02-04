@@ -1,5 +1,5 @@
-define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map'],
-function(createjs,lib,Global,Tile,Player,Map){
+define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map','shared/Item'],
+function(createjs,lib,Global,Tile,Player,Map,Item){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -81,6 +81,42 @@ function(createjs,lib,Global,Tile,Player,Map){
     p.removeProjectile = function(proj){
         this.removeChild(proj);
         delete(this.projectiles[proj.pid]);
+    }
+    
+    p.testItem = function(){
+        ps = Global.player.state;
+        Global.wtest = this.addProjectile(new Weapon({
+            wid:0,
+            x:this.map.getSpawn().x,
+            y:this.map.getSpawn().y,
+            speed:0
+        }));
+    }
+    
+    p.getNearestItem = function(x,y,maxDistance){
+        maxDistance = !maxDistance ? 0 : maxDistance;
+        shortestDistance = -1;
+        nearestItem = false;
+        for(i in this.projectiles){
+            proj = this.projectiles[i];
+            if(proj instanceof Item){
+                distance = Math.sqrt(Math.pow(proj.state.x - x,2) + Math.pow(proj.state.y - y,2));
+                if(shortestDistance<0 || distance < shortestDistance){
+                    if(distance < maxDistance || maxDistance === 0){
+                        nearestItem = proj;
+                    }
+                }
+            }
+        }
+        return nearestItem;
+    }
+    
+    p.removeNearestItem = function(x,y,maxDistance){
+        var item = this.getNearestItem(x,y,maxDistance);
+        if(item){
+            this.removeProjectile(item);
+        }
+        return item;
     }
     
     p.focusOn = function(target,lock){
@@ -169,26 +205,33 @@ function(createjs,lib,Global,Tile,Player,Map){
             dy = cords['y'];
         var newtile = this.map.getTile(rx,ry,dx,dy);
         if(newtile instanceof Tile){
-            if(!this.mapContainer.contains(newtile)){
-                this.mapContainer.addChild(newtile);
+            v = newtile.frame;
+            if(v>0){
+                if(!this.mapContainer.contains(newtile)){
+                    this.mapContainer.addChild(newtile);
+                }
             }
         }else{
-            v = (newtile==1) ? 9 : newtile;
-            newtile = new Tile();
-            newtile = this.mapContainer.addChild(newtile);
-            this.map.setTile(rx,ry,dx,dy,newtile);
+            v = newtile;
+            if(v>0){
+                newtile = new Tile();
+                newtile = this.mapContainer.addChild(newtile);
+                this.map.setTile(rx,ry,dx,dy,newtile);
+            }
         }
-        newtile.x = cx * this.map.getTileSize();
-        newtile.y = cy * this.map.getTileSize();
-        newtile.frame = v;
-        newtile.scale = this.tileScale;
+        if(v>0){
+            newtile.x = cx * this.map.getTileSize();
+            newtile.y = cy * this.map.getTileSize();
+            newtile.frame = v;
+            newtile.scale = this.tileScale;
+        }
     }
     
     p.removeTile = function(t){
         if(t instanceof Tile){
             var cords = this.map.convertCords(t.x,t.y);
             this.map.setTile(cords['rx'],cords['ry'],cords['x'],cords['y'],t.frame);
-            t.frame = 0;
+            //t.frame = 0;
             this.mapContainer.removeChild(t);
         }
     }
@@ -208,6 +251,7 @@ function(createjs,lib,Global,Tile,Player,Map){
             Tile.buildSheet(scale);
             this.clearDisplay();
             full=true;
+            //times = 3;
         }
         
         var scrW = Global.stage.canvas.width,
@@ -236,10 +280,7 @@ function(createjs,lib,Global,Tile,Player,Map){
                     cy = cord['y'];
                     
                     var tile = this.map.getTile(rx,ry,cx,cy);
-                    if(tile>0){
-                        tile = 9;
-                        this.addTile(x,y,tile);
-                    }
+                    this.addTile(x,y,tile);
                 }
             }
             
@@ -273,10 +314,7 @@ function(createjs,lib,Global,Tile,Player,Map){
                         if(l>=dY1 && l<=dY2){
                             cord = this.map.convertCords(addX,l,true); 
                             var tile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
-                            if(tile>0){
-                                tile = 9;
-                                this.addTile(addX,l,tile);
-                            }
+                            this.addTile(addX,l,tile);
                         }
                     }
                 }
@@ -300,10 +338,7 @@ function(createjs,lib,Global,Tile,Player,Map){
                         if(n>=dX1 && n<=dX2){
                             cord = this.map.convertCords(n,addY,true); 
                             var tile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
-                            if(tile>0){
-                                tile = 9;
-                                this.addTile(n,addY,tile);
-                            }
+                            this.addTile(n,addY,tile);
                         }
                     }
                 }
