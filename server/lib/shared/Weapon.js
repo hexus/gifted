@@ -16,6 +16,10 @@ var init = function(Item,Bullet){
         this.spray = 3;
         //this.state.isFlying = true; // For testing
         if(!node){
+            this.clipInfo = {
+                type:'weaponsRanged',
+                frame:this.wid
+            }
             this.clip = this.addChild(new lib.weaponsRanged()); 
             this.clip.gotoAndStop(this.wid);
         }
@@ -36,11 +40,10 @@ var init = function(Item,Bullet){
     p.use = function(){ // fire
         this.super3.use.call(this);
         if(this.owner){
-            console.log("hallo! this weapon is firing with an owner");
             var ps = this.owner.state;
             var proj = new Bullet({
                 x:ps.x,
-                y:ps.y,
+                y:ps.y-10,
                 direction:ps.aimDir,
                 angle:ps.aimAngle+this.sprayModifier(),
                 speed:40

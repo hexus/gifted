@@ -18,7 +18,7 @@ var init = function(Entity){ // Class definition
         this.hitbox.height = 4;
         this.state.xSpeed = 0;
         this.state.ySpeed = 0;
-        this.state.xLimit = this.state.yLimit = this.state.flySpeed = 20;
+        this.state.xLimit = this.state.yLimit = this.state.flySpeed = 40;
         this.state.direction = 1;
         this.state.angle = 0;
         
@@ -26,7 +26,7 @@ var init = function(Entity){ // Class definition
             this.state.direction = args.direction || this.state.direction;
             this.state.angle = args.angle || this.state.angle;
             var rads = this.state.angle * (Math.PI/180);
-            this.state.xLimit = this.state.yLimit = this.state.flySpeed = args.speed || this.state.flySpeed;
+            this.state.flySpeed = args.speed || this.state.flySpeed;
             this.state.xSpeed = Math.round(Math.cos(rads) * args.speed) || this.state.xSpeed; // Round these if
             this.state.ySpeed = Math.round(Math.sin(rads) * args.speed) || this.state.ySpeed; // you get problems
             this.updateRotation();

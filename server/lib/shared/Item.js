@@ -33,7 +33,6 @@ var init = function(lib,Projectile){
     p.constructor = Item;
     
     p.tick = function(){
-        
         // Air resistance
         if((this.state.ySpeed==this.state.yLimit || this.state.onFloor) && !this.state.isFlying){
             if(Math.abs(this.state.xSpeed) > this.state.Accel + 1){
@@ -62,7 +61,6 @@ var init = function(lib,Projectile){
             this.lastInUse = true;
         }else{
             if(this.lastInUse){
-                console.log('bam');
                 this.stopUsing();
             }
             this.lastInUse = false;

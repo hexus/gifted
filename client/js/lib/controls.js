@@ -12,7 +12,8 @@ function($,Global,Ui,Weapon,Bullet){
             },
             up:function(){
                 Global.player.state.moveUp = false;
-            }},
+            }
+        },
         down : {
             key:83,
             down:function(){
@@ -20,7 +21,8 @@ function($,Global,Ui,Weapon,Bullet){
             },
             up:function(){
                 Global.player.state.moveDown = false;
-            }},
+            }
+        },
         left : {
             key:65,
             down:function(){
@@ -28,7 +30,8 @@ function($,Global,Ui,Weapon,Bullet){
             },
             up:function(){
                 Global.player.state.moveLeft = false;
-            }},
+            }
+        },
         right : {
             key:68,
             down:function(){
@@ -36,7 +39,8 @@ function($,Global,Ui,Weapon,Bullet){
             },
             up:function(){
                 Global.player.state.moveRight = false;
-            }},
+            }
+        },
         armLeft : {
             key:81,
             down:function(){
@@ -44,7 +48,8 @@ function($,Global,Ui,Weapon,Bullet){
             },
             up:function(){
                 //Global.player.state.isAimingLeft = false;
-            }},
+            }
+        },
         armRight : {
             key:69,
             down:function(){
@@ -52,27 +57,32 @@ function($,Global,Ui,Weapon,Bullet){
             },
             up:function(){
                 //Global.player.state.isAimingRight = false;
-            }},
-        shoot : {
-            key:67,
-            repeat:true,
+            }
+        },
+        pickUpDropLeft : {
+            key:90,
             down:function(){
-                //Global.player.useItem('r');
-                if(Global.wtest){
-                    Global.wtest.state.inUse = true;
-                }
+                Global.player.pickUpOrDropItem('l');
             },
             up:function(){
-                if(Global.wtest){
-                    Global.wtest.state.inUse = false;
-                }
-            }},
+                
+            }
+        },
+        pickUpDropRight : {
+            key:67,
+            down:function(){
+                Global.player.pickUpOrDropItem('r');
+            },
+            up:function(){
+                
+            }
+        },
         createGun : {
             key:71,
             down:function(){
                 ps = Global.player.state;
                 Global.wtest = Global.world.addProjectile(new Weapon({
-                    wid:0,
+                    wid:1,
                     x:ps.x,
                     y:ps.y,
                     speed:10,
@@ -81,7 +91,26 @@ function($,Global,Ui,Weapon,Bullet){
             },
             up:function(){
                 
-            }}
+            }
+        },
+        useLeft : {
+            key:'mouse0',
+            down:function(){
+                Global.player.useItem('l');
+            },
+            up:function(){
+                Global.player.stopUsingItem('l');
+            }
+        },
+        useRight : {
+            key:'mouse2',
+            down:function(){
+                Global.player.useItem('r');
+            },
+            up:function(){
+                Global.player.stopUsingItem('r');
+            }
+        },
     }
     
     Controls.init = function(){
@@ -90,6 +119,14 @@ function($,Global,Ui,Weapon,Bullet){
             //console.log(Global.player.state.isAimingLeft,Global.player.state.isAimingRight);
         }
         
+        // Disable context menu on right click
+        $('#client').bind('contextmenu',function(){
+            if(Ui.selected()==='world'){
+                return false;
+            }
+        }); 
+        
+        // Key handlers
         $(window).keydown(function(e){
             var k = e.keyCode || e.which;
             keysLast[k] = keysDown[k];
@@ -101,6 +138,20 @@ function($,Global,Ui,Weapon,Bullet){
             var k = e.keyCode || e.which;
             keysLast[k] = keysDown[k];
             keysDown[k] = false;
+        });
+        
+        // Mouse handlers
+        $(window).mousedown(function(e){
+            var k = e.button || e.which-1;
+            keysLast['mouse'+k] = keysDown['mouse'+k];
+            keysDown['mouse'+k] = true;
+            //console.log(k);
+        });
+        
+        $(window).mouseup(function(e){
+            var k = e.button || e.which-1;
+            keysLast['mouse'+k] = keysDown['mouse'+k];
+            keysDown['mouse'+k] = false;
         });
         
     }

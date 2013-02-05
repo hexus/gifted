@@ -22,14 +22,14 @@ function(createjs,lib,Global,Character){
         
         this.char = this.clip.playerChar;
         this.char.head.wear.stop();
-        this.char.larm_l.wpnOver.stop();
-        this.char.larm_l.wpnUnder.stop();
-        this.char.rarm_l.wpnOver.stop();
-        this.char.rarm_l.wpnUnder.stop();
-        this.char.larm_d.arm.l.wpnOver.stop();
-        this.char.larm_d.arm.l.wpnUnder.stop();
-        this.char.rarm_d.arm.l.wpnOver.stop();
-        this.char.rarm_d.arm.l.wpnUnder.stop();
+        this.char.larm_l.itemOver.visible = false;
+        this.char.larm_l.itemUnder.visible = true;
+        this.char.rarm_l.itemOver.visible = true;
+        this.char.rarm_l.itemUnder.visible = false;
+        this.char.larm_d.arm.l.itemOver.visible = false;
+        this.char.larm_d.arm.l.itemUnder.visible = true;
+        this.char.rarm_d.arm.l.itemOver.visible = true;
+        this.char.rarm_d.arm.l.itemUnder.visible = false;
         this.char.larm_d.regX = 0;
         this.char.rarm_d.regY = 0;
         this.char.larm_d.visible = false;
@@ -41,10 +41,12 @@ function(createjs,lib,Global,Character){
         this.lastAnim = "";
         this.setAnim("static");
         
-        this.weapon = {
+        this.item = {
             left:0,
             right:0
         }
+        
+        this.setItemClips(); // hides
         
         this.get('thisPlayer',function(){
             return Global.player === that;
@@ -132,6 +134,49 @@ function(createjs,lib,Global,Character){
         this.setPart(part,side,'l',!vis);
     }
     
+    p.setItemClip = function(side,item){
+        side = !side ? 'r' : side;
+        var clips = {
+            'l':[this.char.larm_l.itemUnder,this.char.larm_d.arm.l.itemUnder],
+            'r':[this.char.rarm_l.itemOver,this.char.rarm_d.arm.l.itemOver]
+        }
+        if(item){
+            if(item.clipInfo){
+                var itemType = item.clipInfo.type;
+                var frame = item.clipInfo.frame;
+                for(c in clips[side]){
+                    var clip = clips[side][c];
+                    clip[itemType].gotoAndStop(frame);
+                    if(!clip[itemType].visible){
+                        for(i=0;i<clip.children.length;i++){
+                            clip.children[i].visible = false;
+                        }
+                        clip[itemType].visible = true;
+                    }
+                }
+            }
+        }else{
+            for(c in clips[side]){
+                var clip = clips[side][c];
+                for(i=0;i<clip.children.length;i++){
+                    clip.children[i].visible = false;
+                }
+            }
+        }
+    }
+    
+    p.setItemClips = function(lItem,rItem){
+        this.setItemClip('l',lItem);
+        this.setItemClip('r',rItem);
+    }
+    
+    p.useItem = function(side){
+        side = !side ? 'r' : side;
+        if((side=='l' && this.state.isAimingLeft) || (side=='r' && this.state.isAimingRight)){
+            this.super2.useItem.call(this,side);
+        }
+    }
+    
     p.tick = function(){
         this.super2.tick.call(this);
 
@@ -160,11 +205,11 @@ function(createjs,lib,Global,Character){
                 this.setDynamicPart('arm',leftArm,true);
                 this.setDynamicPart('arm',rightArm,true);
                 // Arm rotation
-                this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? aimAngle - 72 : aimAngle + 72;
-                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? (90+36)-aimAngle2*0.1 : (90-36)+aimAngle2*0.1;
+                this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? aimAngle - 65 : aimAngle + 65;
+                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? (90+40)-aimAngle2*0.1 : (90-40)+aimAngle2*0.1;
                 // Lower arm rotation
-                this.char[leftArm+'arm_d'].arm.l.rotation = -72 + aimAngle2*0.1;
-                this.char[rightArm+'arm_d'].arm.l.rotation = -16;
+                this.char[leftArm+'arm_d'].arm.l.rotation = -80 + aimAngle2*0.1;
+                this.char[rightArm+'arm_d'].arm.l.rotation = -20;
                 // Y Flip
                 this.char[leftArm+'arm_d'].arm.scaleY = -aimDir;
                 this.char[rightArm+'arm_d'].arm.scaleY = aimDir;
@@ -176,12 +221,12 @@ function(createjs,lib,Global,Character){
             if(isAimingLeft){
                 this.setDynamicPart('arm',leftArm,true);
                 this.setDynamicPart('arm',rightArm,true);
-                this.char[leftArm+'arm_d'].arm.rotation = 180 + (aimDir>0 ? -aimAngle + 72 : -aimAngle - 72);
-                this.char[leftArm+'arm_d'].arm.l.rotation = -15;
+                this.char[leftArm+'arm_d'].arm.rotation = 180 + (aimDir>0 ? -aimAngle + 65 : -aimAngle - 65);
+                this.char[leftArm+'arm_d'].arm.l.rotation = -20;
                 this.char[leftArm+'arm_d'].arm.scaleY = -aimDir;
                 if(!isAimingRight){
-                    this.char[rightArm+'arm_d'].arm.l.rotation = -36 - aimAngle2*0.1;
-                    this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? (90-36) + aimAngle2*0.1 : (90+36) - aimAngle2*0.1;
+                    this.char[rightArm+'arm_d'].arm.l.rotation = -40 - aimAngle2*0.1;
+                    this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? (90-40) + aimAngle2*0.1 : (90+40) - aimAngle2*0.1;
                     this.char[rightArm+'arm_d'].arm.scaleY = aimDir;
                 }
             }else{
@@ -189,17 +234,21 @@ function(createjs,lib,Global,Character){
                 this.setDynamicPart('arm',rightArm,isAimingRight);
             }
             
-            // Weapon display
+            // Item display
+            this.setItemClip(leftArm,this.getItem('l'));
+            this.setItemClip(rightArm,this.getItem('r'));
+            /*
             this.char.larm_l.wpnUnder.gotoAndStop(this.getItem(leftArm));
             this.char.larm_d.arm.l.wpnUnder.gotoAndStop(this.getItem(leftArm));
             
             this.char.rarm_l.wpnUnder.gotoAndStop(this.getItem(rightArm));
             this.char.rarm_d.arm.l.wpnOver.gotoAndStop(this.getItem(rightArm));
+            */
             
             // Animation
             if(onFloor){
                 if(xSpeed!=0){
-                    if((xSpeed>0 && this.char.scaleX>0) || (xSpeed<0 && this.char.scaleX<0)){
+                    if((xSpeed>0 && this.state.aimDir>0) || (xSpeed<0 && this.state.aimDir<0)){
                         this.setAnim("running");
                     }else{
                         this.setAnim("running_back");
@@ -217,7 +266,7 @@ function(createjs,lib,Global,Character){
                 }
                 if(xSpeed!=0){
                     if(isFlying && ySpeed<flySpeed/2 && ySpeed>-flySpeed/2){
-                        if((xSpeed>flySpeed/4 && this.state.direction>0) || (xSpeed<-flySpeed/4 && this.state.direction<0)){
+                        if((xSpeed>flySpeed/4 && this.state.aimDir>0) || (xSpeed<-flySpeed/4 && this.state.aimDir<0)){
                             this.setAnim("flying");
                         }else{
                             this.setAnim("flying_back");
@@ -231,6 +280,16 @@ function(createjs,lib,Global,Character){
             }
             
         }
+    }
+    
+    p.itemTick = function(){
+        if(!this.state.isAimingLeft){
+            this.stopUsingItem('l');
+        }
+        if(!this.state.isAimingRight){
+            this.stopUsingItem('r');
+        }
+        this.super2.itemTick.call(this);
     }
     
     return Player;

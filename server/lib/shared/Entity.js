@@ -170,13 +170,6 @@ var init = function(createjs,Global){
             this.life--;
         }
         
-        if(this.life===0 || (this.hasCollided && this.isRubbishOnCollide)){
-            this.isRubbish = true;
-            this.state.xSpeed = 0;
-            this.state.ySpeed = 0;
-            this.state.isFlying = true;
-        }
-        
         if(!this.isRubbish){
             with(this.state){
                 var Cx = x; // Center of the object
@@ -354,6 +347,12 @@ var init = function(createjs,Global){
             this.y = this.state.y;
         }
         
+        if(this.life===0 || (this.hasCollided && this.isRubbishOnCollide)){
+            this.isRubbish = true;
+            this.state.xSpeed = 0;
+            this.state.ySpeed = 0;
+            this.state.isFlying = true;
+        }
         //this.streamTick();
     }
     

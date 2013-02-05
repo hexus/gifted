@@ -66,20 +66,19 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         }
     }
     
-    p.setItem = function(side,frame){
+    p.setItem = function(side,item){
         side = !side ? 'r' : side;
         item = !item ? false : item;
-        switch(side){
-            case 'b': // both
-                this.setItem('l',item);
-                this.setItem('r',item);
-                break;
-            case 'l': 
-                this.item.left = item;
-                break;
-            case 'r':
-                this.item.right = item;
-                break;
+        if(item){
+            item.owner = this;
+            switch(side){
+                case 'l': 
+                    this.item.left = item;
+                    break;
+                case 'r':
+                    this.item.right = item;
+                    break;
+            }
         }
     }
     
@@ -88,11 +87,28 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.setItem('r',right);
     }
     
+    p.unsetItem = function(side){
+        side = !side ? 'r' : side;
+        var i = this.getItem(side);
+        if(i){
+            i.owner = false;
+            switch(side){
+                case 'l':
+                    this.item.left = false;
+                    break;
+                case 'r':
+                    this.item.right = false;
+                    break;
+            }
+        }
+        return i;
+    }
+    
     p.useItem = function(side){
         side = !side ? 'r' : side;
         i = this.getItem(side);
         if(i){
-            i.inUse = true;
+            i.state.inUse = true;
         }
     }
     
@@ -100,13 +116,43 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         side = !side ? 'r' : side;
         i = this.getItem(side);
         if(i){
-            this.inUse = false;
+            i.state.inUse = false;
         }
     }
     
-    p.pickUpNearestItem = function(){
-        this.world.getNearestItem(this.state.x,this.state.y);
-        
+    p.pickUpItem = function(side){
+        side = !side ? 'r' : side;
+        var i = this.world.removeNearestItem(
+            this.state.x,
+            this.state.y,
+            Math.round(this.hitbox.width + this.hitbox.height / 2)
+        );
+        if(i){
+            this.setItem(side,i);
+        }
+    }
+    
+    p.dropItem = function(side){
+        side = !side ? 'r' : side;
+        var i = this.unsetItem(side);
+        if(i){
+            i.state.inUse = false;
+            i.state.x = this.state.x;
+            i.state.y = this.state.y;
+            i.state.xSpeed = Math.round(this.state.xSpeed * 1.5);
+            i.state.ySpeed = Math.round(this.state.ySpeed * 1.5);
+            this.world.addProjectile(i);
+        }
+    }
+    
+    p.pickUpOrDropItem = function(side){
+        side = !side ? 'r' : side;
+        var i = this.getItem(side);
+        if(i){
+            this.dropItem(side);
+        }else{
+            this.pickUpItem(side);
+        }
     }
     
     p.fly = function(){ with(this.state){flying = !isFlying; ySpeed %= flySpeed; flyDir = ySpeed>=0 ? 1 : -1;} }
@@ -115,6 +161,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     p.tick = function(){
         if(this.state.health>0){
+            this.itemTick();
             with(this){
                 if(state.moveUp && state.onFloor && !upDown){
                     jump = true;
@@ -154,6 +201,15 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
             }
         }
         this.super.tick.call(this);
+    }
+    
+    p.itemTick = function(){
+        if(this.getItem('l')){
+            this.getItem('l').tick();
+        }
+        if(this.getItem('r')){
+            this.getItem('r').tick();
+        }
     }
     
     return Character;

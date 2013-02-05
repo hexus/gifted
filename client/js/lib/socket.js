@@ -138,7 +138,7 @@ function($,createjs,io,Global,Player){
                     world.addPlayer(player.gid,player);
                     world.focusOn(player);
                     // Ui.hideLoadingScreen(); // Implement a loading overlay!
-                    logData = false;
+                    //logData = false;
                     break;
                 case "/ping":
                     Global.debugObj.ping = d[1];
