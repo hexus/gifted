@@ -64,6 +64,10 @@ var init = function(createjs,Global){
         this.get('tileW',function(){return that.map.getTileSize();});
         this.get('gravity',function(){return gravity;});
         this.get('gravSpeed',function(){return gravSpeed;});
+        
+        if(Global.debug){
+            this.hitboxShape = false;
+        }
     }
     
     var p = Entity.prototype;
@@ -96,8 +100,8 @@ var init = function(createjs,Global){
     }
     
     p.spawn = function(x,y){
-        if(!this.world.contains(this)){
-            this.world.addChild(this);
+        if(!this.world.entityContainer.contains(this)){
+            this.world.entityContainer.addChild(this);
         }
         
         if(!(x&&y)){
@@ -115,8 +119,8 @@ var init = function(createjs,Global){
     }
     
     p.unspawn = function(){
-        if(this.world.contains(this)){
-            this.world.removeChild(this);
+        if(this.world.entityContainer.contains(this)){
+            this.world.entityContainer.removeChild(this);
         }
     }
     
@@ -143,9 +147,6 @@ var init = function(createjs,Global){
                 leTile = leTile.frame;
             }else{ // Typing problems going on here, only tile objects working
                 leTile = parseInt(leTile);
-                if(leTile==1){ // temporary
-                    leTile = 9;
-                }
             }
             
             if(leTile!=null){
@@ -165,6 +166,15 @@ var init = function(createjs,Global){
     }
     
     p.tick = function(){
+        
+        if(Global.debug && Global.debugObj.showHitboxes && !this.hitboxShape){
+            var g = new createjs.Graphics();
+            g.beginStroke("#F0F").beginFill("#F44").drawRect(-this.hitbox.width*0.5,-this.hitbox.height*0.5,this.hitbox.width,this.hitbox.height);
+            var s = new createjs.Shape(g);
+            s.alpha = 0.5;
+            s.x = s.y = 0;
+            this.hitboxShape = this.addChild(s);
+        }
         
         if(this.life>0){
             this.life--;
@@ -209,11 +219,11 @@ var init = function(createjs,Global){
                 if(xSpeed<0){
                     direction = -1;
                     cLx = pLx; 
-                    cRx = pLx + this.hitbox.width;
+                    cRx = pLx;// + this.hitbox.width;
                     pDx = pLx;
                 }else if(xSpeed>0){
                     direction = 1;
-                    cLx = pRx - this.hitbox.width; 
+                    cLx = pRx;// - this.hitbox.width; 
                     cRx = pRx;
                     pDx = pRx;
                 }
@@ -272,8 +282,8 @@ var init = function(createjs,Global){
                         doMove = true;
                     }else{
                         if(!this.chkSolid(pDx,Cy)){ // Main X rules
-                            if( !((this.chkSolid(pDx,pBy) && ySpeed>0) || 
-                                  (this.chkSolid(pDx,pTy) && ySpeed<0) || 
+                            if( !((this.chkSolid(pDx,pBy) && ySpeed>0) ||
+                                  (this.chkSolid(pDx,pTy) && ySpeed<0) ||
                                   (this.chkSolid(pDx,Ty) && ySpeed==0)||
                                   (this.chkSolid(pDx,Cy+qh)) ||
                                   (this.chkSolid(pDx,Cy-qh)) )

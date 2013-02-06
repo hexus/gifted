@@ -111,6 +111,16 @@ function($,Global,Ui,Weapon,Bullet){
                 Global.player.stopUsingItem('r');
             }
         },
+        showMap : {
+            key:77,
+            down:function(){
+                Global.world.createMapCanvas(Global.world.map);
+                Global.world.overlay.visible = true;
+            },
+            up:function(){
+                Global.world.overlay.visible = false;
+            }
+        }
     }
     
     Controls.init = function(){
@@ -124,14 +134,14 @@ function($,Global,Ui,Weapon,Bullet){
             if(Ui.selected()==='world'){
                 return false;
             }
-        }); 
+        });
         
         // Key handlers
         $(window).keydown(function(e){
             var k = e.keyCode || e.which;
             keysLast[k] = keysDown[k];
             keysDown[k] = true;
-            //console.log(k);
+            console.log(k);
         });
         
         $(window).keyup(function(e){

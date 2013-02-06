@@ -24,7 +24,7 @@ function(createjs,lib,Global){
             return _f;
         });
         this.set('frame',function(f){
-            _f = f || 0;
+            _f = parseInt(f) || 0;
             var getFrame = Global.tiles.getFrame(_f);
             if(getFrame){
                 if(that.clip){
@@ -72,6 +72,14 @@ function(createjs,lib,Global){
     
     p.tick = function(){
         
+    }
+    
+    p.valueOf = function(){
+        return parseInt(this.frame);
+    }
+    
+    p.toString = function(){
+        return ""+this.frame;
     }
     
     Tile.buildSheet();

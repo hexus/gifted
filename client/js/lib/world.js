@@ -20,7 +20,11 @@ function(createjs,lib,Global,Tile,Player,Map,Item){
         this.map = map;
         this.outerMargin = 4;
         this.tileScale = this.map.getTileSize()/62;
-        this.mapContainer = new createjs.Container();
+        
+        this.mapContainer = this.addChild(new createjs.Container());
+        this.entityContainer = this.addChild(new createjs.Container());
+        this.overlay = this.addChild(new createjs.Container());
+        this.overlay.alpha = 0.8;
         
         this.set('scale',function(v){
             that.view.scale = that.scaleX = that.scaleY = v;
@@ -34,8 +38,6 @@ function(createjs,lib,Global,Tile,Player,Map,Item){
         this.scrollTarget = this.addChild(this.defaultTarget);
         this.scrollSensitivity = 0.36;
         this.update = {rate:6,count:0}
-        
-        this.addChild(this.mapContainer);
         //this.testTiles();
     }
     
@@ -52,6 +54,10 @@ function(createjs,lib,Global,Tile,Player,Map,Item){
             }
         }
         this.iScroll();
+        
+        // clean this up and take it somewhere else later
+        this.overlay.x = this.view.x - (this.scrollTarget.x/this.map.getTileSize());
+        this.overlay.y = this.view.y - (this.scrollTarget.y/this.map.getTileSize());
     }
     
     p.addPlayer = function(id,u){
@@ -356,6 +362,26 @@ function(createjs,lib,Global,Tile,Player,Map,Item){
             this.updateDisplay(x,y,scale,times);
         }
         
+    }
+    
+    p.createMapCanvas = function(map){
+        if(map){
+            var data = map.createCanvasData();
+            canvas = $('<canvas>').attr({id:map.name})[0];
+            canvas.width = data.width;
+            canvas.height = data.height;
+            context = canvas.getContext("2d");
+            image = context.getImageData(0, 0, canvas.width, canvas.height);
+            for(i=0;i<image.data.length;i++){
+                image.data[i] = data.data[i];
+            }
+            context.putImageData(image,0,0);
+            if(!this.overlay.map){
+                this.overlay.map = this.overlay.addChild(new createjs.Bitmap(canvas));
+            }else{
+                this.overlay.map.image = canvas;
+            }
+        }
     }
     
     return World;

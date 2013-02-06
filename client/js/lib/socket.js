@@ -61,7 +61,7 @@ function($,createjs,io,Global,Player){
             switch(d[0]){
                 case "/login-request":
                     $('#worldList input').remove();
-                    var worlds = JSON.parse(data.substr(d[0].length+1));
+                    var worlds = JSON.parse(dstr);
                     var html = '';
                     for(w in worlds){
                         $('<input>').attr({
@@ -141,7 +141,7 @@ function($,createjs,io,Global,Player){
                     //logData = false;
                     break;
                 case "/ping":
-                    Global.debugObj.ping = d[1];
+                    Global.debugObj.out.ping = d[1];
                     logData = false;
                     break;
                 case "/c":

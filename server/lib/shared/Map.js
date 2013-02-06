@@ -304,7 +304,7 @@ var init = function(){
                     x = i % rSize.width,
                     y = Math.floor(i / fullWidth) % rSize.height;
                 //console.log(rx+' '+ry+' '+x+' '+y);
-                this.setTile(rx,ry,x,y,mapflat[i]);
+                this.setTile(rx,ry,x,y,parseInt(mapflat[i]));
             }
         }
     }
@@ -326,7 +326,39 @@ var init = function(){
     	return worldStr;
     }
     
-    m.createHtml = function(){
+    m.createCanvasData = function(){
+        var flat = this.flatLinear();
+        var width = this.getWorldSize().width * this.getRegionSize().width;
+        var height = this.getWorldSize().height * this.getRegionSize().height;
+        var length = width*height*4;
+        
+        console.log(flat.length*4,length,width,height);
+        data = [];
+        for (i = 0; i < length; i+=4) {
+            var tile = flat[i/4];
+            var colour = {r:0,g:0,b:0,a:255};
+            switch(tile){
+                case 9:
+                    colour.r = colour.g = colour.b = 66;
+                    break;
+                default:
+                    colour.r = colour.g = colour.b = 236;
+                    break;
+            }
+            data[i]     = colour.r;
+            data[i+1]   = colour.g;
+            data[i+2]   = colour.b;
+            data[i+3]   = colour.a;
+        }
+        
+        return {
+            width:width,
+            height:height,
+            data:data
+        }
+    }
+    
+    m.createHtml = function(){ // depracated ugly shit
     	var html = '';
     	for(ry=0;ry<this.getWorldSize().height;ry++){ // Region row
     		var chunk = '';

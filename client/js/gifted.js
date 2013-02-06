@@ -90,13 +90,13 @@ function($,Global){
                         }
                         if(Global.debug && ticker.getTicks()%16==0){ // every half second
                             debugStr = '';
-                            debugObj.fps = Math.round(ticker.getMeasuredFPS());
-                            debugObj.x = Global.player.x;
-                            debugObj.y = Global.player.y;
-                            debugObj.health = Global.player.state.health;
-                            for(i in debugObj){
+                            debugObj.out.fps = Math.round(ticker.getMeasuredFPS());
+                            debugObj.out.x = Global.player.x;
+                            debugObj.out.y = Global.player.y;
+                            debugObj.out.health = Global.player.state.health;
+                            for(i in debugObj.out){
                                 if(debugStr.length>0){debugStr = debugStr.concat('<br/>');}
-                                debugStr = debugStr.concat(i+' : '+debugObj[i]);
+                                debugStr = debugStr.concat(i+' : '+debugObj.out[i]);
                             }
                             Ui.updateDebug(debugStr);
                         }

@@ -187,7 +187,7 @@ function(createjs,lib,Global,Character){
                 aimAngle = Math.atan2(this.mouseY,this.mouseX)*180/Math.PI;
                 aimAngle2 = Math.round(Math.atan2(this.mouseY,Math.abs(this.mouseX))*180/Math.PI)+90;
                 if(aimAngle<0){aimAngle+=360;}
-                Global.debugObj.aimAngle = aimAngle;
+                Global.debugObj.out.aimAngle = aimAngle;
                 if(this.mouseX>0){
                     aimDir = 1;
                 }else{
