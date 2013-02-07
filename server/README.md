@@ -21,7 +21,7 @@ However, some will be more advanced:
 
 - Listen for HTTP connections
 - Serve the client files
-	- Similarly, serve the exact same game engine used to simulate the game within the server to keep both perfectly synchronised
+	- Similarly, serve exactly the same game engine used to simulate the game within the server to keep both perfectly synchronised
 - Host multiple game worlds/instances concurrently
 - (Extra) Undertake modularity governed by a master server, accepting new connections from players previously connected to other servers/worlds
 

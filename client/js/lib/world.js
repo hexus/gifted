@@ -85,7 +85,7 @@ function(createjs,lib,Global,Tile,Player,Map,Item){
     }
     
     p.removeProjectile = function(proj){
-        this.removeChild(proj);
+        proj.unspawn();
         delete(this.projectiles[proj.pid]);
     }
     
