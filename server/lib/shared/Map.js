@@ -140,6 +140,25 @@ var init = function(){
         }
     }
     
+    // Miner class
+    m.miner = function(args){
+        if(!args){args={};}
+        var that = this;
+        this.direction = args.direction || 0;
+        this.life = args.life || 500;
+        this.x = args.x || 0;
+        this.y = args.y || 0;
+        this.turn = function(){
+            var decide = Math.random();
+            if(decide>0.5){
+                that.direction++;
+            }else{
+                that.direction--;
+            }
+            that.direction = ((that.direction % 4) + 4) % 4;
+        }
+    }
+    
     m.generate = function(){
     	console.log('Generating world \'' + this.name + '\'');
     	
@@ -151,11 +170,8 @@ var init = function(){
             smoothWidth = 20,
             smooth = 3;
     	
-    	//console.log("Size: " + fullWidth + ":" + fullHeight);
-    	
     	for(i=0;i<fullWidth;i++){
     		heights[i] = (fullHeight/2 - fullHeight/8) + (Math.random() * (fullHeight/2 + fullHeight/8));
-    		//heights[i] = Math.random()
     	}
     	
     	// Smoothing
@@ -173,11 +189,10 @@ var init = function(){
     		heights = newHeights;
     	}
     	
-    	var spawn = {
+    	var topSpawn = {
     		x : Math.round(fullWidth * 0.5),
     		y : Math.round(fullHeight - heights[Math.round(heights.length*0.5)]) - 2
     	};
-    	this.setSpawn(spawn.x,spawn.y);
     	
     	for(var y=0;y<fullHeight;y++){
     		for(var x=0;x<fullWidth;x++){
@@ -191,7 +206,58 @@ var init = function(){
     		}
     	}
     	
-    	// Done
+    	
+    	var lowSpawnSize = {width:16,height:4};
+        var lowSpawn = {
+            x : topSpawn.x-Math.round(lowSpawnSize.width/2),
+            y : Math.round(fullHeight/2)+topSpawn.y-Math.round(lowSpawnSize.height/2),
+            width: 16,
+            height: 4
+        }
+        
+        this.setSpawn(lowSpawn.x,lowSpawn.y);
+    	
+    	for(var i=lowSpawn.x-Math.round(lowSpawn.width/2);i<lowSpawn.x+Math.round(lowSpawn.width/2);i++){
+    	    for(var j=lowSpawn.y-Math.round(lowSpawn.height/2);j<lowSpawn.y+Math.round(lowSpawn.height/2);j++){
+    	        var c = this.convertCords(i,j,true);
+    	        this.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
+    	    }    	    
+    	}
+    	
+    	// Let's dig!
+    	var miners = {};
+    	miners[0] = new this.miner({x:lowSpawn.x,y:lowSpawn.y,direction:3,life:10000});
+    	var mine = true;
+    	
+	    for(m in miners){
+	        m = miners[m];
+	        while(m.life>0){
+    	        var newPos = {x:m.x,y:m.y};
+    	        switch(m.direction){
+    	            case 0: // Right
+    	               newPos.x++;
+    	               break;
+    	            case 1: // Down
+    	               newPos.y++;
+    	               break;
+    	            case 2: // Left
+    	               newPos.x--;
+    	               break;
+    	            case 3: // Up
+    	               newPos.y--;
+    	               break;
+    	        }
+    	        var c = this.convertCords(newPos.x,newPos.y,true);
+    	        this.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
+    	        m.x = newPos.x;
+    	        m.y = newPos.y;
+    	        m.life--;
+    	        m.turn();
+	        }
+    	}
+    	
+    	
+    	// Done.
     }
     
     m.expand = function(str){

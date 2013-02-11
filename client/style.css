@@ -16,6 +16,6 @@ input[disabled]{background-color:#aaa;color:#ccc;}
 user-select:none;
 cursor:default;}
 #canvas{background-color:#ccc;}
-#debug{color:#815391;}
+#debug{color:#815391;background-color:#EBF;}
 #mainMenu{}
 #worldList{background-color:#ddd;}

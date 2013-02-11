@@ -16,7 +16,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.state.Accel = 1;
         this.state.yLimit = 20;
         this.state.flySpeed = 20;
-        this.state.jumpStr = 12;
+        this.state.jumpStr = 14;
         
         this.upDown = false;
         this.jump = false;

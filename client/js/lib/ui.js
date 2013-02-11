@@ -29,7 +29,7 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         
         $("#sp").click(function(){
             if(world){
-                world.map.generate();
+                world.generateMap();
                 var p = world.map.getProperties();
                 world.addPlayer(Global.player.gid,Global.player);
                 world.focusOn(Global.player);

@@ -22,7 +22,8 @@ input[type=text]{padding:0 2px;}
 }
 #debug{
     position:absolute;
-    top:0;left:4px;
+    top:0;left:0px;
+    padding:0 4px;
 }
 #canvas{}
 #mainMenu,#worldList{z-index:1337;height:50%;top:25%;text-align:center;}

@@ -100,8 +100,10 @@ var init = function(createjs,Global){
     }
     
     p.spawn = function(x,y){
-        if(!this.world.entityContainer.contains(this)){
-            this.world.entityContainer.addChild(this);
+        if(!node){
+            if(!this.world.entityContainer.contains(this)){
+                this.world.entityContainer.addChild(this);
+            }
         }
         
         if(!(x&&y)){
@@ -119,8 +121,10 @@ var init = function(createjs,Global){
     }
     
     p.unspawn = function(){
-        if(this.world.entityContainer.contains(this)){
-            this.world.entityContainer.removeChild(this);
+        if(!node){
+            if(this.world.entityContainer.contains(this)){
+                this.world.entityContainer.removeChild(this);
+            }
         }
     }
     
@@ -249,7 +253,7 @@ var init = function(createjs,Global){
                     if(ySpeed<=0){ // if travellin upwards and there's shit above, stop dis shit
                         if( !(this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && !this.chkSolid(Cx,pTy) ){
                             // nudge character a bit if there ain't that much shit above
-                            if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw); }
+                            if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw -1); }
                             if(this.chkSolid(Lx,Ty) && !this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Lx) + this.tileW + hw); }
                         }else{
                             ySpeed = 0;

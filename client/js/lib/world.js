@@ -1,5 +1,5 @@
-define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map','shared/Item'],
-function(createjs,lib,Global,Tile,Player,Map,Item){
+define(['createjs','assets','lib/global','lib/tile','lib/player','lib/worldUi','shared/Map','shared/Item'],
+function(createjs,lib,Global,Tile,Player,worldUi,Map,Item){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -21,24 +21,29 @@ function(createjs,lib,Global,Tile,Player,Map,Item){
         this.outerMargin = 4;
         this.tileScale = this.map.getTileSize()/62;
         
-        this.mapContainer = this.addChild(new createjs.Container());
-        this.entityContainer = this.addChild(new createjs.Container());
-        this.overlay = this.addChild(new createjs.Container());
-        this.overlay.alpha = 0.8;
-        
         this.set('scale',function(v){
             that.view.scale = that.scaleX = that.scaleY = v;
         });
         this.get('scale',function(){
             return that.view.scale;
         });
+        this.get('scrW',function(){
+            return Global.stage.canvas.width / this.scale;
+        });
+        this.get('scrH',function(){
+            return Global.stage.canvas.height / this.scale;
+        });
+        
         this.view = {x:0,y:0,scale:1};
         this.lastUpdated = {x:0,y:0,scale:1};
         this.defaultTarget = new createjs.Container();
         this.scrollTarget = this.addChild(this.defaultTarget);
         this.scrollSensitivity = 0.36;
-        this.update = {rate:6,count:0}
-        //this.testTiles();
+        this.update = {rate:6,count:0};
+        
+        this.mapContainer = this.addChild(new createjs.Container());
+        this.entityContainer = this.addChild(new createjs.Container());
+        this.overlay = this.addChild(new worldUi(this));
     }
     
     var p = World.prototype = new createjs.Container();
@@ -54,10 +59,18 @@ function(createjs,lib,Global,Tile,Player,Map,Item){
             }
         }
         this.iScroll();
-        
-        // clean this up and take it somewhere else later
-        this.overlay.x = this.view.x - (this.scrollTarget.x/this.map.getTileSize());
-        this.overlay.y = this.view.y - (this.scrollTarget.y/this.map.getTileSize());
+        this.overlayTick();
+    }
+    
+    p.overlayTick = function(){
+        this.overlay.x = this.view.x - this.scrW * 0.5;
+        this.overlay.y = this.view.y - this.scrH * 0.5;
+        this.overlay.tick();
+    }
+    
+    p.generateMap = function(){
+        this.map.generate();
+        this.overlay.updateMap();
     }
     
     p.addPlayer = function(id,u){
@@ -362,26 +375,6 @@ function(createjs,lib,Global,Tile,Player,Map,Item){
             this.updateDisplay(x,y,scale,times);
         }
         
-    }
-    
-    p.createMapCanvas = function(map){
-        if(map){
-            var data = map.createCanvasData();
-            canvas = $('<canvas>').attr({id:map.name})[0];
-            canvas.width = data.width;
-            canvas.height = data.height;
-            context = canvas.getContext("2d");
-            image = context.getImageData(0, 0, canvas.width, canvas.height);
-            for(i=0;i<image.data.length;i++){
-                image.data[i] = data.data[i];
-            }
-            context.putImageData(image,0,0);
-            if(!this.overlay.map){
-                this.overlay.map = this.overlay.addChild(new createjs.Bitmap(canvas));
-            }else{
-                this.overlay.map.image = canvas;
-            }
-        }
     }
     
     return World;

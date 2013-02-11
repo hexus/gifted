@@ -114,11 +114,12 @@ function($,Global,Ui,Weapon,Bullet){
         showMap : {
             key:77,
             down:function(){
-                Global.world.createMapCanvas(Global.world.map);
-                Global.world.overlay.visible = true;
+                Global.world.overlay.fullmap.visible = true;
+                Global.world.overlay.minimap.visible = false;
             },
             up:function(){
-                Global.world.overlay.visible = false;
+                Global.world.overlay.fullmap.visible = false;
+                Global.world.overlay.minimap.visible = true;
             }
         }
     }
