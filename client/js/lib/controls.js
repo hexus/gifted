@@ -17,9 +17,15 @@ function($,Global,Ui,Weapon,Bullet){
         down : {
             key:83,
             down:function(){
+                if(!Global.player.state.isFlying){ // debug
+                    Global.player.hitbox.height = 30;
+                }
                 Global.player.state.moveDown = true;
             },
             up:function(){
+                if(!Global.player.state.isFlying){ // debug
+                    Global.player.hitbox.height = 60;
+                }
                 Global.player.state.moveDown = false;
             }
         },
@@ -77,22 +83,6 @@ function($,Global,Ui,Weapon,Bullet){
                 
             }
         },
-        createGun : {
-            key:71,
-            down:function(){
-                ps = Global.player.state;
-                Global.wtest = Global.world.addProjectile(new Weapon({
-                    wid:1,
-                    x:ps.x,
-                    y:ps.y,
-                    speed:10,
-                    angle:ps.aimAngle
-                }));
-            },
-            up:function(){
-                
-            }
-        },
         useLeft : {
             key:'mouse0',
             down:function(){
@@ -120,6 +110,31 @@ function($,Global,Ui,Weapon,Bullet){
             up:function(){
                 Global.world.overlay.fullmap.visible = false;
                 Global.world.overlay.minimap.visible = true;
+            }
+        },
+        createGun : {
+            key:71,
+            down:function(){
+                ps = Global.player.state;
+                Global.wtest = Global.world.addProjectile(new Weapon({
+                    wid:1,
+                    x:ps.x,
+                    y:ps.y,
+                    speed:10,
+                    angle:ps.aimAngle
+                }));
+            },
+            up:function(){
+                
+            }
+        },
+        fly : {
+            key:70,
+            down:function(){
+                Global.player.state.isFlying = !Global.player.state.isFlying;
+            },
+            up:function(){
+                
             }
         }
     }

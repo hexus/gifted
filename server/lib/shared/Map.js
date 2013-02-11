@@ -141,26 +141,85 @@ var init = function(){
     }
     
     // Miner class
-    m.miner = function(args){
+    var mapMiner = function(args){
         if(!args){args={};}
         var that = this;
-        this.direction = args.direction || 0;
-        this.life = args.life || 500;
         this.x = args.x || 0;
         this.y = args.y || 0;
-        this.turn = function(){
-            var decide = Math.random();
-            if(decide>0.5){
-                that.direction++;
-            }else{
-                that.direction--;
+        this.map = args.map || null;
+        this.life = args.life || 10000;
+        this.width = args.width || 0;
+        this.direction = args.direction || 0;
+        this.directionLimit = args.directionLimit || [0,1,2,3]; // >,v,<,^
+        this.turnChances = args.turnChances || {x:0.5,y:0.5}; // x/y
+        this.afterlife = args.afterlife || 100;
+        this.turn = function(force){
+            force = !!force;
+            var newDir = that.direction;
+            if(Math.random()<that.turnChances[newDir%2?'y':'x']){
+                if(Math.random()<0.5){
+                    newDir++;
+                }else{
+                    newDir--;
+                }
+                newDir = ((newDir % 4) + 4) % 4;
             }
-            that.direction = ((that.direction % 4) + 4) % 4;
+            if(that.directionLimit.indexOf(newDir)>-1){
+                that.direction = newDir;
+            }else{
+                that.turn(force);
+            }
+        }
+        this.move = function(){
+            switch(that.direction){
+                case 0: // Right
+                   that.x++;
+                   break;
+                case 1: // Down
+                   that.y++;
+                   break;
+                case 2: // Left
+                   that.x--;
+                   break;
+                case 3: // Up
+                   that.y--;
+                   break;
+           }
+            if(that.life>0){
+                that.life--;
+            }
+        }
+        this.clearTile = function(x,y){
+            var c = that.map.convertCords(x,y,true);
+            that.map.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
+        }
+        this.dig = function(){
+            width = that.width;
+            that.clearTile(that.x,that.y);
+            if(width>0){
+                for(var w=1;w<width+1;w++){
+                    switch(m.direction){
+                        case 0: case 2:
+                            that.clearTile(that.x,that.y-w);
+                            that.clearTile(that.x,that.y+w);
+                            break;
+                        case 1: case 3:
+                            that.clearTile(that.x-w,that.y);
+                            that.clearTile(that.x+w,that.y);
+                            break;
+                    }
+                }
+            }
+        }
+        this.age = function(){
+            that.life = that.afterlife;
         }
     }
     
     m.generate = function(){
-    	console.log('Generating world \'' + this.name + '\'');
+        if(node){
+    	   console.log('Generating world \'' + this.name + '\'');
+    	}
     	
     	var wSize = this.getWorldSize(),
             rSize = this.getRegionSize(),
@@ -217,8 +276,8 @@ var init = function(){
         
         this.setSpawn(lowSpawn.x,lowSpawn.y);
     	
-    	for(var i=lowSpawn.x-Math.round(lowSpawn.width/2);i<lowSpawn.x+Math.round(lowSpawn.width/2);i++){
-    	    for(var j=lowSpawn.y-Math.round(lowSpawn.height/2);j<lowSpawn.y+Math.round(lowSpawn.height/2);j++){
+    	for(var i=lowSpawn.x-Math.round(lowSpawn.width/2);i<lowSpawn.x+Math.floor(lowSpawn.width/2);i++){
+    	    for(var j=lowSpawn.y-Math.round(lowSpawn.height/2);j<lowSpawn.y+Math.floor(lowSpawn.height/2);j++){
     	        var c = this.convertCords(i,j,true);
     	        this.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
     	    }    	    
@@ -226,37 +285,39 @@ var init = function(){
     	
     	// Let's dig!
     	var miners = {};
-    	miners[0] = new this.miner({x:lowSpawn.x,y:lowSpawn.y,direction:3,life:10000});
-    	var mine = true;
+    	miners[0] = new mapMiner({
+    	    map:this, x:lowSpawn.x + Math.floor(lowSpawn.width/2)-1, y:lowSpawn.y, life:-1,
+    	    direction:0, directionLimit:[0,3], width:1, turnChances:{x:0.4,y:0.9}
+    	});
+    	miners[1] = new mapMiner({
+    	    map:this, x:lowSpawn.x - Math.ceil(lowSpawn.width/2), y:lowSpawn.y, life:-1,
+    	    direction:2, directionLimit:[2,3], width:1, turnChances:{x:0.4,y:0.9}
+    	});
+        miners[2] = new mapMiner({
+            map:this, x:lowSpawn.x, y:lowSpawn.y, life:50000,
+            direction:3, width:1, turnChances:{x:0.5,y:0.8}
+        });
     	
 	    for(m in miners){
 	        m = miners[m];
-	        while(m.life>0){
-    	        var newPos = {x:m.x,y:m.y};
-    	        switch(m.direction){
-    	            case 0: // Right
-    	               newPos.x++;
-    	               break;
-    	            case 1: // Down
-    	               newPos.y++;
-    	               break;
-    	            case 2: // Left
-    	               newPos.x--;
-    	               break;
-    	            case 3: // Up
-    	               newPos.y--;
-    	               break;
+	        while(m.life!=0){
+	            m.turn();
+    	        m.move();
+    	        if(!(m.y<0 || m.y>fullHeight)){
+    	            if((m.x < lowSpawn.x-lowSpawn.width/2 || m.x > lowSpawn.x+lowSpawn.width/2-1) ||
+    	            (m.y < lowSpawn.y-lowSpawn.height/2-1 || m.y > lowSpawn.y+lowSpawn.height/2+1)){
+    	                m.dig();
+        	        }
+    	        }else{
+    	            m.turn();
     	        }
-    	        var c = this.convertCords(newPos.x,newPos.y,true);
-    	        this.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
-    	        m.x = newPos.x;
-    	        m.y = newPos.y;
-    	        m.life--;
-    	        m.turn();
+    	        if(m.y < fullHeight - heights[m.x]){ // Reached surface
+    	            //m.life = 50;
+    	            m.age();
+    	        }
 	        }
     	}
-    	
-    	
+
     	// Done.
     }
     

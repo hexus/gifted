@@ -16,7 +16,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.state.Accel = 1;
         this.state.yLimit = 20;
         this.state.flySpeed = 20;
-        this.state.jumpStr = 14;
+        this.state.jumpStr = 12;
         
         this.upDown = false;
         this.jump = false;
@@ -163,7 +163,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         if(this.state.health>0){
             this.itemTick();
             with(this){
-                if(state.moveUp && state.onFloor && !upDown){
+                if(state.moveUp && state.onFloor && !upDown && !state.isFlying){
                     jump = true;
                     upDown = true;
                 }

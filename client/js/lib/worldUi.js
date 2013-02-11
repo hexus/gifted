@@ -36,7 +36,7 @@ function(createjs,lib,Global){
         var tSize = this.world.map.getTileSize();
         var wX = this.world.view.x;
         var wY = this.world.view.y;
-        var scale = this.minimapScale;// /this.world.scale;
+        var scale = this.minimapScale;
         var dimen = this.minimapSize/scale;
         var x = (wX/tSize) - (dimen/2);
         var y = (wY/tSize) - (dimen/2);
