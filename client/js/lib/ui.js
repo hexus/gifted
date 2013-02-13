@@ -52,7 +52,8 @@ function($,createjs,Global,Socket,Bullet,Weapon){
             }else{
                 dom.headwear_frame = player.char.head.wear.timeline.duration-1;
             }
-            player.char.head.wear.gotoAndStop(dom.headwear_frame);
+            player.setOutfit('headwear',dom.headwear_frame);
+            //player.char.head.wear.gotoAndStop(dom.headwear_frame);
         });
         
         $("#headwear_next").click(function(){
@@ -61,7 +62,8 @@ function($,createjs,Global,Socket,Bullet,Weapon){
             }else{
                 dom.headwear_frame = 0;
             }
-            player.char.head.wear.gotoAndStop(dom.headwear_frame);
+            player.setOutfit('headwear',dom.headwear_frame);
+            //player.char.head.wear.gotoAndStop(dom.headwear_frame);
         });
         
         $('#send').click(function(){

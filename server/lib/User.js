@@ -23,6 +23,7 @@ var User = function(args){
     this.state.isAimingRight = false;
     this.state.aimAngle = 0;
     this.state.aimDir = 1;
+    this.state.outfit = {headwear:0};
 }
 
 var p = User.prototype = new Character();

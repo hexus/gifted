@@ -41,6 +41,10 @@ function(createjs,lib,Global,Character){
         this.lastAnim = "";
         this.setAnim("static");
         
+        this.state.outfit = {
+            headwear:0
+        }
+        
         this.item = {
             left:0,
             right:0
@@ -99,6 +103,21 @@ function(createjs,lib,Global,Character){
                 char.gotoAndPlay(label);
                 lastAnim = label;
                 //setOutfit();
+            }
+        }
+    }
+    
+    p.setOutfit = function(part,value){
+        this.state.outfit[part] = value;
+        this.displayOutfit();
+    }
+    
+    p.displayOutfit = function(){
+        for(part in this.state.outfit){
+            switch(part){
+                case 'headwear':
+                    this.char.head.wear.gotoAndStop(this.state.outfit[part]);
+                    break;
             }
         }
     }
@@ -187,7 +206,7 @@ function(createjs,lib,Global,Character){
                 aimAngle = Math.atan2(this.mouseY,this.mouseX)*180/Math.PI;
                 aimAngle2 = Math.round(Math.atan2(this.mouseY,Math.abs(this.mouseX))*180/Math.PI)+90;
                 if(aimAngle<0){aimAngle+=360;}
-                Global.debugObj.out.aimAngle = aimAngle;
+                //Global.debugObj.out.aimAngle = aimAngle;
                 if(this.mouseX>0){
                     aimDir = 1;
                 }else{
@@ -244,6 +263,9 @@ function(createjs,lib,Global,Character){
             this.char.rarm_l.wpnUnder.gotoAndStop(this.getItem(rightArm));
             this.char.rarm_d.arm.l.wpnOver.gotoAndStop(this.getItem(rightArm));
             */
+            
+            // Outfit display
+            this.displayOutfit();
             
             // Animation
             if(onFloor){
