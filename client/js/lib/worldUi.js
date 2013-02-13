@@ -36,6 +36,8 @@ function(createjs,lib,Global){
         var tSize = this.world.map.getTileSize();
         var wX = this.world.view.x;
         var wY = this.world.view.y;
+        var tX = this.world.scrollTarget.x || wX;
+        var tY = this.world.scrollTarget.y || wY;
         var scale = this.minimapScale;
         var dimen = this.minimapSize/scale;
         var x = (wX/tSize) - (dimen/2);
@@ -48,14 +50,16 @@ function(createjs,lib,Global){
         
         this.minimap.scaleX = this.minimap.scaleY = scale;
         this.minimap.map.sourceRect = new createjs.Rectangle(x,y,dimen,dimen);
-        this.minimap.player.x = -(x - wX/tSize);
-        this.minimap.player.y = -(y - wY/tSize);
+        this.minimap.player.x = (tX/tSize) - x;
+        this.minimap.player.y = (tY/tSize) - y;
         
-        this.fullmap.scaleX = this.fullmap.scaleY = 1/this.world.scale;
+        this.fullmap.scaleX = this.fullmap.scaleY = this.world.scrW/this.mapCanvas.width;
         var fullWidth = this.world.map.getWorldSize().width * this.world.map.getRegionSize().width;
         var fullHeight = this.world.map.getWorldSize().height * this.world.map.getRegionSize().height;
-        this.fullmap.player.x = (wX/tSize - (fullWidth/2));
-        this.fullmap.player.y = (wY/tSize - (fullHeight/2));
+        this.fullmap.map.x = -this.mapCanvas.width/2; // Center
+        this.fullmap.map.y = -this.mapCanvas.height/2; // align
+        this.fullmap.player.x = (tX/tSize) - (fullWidth/2); // Player
+        this.fullmap.player.y = (tY/tSize) - (fullHeight/2); // pos
     }
     
     p.createMapCanvas = function(){
@@ -76,8 +80,6 @@ function(createjs,lib,Global){
     p.updateMap = function(){
         this.createMapCanvas();
         this.fullmap.map.image = this.mapCanvas;
-        this.fullmap.map.x = -this.mapCanvas.width/2;
-        this.fullmap.map.y = -this.mapCanvas.height/2;
         this.minimap.map.image = this.mapCanvas;
     }
     

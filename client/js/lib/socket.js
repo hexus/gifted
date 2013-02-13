@@ -134,7 +134,7 @@ function($,createjs,io,Global,Player){
                     break;
                 case "/wd": // World data (map)
                     world.map.expand(dstr);
-                    var p = world.map.getProperties();
+                    world.overlay.updateMap();
                     world.addPlayer(player.gid,player);
                     world.focusOn(player);
                     // Ui.hideLoadingScreen(); // Implement a loading overlay!
