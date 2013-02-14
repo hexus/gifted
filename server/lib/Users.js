@@ -91,7 +91,7 @@ p.sendTo = function(u){ // Send users to given user
         async.forEach(this.collection,function(i,c){
             if(i instanceof User){
                 if(i!=u){
-                    u.send('/uc ' + i.id + ' ' + i.name);
+                    i.sendTo(u);
                 }
             }else{
                 delete(this.collection[i.id]);

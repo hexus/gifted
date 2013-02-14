@@ -33,6 +33,12 @@ p.tick = function(){
     this.super_Character.tick.call(this);
 }
 
+p.getState = function(){
+    var state = JSON.parse(JSON.stringify(this.state));
+    state.id = this.id;
+    return state;
+}
+
 p.getPing = function(){
     return Math.round((this.pongTime - this.pingTime) / 2);
 }
@@ -61,6 +67,7 @@ p.send = function(str){
 p.sendTo = function(u){
     if(u instanceof User){
         u.send('/uc ' + this.id + ' ' + this.name);
+        u.send('/m ' + JSON.stringify(this.getState()));
     }
 }
 

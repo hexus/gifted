@@ -93,8 +93,6 @@ function($,createjs,io,Global,Player){
                     Ui.print(users[d[1]].name + ' connected');
                     if(Ui.selected()==='world'){
                         world.addPlayer(d[1],users[d[1]]);
-                        //world.users[d[1]] = users[d[1]];
-                        //users[d[1]].spawn();
                     }
                     break;
                 case "/ud":
@@ -105,11 +103,9 @@ function($,createjs,io,Global,Player){
                     delete(users[d[1]]);
                     break;
                 case "/us":
-                    if(d[1]!=id){
-                        var u = users[d[1]];
-                        if(u){
-                            u.spawn();
-                        }
+                    var u = users[d[1]];
+                    if(u){
+                        u.spawn();
                     }
                     break;
                 case "/uw": // other user moving to lobby or world
