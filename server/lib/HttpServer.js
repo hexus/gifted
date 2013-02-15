@@ -70,7 +70,7 @@ var server = http.createServer(function(request, response) { // One day this wil
         	response.end(JSON.stringify(resp));
         	break;
         case "socket":
-            response.end(config.socketUrl);
+            response.end(''+config.socketPort);
             break;
         case "port":
         	response.end(config.listenPort.toString());

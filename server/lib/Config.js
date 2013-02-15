@@ -37,10 +37,11 @@ c.worlds = c.static.worlds || [
 	"Buren"
 ];
 c.clientPath = c.basePath+"client/index.html";
-c.listenPort = env.PORT_GAME || 7000;
-c.listenPort2 = env.PORT_GAME2 || 7001;
-c.socketUrl = "//" + (env.DOTCLOUD_SERVER_GAME_HOST || "localhost") + ":" + (env.DOTCLOUD_SERVER_GAME2_PORT || c.listenPort2);
-c.clientUrl = "http://" + (env.DOTCLOUD_SERVER_HTTP_HOST || "localhost") + "/client/";
+c.listenPort = c.static.tcpPort || env.PORT_GAME || 7000;
+c.listenPort2 = c.static.websocketPort || env.PORT_GAME2 || 7001;
+c.socketPort = env.DOTCLOUD_SERVER_GAME2_PORT || c.listenPort2;
+c.socketUrl = "//" + (env.DOTCLOUD_SERVER_GAME_HOST || "localhost") + ":" + c.socketPort;
+c.clientUrl = "/client/";//"http://" + (env.DOTCLOUD_SERVER_HTTP_HOST || "localhost") + "/client/";
 c.motd = "Welcome to the new Gifted Server v" + c.version + "! Thanks for testing.";
 c.fps = 32;
 
