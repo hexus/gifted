@@ -1,6 +1,7 @@
 var empty = require('./Helpers').empty;
 var User = require('./User');
 var Users = require('./Users');
+var Projectiles = require('./Projectiles');
 var Map = require('./shared/Map');
 
 var Room = function(args){
@@ -11,6 +12,7 @@ var Room = function(args){
     this.map = args.map || new Map(this.name);
     this.lobbyUsers = new Users(); // Users in room lobby
     this.users = new Users(); // Users in room world
+    this.projectiles = new Projectiles();
     
     this.fps = args.fps || 32;
     this.step = 0;
@@ -26,6 +28,23 @@ module.exports = Room;
 p.tick = function(){
     this.step++;
     this.ontick.call(this);
+    
+    var projDeltas = {};
+    for(i in Projectiles){
+    	var proj = this.projectiles.get(i);
+    	if(this.step%3==0){
+    		var delta = proj.getStateDelta();
+    		deltaSize = 0;
+    		for(d in delta){
+    			deltaSize++;
+    		}
+    		if(deltaSize>0){
+    			delta.id = i;
+    			projDeltas[i] = delta;
+    		}
+    	}
+    }
+    
     for(u in this.users.get()){
         var user = this.users.get(u);
         if(user instanceof User){
@@ -38,9 +57,10 @@ p.tick = function(){
                         deltaSize++;
                     }
                     if(deltaSize>0){
-                        delta.id = user.id;
+                        delta.id = u;//user.id;
                         user.room.send('/m '+JSON.stringify(delta),user.inLobby,user);
                     }
+                    // if proj delta size > 0 send proj deltas
                 }
                 if(this.step%32==0){
                     this.ping();
