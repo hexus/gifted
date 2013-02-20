@@ -73,6 +73,9 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
             switch(i){
                 case "aimAngle":
                     care = this.state.isAiming;
+                    if(care){
+                        delta.aimAngle = this.state.aimAngle;
+                    }
                     break;
             }
             if(!care){
@@ -93,7 +96,9 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.setItem = function(side,item){
         side = !side ? 'r' : side;
         item = !item ? false : item;
-        item.owner = this;
+        if(item){
+            item.owner = this;
+        }
         var oldItem;
         switch(side){
             case 'l': 
@@ -134,14 +139,14 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.pickUpItem = function(side){
         side = !side ? 'r' : side;
         if(!this.getItem(side)){
-            var i = this.world.removeNearestItem(
+            var item = this.world.removeNearestItem(
                 this.state.x,
                 this.state.y,
                 Math.round(this.hitbox.width + this.hitbox.height / 2)
             );
-            if(i){
-                this.setItem(side,i);
-                return i;
+            if(item){
+                this.setItem(side,item);
+                return item;
             }
         }
         return false;
@@ -164,8 +169,8 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     p.pickUpOrDropItem = function(side){
         side = !side ? 'r' : side;
-        var i = this.getItem(side);
-        if(i){
+        var item = this.getItem(side);
+        if(item){
             this.dropItem(side);
         }else{
             this.pickUpItem(side);

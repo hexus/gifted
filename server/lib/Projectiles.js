@@ -16,7 +16,7 @@ p.get = function(id){
 
 p.add = function(i){
 	if(i instanceof Projectile){
-		i.pid = i.pid || ++count;
+		i.pid = !i.pid ? ++count : i.pid;
 		this.collection[i.pid] = i;
 		return i;
 	}
@@ -24,7 +24,7 @@ p.add = function(i){
 
 p.remove = function(i){
 	if(i instanceof Projectile){
-	    this.collection.splice(i.pid,1);
+	    this.collection[i.pid] = false;
 	}
 }
 

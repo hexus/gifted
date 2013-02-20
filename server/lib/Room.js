@@ -32,6 +32,7 @@ p.tick = function(){
     this.step++;
     this.ontick.call(this);
     
+    // Projectile tick and deltas
     var projDeltas = {};
     for(var i in this.projectiles.get()){
     	var proj = this.projectiles.get(i);
@@ -45,13 +46,10 @@ p.tick = function(){
         		}
         		if(projDeltaSize>0){
         			projDeltas[i] = projDelta;
-        			projDeltas[i].pid = proj.pid;
         		}
     	   }
     	}
     }
-    
-    
     
     for(u in this.users.get()){
         var user = this.users.get(u);
@@ -122,8 +120,7 @@ p.joinUser = function(u,lobby){
 				u.room.leaveUser(u);
 			}
 		}
-		u.room = this;
-		u.world = this;
+		u.room = u.world = this;
 		u.inLobby = lobby;
 		if(lobby){ // Deferred when joining world
             space.sendTo(u);
@@ -131,9 +128,11 @@ p.joinUser = function(u,lobby){
             u.spawn();
             for(var i in this.projectiles.get()){
                 var proj = this.projectiles.get(i);
-                var projState = JSON.parse(JSON.stringify(proj.state));
-                projState.pid = proj.pid;
-                u.send('/pc ' + JSON.stringify(projState));
+                if(proj){
+                    var projState = JSON.parse(JSON.stringify(proj.state));
+                    projState.pid = proj.pid;
+                    u.send('/pc ' + JSON.stringify(projState));
+                }
             }
 		}
 		space.add(u);
@@ -175,8 +174,7 @@ p.leaveUser = function(u){
 p.addProjectile = function(i){
     if(i instanceof Projectile){
         var proj = this.projectiles.add(i);
-        proj.world = this;
-        proj.room = this;
+        proj.room = proj.world = this;
         //var state = proj.state;
         //state.pid = proj.pid;
         //this.users.send('/pc ' + JSON.stringify(state));
@@ -199,7 +197,7 @@ p.getNearestItem = function(x,y,maxDistance){
     for(var i in this.projectiles.get()){
         var proj = this.projectiles.get(i);
         if(proj instanceof Item){
-            distance = Math.sqrt(Math.pow(proj.state.x - x,2) + Math.pow(proj.state.y - y,2));
+            var distance = Math.sqrt(Math.pow(proj.state.x - x,2) + Math.pow(proj.state.y - y,2));
             if(shortestDistance<0 || distance < shortestDistance){
                 if(distance < maxDistance || maxDistance === 0){
                     nearestItem = proj;

@@ -163,9 +163,14 @@ function(createjs,lib,Global,Character){
             // Arm rotation
             if(this.thisPlayer){
                 aimAngle = Math.atan2(this.mouseY,this.mouseX)*180/Math.PI;
-                aimAngle2 = Math.round(Math.atan2(this.mouseY,Math.abs(this.mouseX))*180/Math.PI)+90;
                 if(aimAngle<0){aimAngle+=360;}
-                //Global.debugObj.out.aimAngle = aimAngle;
+                //aimAngle2 = Math.round(Math.atan2(this.mouseY,Math.abs(this.mouseX))*180/Math.PI)+90;
+                //aimAngle3 = ((aimAngle % 180) + 270) % 180;
+                //aimAngle3 = (this.mouseX>0) ? aimAngle3 : 180-aimAngle3;
+                
+                //Global.debugObj.out.aimAngle2 = aimAngle2;
+                //Global.debugObj.out.aimAngle3 = aimAngle3;
+                //Global.debugObj.out.aimAngle4 = aimAngle4;
                 if(this.mouseX>0){
                     aimDir = 1;
                 }else{
@@ -173,6 +178,13 @@ function(createjs,lib,Global,Character){
                 }
                 //this.char.head.rotation = aimAngle*0.5;
             }
+            //var atemp = aimAngle>180 ? aimAngle-360 : aimAngle;
+            //aimAngle2 = this.mouseX>0 ? atemp+90 : (270-atemp) % 180;
+            aimAngle2 = aimDir>0 ? (aimAngle+90)%180 : (270-aimAngle) % 180; //aimAngle3
+            
+            Global.debugObj.out.aimAngle = aimAngle;
+            //Global.debugObj.out.aimAngle2 = aimAngle2;
+            //Global.debugObj.out.aimAngle3 = aimAngle3;
             
             this.char.scaleX = aimDir>0 ? 1 : -1;
             

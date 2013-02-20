@@ -58,24 +58,15 @@ h.handleData = function(data){ // Called in context of a User
                     this.state[i] = stateDelta[i];
                 }
             }
-            this.tick();
+            //this.tick();
             break;
         case "/itemTake":
             if(d[1]=='l' || d[1]=='r'){
-                var item = this.pickUpItem(d[1]);
-                if(item){
-                    var json = JSON.stringify({
-                        id:this.id,
-                        side:d[1],
-                        pid:item.pid
-                    });
-                    this.room.send("/itemTake " + json);
-                }
+                this.pickUpItem(d[1]);
             }
             break;
         case "/itemDrop":
             if(d[1]=='l' || d[1]=='r'){
-                this.room.send("/itemDrop " + this.id + " " + d[1]);
                 this.dropItem(d[1]);
             }
             break;
@@ -89,9 +80,6 @@ h.handleData = function(data){ // Called in context of a User
                 y:this.y
             });
             this.room.addProjectile(gun);
-            var state = JSON.parse(JSON.stringify(gun.state));
-            state.pid = gun.pid;
-            this.room.send('/pc ' + JSON.stringify(state));
             break;
         default:
           log = false;

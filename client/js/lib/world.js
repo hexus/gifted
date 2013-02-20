@@ -104,14 +104,14 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Item,Weapon){
         }
     }
     
-    p.recreateProjectile = function(s){
+    p.recreateProjectile = function(pid,s){
         var proj = false;
-        if(s.pid){
+        if(pid>0){
             switch(s.projType){
                 case 'item':
                     switch(s.itemType){
                         case 'weapon':
-                            proj = new Weapon({pid:s.pid,weaponId:s.weaponId});
+                            proj = new Weapon({pid:pid,weaponId:s.weaponId});
                             break;
                     }
                     break;

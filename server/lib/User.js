@@ -39,6 +39,24 @@ p.getState = function(){
     return state;
 }
 
+p.pickUpItem = function(side){
+    this.super_Character.pickUpItem.call(this,side);
+    var item = this.getItem(side);
+    if(item){
+        var json = JSON.stringify({
+            id:this.id,
+            side:side,
+            pid:item.pid
+        });
+        this.room.send("/itemTake " + json);
+    }
+}
+
+p.dropItem = function(side){
+    this.super_Character.dropItem.call(this,side);
+    this.room.send("/itemDrop " + this.id + " " + side);
+}
+
 p.getPing = function(){
     return Math.round((this.pongTime - this.pingTime) / 2);
 }
@@ -69,17 +87,16 @@ p.sendTo = function(u){
         u.send('/uc ' + this.id + ' ' + this.name);
         u.send('/m ' + JSON.stringify(this.getState()));
         for(var i=0;i<2;i++){
-            var side = i>0 ? 'l' : 'r';
-            if(u.getItem(side)){
-                var item = u.getItem(side);
-                if(item){
-                    var json = JSON.stringify({
-                        id:this.id,
-                        side:side,
-                        state:item.state
-                    });
-                    u.send("/itemGive " + json);
-                }
+            var side = i>0 ? 'r' : 'l';
+            var item = this.getItem(side);
+            if(item){
+                var json = JSON.stringify({
+                    id:this.id,
+                    side:side,
+                    pid:item.pid,
+                    state:item.state
+                });
+                u.send("/itemGive " + json);
             }
         }
     }

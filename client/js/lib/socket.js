@@ -161,8 +161,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                 case "/pc": // Create projectile
                     var s = JSON.parse(dstr);
                     var proj = false;
-                    console.log(s.pid);
-                    var proj = world.recreateProjectile(s);
+                    var proj = world.recreateProjectile(s.pid,s);
                     if(proj){
                         world.addProjectile(proj);
                     }
@@ -176,7 +175,10 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     var deltas = JSON.parse(dstr);
                     for(var pid in deltas){
                         var proj = world.projectiles[pid];
-                        for(i in deltas[pid]){
+                        if(!proj){ // create projectile if it doesn't exist
+                            proj = world.addProjectile(world.recreateProjectile(pid,deltas[pid]));
+                        }
+                        for(var i in deltas[pid]){
                             if(proj.state[i]!=null && typeof proj.state[i] === typeof deltas[pid][i]){
                                 proj.state[i] = deltas[pid][i];
                             }
@@ -186,7 +188,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     break;
                 case "/itemGive":
                     var json = JSON.parse(dstr);
-                    var item = world.recreateProjectile(json.state);
+                    var item = world.recreateProjectile(json.pid,json.state);
                     users[json.id].setItem(json.side,item);
                     break;
                 case "/itemTake":

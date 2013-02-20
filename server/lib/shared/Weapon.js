@@ -16,8 +16,6 @@ var init = function(Item,Bullet){
         this.state.itemType = 'weapon';
         this.state.weaponId = args.weaponId || 0;
         this.state.weaponDamage = 5;
-        //this.spray = 3;
-        //this.state.isFlying = true; // For testing
         if(!node){
             this.clipInfo = {
                 type:'weaponsRanged',
