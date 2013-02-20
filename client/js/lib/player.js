@@ -45,11 +45,6 @@ function(createjs,lib,Global,Character){
             headwear:0
         }
         
-        this.item = {
-            left:0,
-            right:0
-        }
-        
         this.setItemClips(); // hides
         
         this.get('thisPlayer',function(){
@@ -60,36 +55,6 @@ function(createjs,lib,Global,Character){
         });
         this.get('mouseY',function(){
             return Global.stage.mouseY/that.world.scale - (that.world.y/that.world.scale + that.y) + 10;
-        });
-        
-        var _aimAngle = 0,_aimDir = 1, _isAimingLeft = false, _isAimingRight = false;
-        
-        this.state.__defineGetter__('isAiming',function(){
-            return that.state.isAimingLeft || that.state.isAimingRight;
-        });
-        this.state.__defineGetter__('isAimingLeft',function(){
-            return _isAimingLeft;
-        });
-        this.state.__defineSetter__('isAimingLeft',function(v){
-            _isAimingLeft = v;
-        });
-        this.state.__defineGetter__('isAimingRight',function(){
-            return _isAimingRight;
-        });
-        this.state.__defineSetter__('isAimingRight',function(v){
-            _isAimingRight = v;
-        });
-        this.state.__defineGetter__('aimAngle',function(){
-            return Math.round(_aimAngle);
-        });
-        this.state.__defineSetter__('aimAngle',function(a){
-            _aimAngle = a;
-        });
-        this.state.__defineGetter__('aimDir',function(){
-            return _aimDir;
-        });
-        this.state.__defineSetter__('aimDir',function(d){
-            _aimDir = (d>0) ? 1 : -1;
         });
     }
     
@@ -188,13 +153,7 @@ function(createjs,lib,Global,Character){
         this.setItemClip('l',lItem);
         this.setItemClip('r',rItem);
     }
-    
-    p.useItem = function(side){
-        side = !side ? 'r' : side;
-        if((side=='l' && this.state.isAimingLeft) || (side=='r' && this.state.isAimingRight)){
-            this.super2.useItem.call(this,side);
-        }
-    }
+
     
     p.tick = function(){
         this.super2.tick.call(this);

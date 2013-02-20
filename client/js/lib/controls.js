@@ -1,6 +1,10 @@
 define(['jquery','lib/global','lib/ui','shared/Weapon','shared/Bullet'],
 function($,Global,Ui,Weapon,Bullet){
     
+    var connected = function(){
+        return Global.socket ? Global.socket.connected : false;
+    }
+    
     var Controls = {},
     keysDown={},
     keysLast={},
@@ -68,7 +72,19 @@ function($,Global,Ui,Weapon,Bullet){
         pickUpDropLeft : {
             key:90,
             down:function(){
-                Global.player.pickUpOrDropItem('l');
+                if(Global.player.getItem('l')){
+                    if(connected()){
+                        Global.socket.send('/itemDrop l');
+                    }else{
+                        Global.player.dropItem('l');
+                    }
+                }else{
+                    if(connected()){
+                        Global.socket.send('/itemTake l');
+                    }else{
+                        Global.player.pickUpItem('l');
+                    }
+                }
             },
             up:function(){
                 
@@ -77,7 +93,19 @@ function($,Global,Ui,Weapon,Bullet){
         pickUpDropRight : {
             key:67,
             down:function(){
-                Global.player.pickUpOrDropItem('r');
+                if(Global.player.getItem('r')){
+                    if(connected()){
+                        Global.socket.send('/itemDrop r');
+                    }else{
+                        Global.player.dropItem('r');
+                    }
+                }else{
+                    if(connected()){
+                        Global.socket.send('/itemTake r');
+                    }else{
+                        Global.player.pickUpItem('r');
+                    }
+                }
             },
             up:function(){
                 
@@ -86,19 +114,35 @@ function($,Global,Ui,Weapon,Bullet){
         useLeft : {
             key:'mouse0',
             down:function(){
-                Global.player.useItem('l');
+                if(connected()){
+                    Global.socket.send('/itemUse l 1');
+                }else{
+                    Global.player.useItem('l');
+                }
             },
             up:function(){
-                Global.player.stopUsingItem('l');
+                if(connected()){
+                    Global.socket.send('/itemUse l 0');
+                }else{
+                    Global.player.stopUsingItem('l');
+                }
             }
         },
         useRight : {
             key:'mouse2',
             down:function(){
-                Global.player.useItem('r');
+                if(connected()){
+                    Global.socket.send('/itemUse r 1');
+                }else{
+                    Global.player.useItem('r');
+                }
             },
             up:function(){
-                Global.player.stopUsingItem('r');
+                if(connected()){
+                    Global.socket.send('/itemUse r 0');
+                }else{
+                    Global.player.stopUsingItem('r');
+                }
             }
         },
         showMap : {
@@ -115,14 +159,18 @@ function($,Global,Ui,Weapon,Bullet){
         createGun : {
             key:71,
             down:function(){
-                ps = Global.player.state;
-                Global.wtest = Global.world.addProjectile(new Weapon({
-                    wid:1,
-                    x:ps.x,
-                    y:ps.y,
-                    speed:10,
-                    angle:ps.aimAngle
-                }));
+                if(connected()){
+                    Global.socket.send('/guntest');
+                }else{
+                    ps = Global.player.state;
+                    Global.wtest = Global.world.addProjectile(new Weapon({
+                        weaponId:0,
+                        x:ps.x,
+                        y:ps.y,
+                        //speed:10,
+                        //angle:ps.aimAngle
+                    }));
+                }
             },
             up:function(){
                 
@@ -169,14 +217,14 @@ function($,Global,Ui,Weapon,Bullet){
         // Mouse handlers
         $(window).mousedown(function(e){
             var k = e.button || e.which-1;
-            keysLast['mouse'+k] = keysDown['mouse'+k];
+            //keysLast['mouse'+k] = keysDown['mouse'+k];
             keysDown['mouse'+k] = true;
             //console.log(k);
         });
         
         $(window).mouseup(function(e){
             var k = e.button || e.which-1;
-            keysLast['mouse'+k] = keysDown['mouse'+k];
+            //keysLast['mouse'+k] = keysDown['mouse'+k];
             keysDown['mouse'+k] = false;
         });
         
@@ -188,7 +236,7 @@ function($,Global,Ui,Weapon,Bullet){
                 o = controlMap[c];
                 if(keysDown[o.key]){
                     if(typeof o.down === 'function'){
-                        if(o.repeat===true || keysDown[o.key]!=keysLast[o.key]){
+                        if(keysDown[o.key]!=keysLast[o.key] || o.repeat===true){
                             keysLast[o.key] = keysDown[o.key]; 
                             o.down();
                         }
@@ -196,6 +244,7 @@ function($,Global,Ui,Weapon,Bullet){
                 }else{
                     if(typeof o.up === 'function'){
                         if(keysDown[o.key]!=keysLast[o.key]){
+                            keysLast[o.key] = keysDown[o.key];
                             o.up();
                         }
                     }

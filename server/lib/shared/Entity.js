@@ -78,7 +78,7 @@ var init = function(createjs,Global){
     
     p.getDelta = function(a,b,readonly){ // Might be useful later
         var delta = {};
-        for(i in a){
+        for(var i in a){
             if(a[i]!=b[i]){
                 delta[i] = a[i];
             }
@@ -88,7 +88,7 @@ var init = function(createjs,Global){
     
     p.getStateDelta = function(readonly){
     	var delta = {};
-    	for(i in this.state){
+    	for(var i in this.state){
     		if(JSON.stringify(this.state[i])!=JSON.stringify(this.lastState[i])){
     			delta[i] = this.state[i];
     			if(!readonly){
@@ -96,6 +96,23 @@ var init = function(createjs,Global){
     			}
     		}
     	}
+    	
+    	// Filter out unnecessary state properties
+        var care;
+        for(i in delta){
+            care = true;
+            switch(i){
+                case "flyDir":
+                    care = this.state.isFlying;
+                    break;
+                case "gravCount": case "onFloor": case "angle":
+                    care = false;
+                    break;
+            }
+            if(!care){
+                delete(delta[i]);
+            }
+        }
     	return delta;
     }
     

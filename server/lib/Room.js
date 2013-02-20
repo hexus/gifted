@@ -1,7 +1,10 @@
 var empty = require('./Helpers').empty;
 var User = require('./User');
 var Users = require('./Users');
+var Projectile = require('./shared/Projectile');
 var Projectiles = require('./Projectiles');
+var Bullet = require('./shared/Bullet');
+var Item = require('./shared/Item');
 var Map = require('./shared/Map');
 
 var Room = function(args){
@@ -30,20 +33,25 @@ p.tick = function(){
     this.ontick.call(this);
     
     var projDeltas = {};
-    for(i in Projectiles){
+    for(var i in this.projectiles.get()){
     	var proj = this.projectiles.get(i);
-    	if(this.step%3==0){
-    		var delta = proj.getStateDelta();
-    		deltaSize = 0;
-    		for(d in delta){
-    			deltaSize++;
-    		}
-    		if(deltaSize>0){
-    			delta.id = i;
-    			projDeltas[i] = delta;
-    		}
+    	if(proj instanceof Projectile){
+        	proj.tick();
+        	if(this.step%3==0 && !(proj instanceof Bullet)){
+        		var projDelta = proj.getStateDelta();
+        		var projDeltaSize = 0;
+        		for(var d in projDelta){
+        			projDeltaSize++;
+        		}
+        		if(projDeltaSize>0){
+        			projDeltas[i] = projDelta;
+        			projDeltas[i].pid = proj.pid;
+        		}
+    	   }
     	}
     }
+    
+    
     
     for(u in this.users.get()){
         var user = this.users.get(u);
@@ -51,16 +59,25 @@ p.tick = function(){
             if(!user.inLobby){
                 user.tick();
                 if(this.step%3==0){
+                    // User delta
                     var delta = user.getStateDelta();
                     var deltaSize = 0;
-                    for(i in delta){
+                    for(var i in delta){
                         deltaSize++;
                     }
                     if(deltaSize>0){
                         delta.id = u;//user.id;
                         user.room.send('/m '+JSON.stringify(delta),user.inLobby,user);
                     }
-                    // if proj delta size > 0 send proj deltas
+                    
+                    // Projectile deltas
+                    var projDeltasSize = 0;
+                    for(var j in projDeltas){
+                        projDeltasSize++;
+                    }
+                    if(projDeltasSize>0){
+                        this.send('/pd '+JSON.stringify(projDeltas));
+                    }
                 }
                 if(this.step%32==0){
                     this.ping();
@@ -112,6 +129,12 @@ p.joinUser = function(u,lobby){
             space.sendTo(u);
 		}else{
             u.spawn();
+            for(var i in this.projectiles.get()){
+                var proj = this.projectiles.get(i);
+                var projState = JSON.parse(JSON.stringify(proj.state));
+                projState.pid = proj.pid;
+                u.send('/pc ' + JSON.stringify(projState));
+            }
 		}
 		space.add(u);
 		space.sendUser(u);
@@ -147,4 +170,50 @@ p.leaveUser = function(u){
 			space.send('/ud ' + u.id);
 		}
 	}
+}
+
+p.addProjectile = function(i){
+    if(i instanceof Projectile){
+        var proj = this.projectiles.add(i);
+        proj.world = this;
+        proj.room = this;
+        //var state = proj.state;
+        //state.pid = proj.pid;
+        //this.users.send('/pc ' + JSON.stringify(state));
+    }
+}
+
+p.removeProjectile = function(i){
+    if(i instanceof Projectile){
+        this.projectiles.remove(i);
+        if(!(i instanceof Bullet)){
+            //this.users.send('/pr ' + i.pid);
+        }
+    }
+}
+
+p.getNearestItem = function(x,y,maxDistance){
+    maxDistance = !maxDistance ? 0 : maxDistance;
+    shortestDistance = -1;
+    nearestItem = false;
+    for(i in this.projectiles.get()){
+        proj = this.projectiles.get(i);
+        if(proj instanceof Item){
+            distance = Math.sqrt(Math.pow(proj.state.x - x,2) + Math.pow(proj.state.y - y,2));
+            if(shortestDistance<0 || distance < shortestDistance){
+                if(distance < maxDistance || maxDistance === 0){
+                    nearestItem = proj;
+                }
+            }
+        }
+    }
+    return nearestItem;
+}
+
+p.removeNearestItem = function(x,y,maxDistance){
+    var item = this.getNearestItem(x,y,maxDistance);
+    if(item){
+        this.removeProjectile(item);
+    }
+    return item;
 }

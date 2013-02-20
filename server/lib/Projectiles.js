@@ -2,7 +2,7 @@ var async = require('async');
 var empty = require('./Helpers').empty;
 var Projectile = require('./shared/Projectile');
 
-var count = 0; // Count of rooms
+var count = 0; // Count of projectiles
 
 var Projectiles = function(args){
 	this.collection = [];
@@ -16,14 +16,15 @@ p.get = function(id){
 
 p.add = function(i){
 	if(i instanceof Projectile){
-		i.eid = i.eid || ++count;
-		this.collection[i.eid] = i;
+		i.pid = i.pid || ++count;
+		this.collection[i.pid] = i;
+		return i;
 	}
 }
 
 p.remove = function(i){
 	if(i instanceof Projectile){
-		delete[this.collection[i.eid]];
+	    this.collection.splice(i.pid,1);
 	}
 }
 

@@ -3,6 +3,8 @@ var global = require('./Global');
 var Room = require('./Room');
 var rooms = global.rooms;
 
+var Weapon = require('./shared/Weapon');
+
 var h = {};
 
 h.handleData = function(data){ // Called in context of a User
@@ -57,6 +59,35 @@ h.handleData = function(data){ // Called in context of a User
                 }
             }
             this.tick();
+            break;
+        case "/itemTake":
+            if(d[1]=='l' || d[1]=='r'){
+                var item = this.pickUpItem(d[1]);
+                if(item){
+                    var json = JSON.stringify({
+                        id:this.id,
+                        side:d[1],
+                        pid:item.pid
+                    });
+                    this.room.send("/itemTake " + json);
+                }
+            }
+            break;
+        case "/itemDrop":
+            if(d[1]=='l' || d[1]=='r'){
+                this.room.send("/itemDrop " + this.id + " " + d[1]);
+                this.dropItem(d[1]);
+            }
+            break;
+        case "/itemUse":
+            
+            break;
+        case "/guntest":
+            this.room.addProjectile(new Weapon({
+                weaponId:1,
+                x:this.x,
+                y:this.y
+            }));
             break;
         default:
           log = false;

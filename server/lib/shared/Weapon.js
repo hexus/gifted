@@ -5,23 +5,26 @@ var deps = ['shared/Item','shared/Bullet'];
 var init = function(Item,Bullet){
     
     if(node){
-        Projectile = require('./Item');
+        Item = require('./Item');
+        Bullet = require('./Bullet');
     }
     
     var Weapon = function(args){ // Further abstract?!
         if(!args){args={};}
         this.super3.constructor.call(this,args);
-        this.wid = args.wid || 0;
-        this.damage = 5;
-        this.spray = 3;
+        this.state.projType = 'item';
+        this.state.itemType = 'weapon';
+        this.state.weaponId = args.weaponId || 0;
+        this.state.weaponDamage = 5;
+        //this.spray = 3;
         //this.state.isFlying = true; // For testing
         if(!node){
             this.clipInfo = {
                 type:'weaponsRanged',
-                frame:this.wid
+                frame:this.state.weaponId
             }
             this.clip = this.addChild(new lib.weaponsRanged()); 
-            this.clip.gotoAndStop(this.wid);
+            this.clip.gotoAndStop(this.clipInfo.frame);
         }
     }
     
@@ -31,6 +34,9 @@ var init = function(Item,Bullet){
     
     p.tick = function(){
         this.super3.tick.call(this);
+        if(!node){
+            this.clip.gotoAndStop(this.clipInfo.frame);
+        }
     }
     
     p.sprayModifier = function(){ // two decimal places
@@ -43,9 +49,9 @@ var init = function(Item,Bullet){
             var ps = this.owner.state;
             var proj = new Bullet({
                 x:ps.x,
-                y:ps.y-10,
+                y:ps.y-15,
                 direction:ps.aimDir,
-                angle:ps.aimAngle+this.sprayModifier(),
+                angle:ps.aimAngle,//+this.sprayModifier(),
                 speed:40
             });
         }else{
@@ -54,7 +60,7 @@ var init = function(Item,Bullet){
                 x:ps.x,
                 y:ps.y,
                 direction:ps.direction,
-                angle:ps.angle+this.sprayModifier(),
+                angle:ps.angle,//+this.sprayModifier(),
                 speed:40
             });
         }

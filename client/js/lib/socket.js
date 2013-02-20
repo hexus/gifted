@@ -1,5 +1,5 @@
-define(['jquery','createjs','socket.io','lib/global','lib/player'],
-function($,createjs,io,Global,Player){
+define(['jquery','createjs','socket.io','lib/global','lib/player','shared/Item','shared/Weapon','shared/Bullet'],
+function($,createjs,io,Global,Player,Item,Weapon,Bullet){
     
     var Socket = {}, stage, world, player, users, Ui;
     
@@ -47,7 +47,7 @@ function($,createjs,io,Global,Player){
         });
         
         socket.on('disconnect',function(){
-            socket.disconnect();
+            //socket.disconnect();
             console.log('Socket.io disconnected!');
             if(typeof onDisconnect === 'function'){
                 onDisconnect();
@@ -144,7 +144,7 @@ function($,createjs,io,Global,Player){
                     d = data.split(" ",2);
                     Ui.print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
                     break;
-                case "/m":
+                case "/m": // Update player state (move)
                     var s = JSON.parse(dstr);
                     if(s.id){
                         if(world.users[s.id]){
@@ -156,6 +156,57 @@ function($,createjs,io,Global,Player){
                             }
                             user.tick(); // Keep physics in check immediately
                         }
+                    }
+                    break;
+                case "/pc": // Create projectile
+                    var s = JSON.parse(dstr);
+                    var proj = false;
+                    if(s.pid){
+                        var proj = world.recreateProjectile(s);
+                        if(proj){
+                            world.addProjectile(proj);
+                        }
+                    }
+                    break;
+                case "/pr":
+                    if(d[1]){
+                        world.removeProjectile(world.projectiles[d[1]]);
+                    }
+                    break;
+                case "/pd": // Update projectile state
+                    var deltas = JSON.parse(dstr);
+                    console.log(dstr);
+                    for(var pid in deltas){
+                        if(!world.projectiles[pid]){
+                            var restate = JSON.parse(JSON.stringify(deltas[pid]));
+                            restate.pid = pid;
+                            world.addProjectile(world.recreateProjectile(restate));
+                        }
+                        var proj = world.projectiles[pid];
+                        for(i in deltas[pid]){
+                            if(proj.state[i]!=null && typeof proj.state[i] === typeof deltas[pid][i]){
+                                proj.state[i] = deltas[pid][i];
+                            }
+                        }
+                        proj.tick();
+                    }
+                    break;
+                case "/itemGive":
+                    var json = JSON.parse(dstr);
+                    var item = world.recreateProjectile(json.state);
+                    users[json.id].setItem(json.side,item);
+                    break;
+                case "/itemTake":
+                    var json = JSON.parse(dstr);
+                    var item = world.projectiles[json.pid];
+                    if(item){
+                        users[json.id].setItem(json.side,item);
+                        world.removeProjectile(item);
+                    }
+                    break;
+                case "/itemDrop":
+                    if(d[2]=='l'||d[2]=='r'){
+                        users[d[1]].dropItem(d[2]);
                     }
                     break;
                 default:

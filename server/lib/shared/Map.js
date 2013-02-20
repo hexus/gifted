@@ -459,7 +459,7 @@ var init = function(){
         var height = this.getWorldSize().height * this.getRegionSize().height;
         var length = width*height*4;
         
-        console.log(flat.length*4,length,width,height);
+        //console.log(flat.length*4,length,width,height);
         data = [];
         for (i = 0; i < length; i+=4) {
             var tile = flat[i/4];

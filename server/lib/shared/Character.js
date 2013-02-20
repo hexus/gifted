@@ -29,29 +29,53 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
             left:false,
             right:false
         }
+        
+        var _aimAngle = 0,_aimDir = 1, _isAimingLeft = false, _isAimingRight = false;
+        
+        this.state.__defineGetter__('isAiming',function(){
+            return that.state.isAimingLeft || that.state.isAimingRight;
+        });
+        this.state.__defineGetter__('isAimingLeft',function(){
+            return _isAimingLeft;
+        });
+        this.state.__defineSetter__('isAimingLeft',function(v){
+            _isAimingLeft = v;
+        });
+        this.state.__defineGetter__('isAimingRight',function(){
+            return _isAimingRight;
+        });
+        this.state.__defineSetter__('isAimingRight',function(v){
+            _isAimingRight = v;
+        });
+        this.state.__defineGetter__('aimAngle',function(){
+            return Math.round(_aimAngle);
+        });
+        this.state.__defineSetter__('aimAngle',function(a){
+            _aimAngle = a;
+        });
+        this.state.__defineGetter__('aimDir',function(){
+            return _aimDir;
+        });
+        this.state.__defineSetter__('aimDir',function(d){
+            _aimDir = (d>0) ? 1 : -1;
+        });
     }
     
     var p = Character.prototype = new Entity(); // Inheritance
     p.super = Entity.prototype; // Superclass reference
     p.constructor = Character;
     
-    p.getStateDelta = function(readonly){ // Filter out unnecessary state properties
+    p.getStateDelta = function(readonly){ 
         var delta = this.super.getStateDelta.call(this,readonly);
-        var giveashit;
+        var care;
         for(i in delta){
-            giveashit = true;
+            care = true;
             switch(i){
                 case "aimAngle":
-                    giveashit = this.state.isAiming;
-                    break;
-                case "flyDir":
-                    giveashit = this.state.isFlying;
-                    break;
-                case "gravCount": case "onFloor": case "angle":
-                    giveashit = false;
+                    care = this.state.isAiming;
                     break;
             }
-            if(!giveashit){
+            if(!care){
                 delete(delta[i]);
             }
         }
@@ -69,17 +93,19 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.setItem = function(side,item){
         side = !side ? 'r' : side;
         item = !item ? false : item;
-        if(item){
-            item.owner = this;
-            switch(side){
-                case 'l': 
-                    this.item.left = item;
-                    break;
-                case 'r':
-                    this.item.right = item;
-                    break;
-            }
+        var oldItem;
+        item.owner = this;
+        switch(side){
+            case 'l': 
+                oldItem = this.item.left;
+                this.item.left = item;
+                break;
+            case 'r':
+                oldItem = this.item.right;
+                this.item.right = item;
+                break;
         }
+        return oldItem;
     }
     
     p.setItems = function(left,right){
@@ -87,28 +113,13 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.setItem('r',right);
     }
     
-    p.unsetItem = function(side){
-        side = !side ? 'r' : side;
-        var i = this.getItem(side);
-        if(i){
-            i.owner = false;
-            switch(side){
-                case 'l':
-                    this.item.left = false;
-                    break;
-                case 'r':
-                    this.item.right = false;
-                    break;
-            }
-        }
-        return i;
-    }
-    
     p.useItem = function(side){
         side = !side ? 'r' : side;
         i = this.getItem(side);
         if(i){
-            i.state.inUse = true;
+            if((side=='l' && this.state.isAimingLeft) || (side=='r' && this.state.isAimingRight)){
+                i.state.inUse = true;
+            }
         }
     }
     
@@ -122,26 +133,32 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     p.pickUpItem = function(side){
         side = !side ? 'r' : side;
-        var i = this.world.removeNearestItem(
-            this.state.x,
-            this.state.y,
-            Math.round(this.hitbox.width + this.hitbox.height / 2)
-        );
-        if(i){
-            this.setItem(side,i);
+        if(!this.getItem(side)){
+            var i = this.world.removeNearestItem(
+                this.state.x,
+                this.state.y,
+                Math.round(this.hitbox.width + this.hitbox.height / 2)
+            );
+            if(i){
+                this.setItem(side,i);
+                return i;
+            }
         }
+        return false;
     }
     
     p.dropItem = function(side){
         side = !side ? 'r' : side;
-        var i = this.unsetItem(side);
-        if(i){
-            i.state.inUse = false;
-            i.state.x = this.state.x;
-            i.state.y = this.state.y;
-            i.state.xSpeed = Math.round(this.state.xSpeed * 1.5);
-            i.state.ySpeed = Math.round(this.state.ySpeed * 1.5);
-            this.world.addProjectile(i);
+        var item = this.setItem(side); // unset
+        if(item){
+            item.state.owner = false;
+            item.state.inUse = false;
+            item.state.x = this.state.x;
+            item.state.y = this.state.y;
+            item.state.xSpeed = Math.round(this.state.xSpeed * 0.5);
+            item.state.ySpeed = Math.round(this.state.ySpeed * 0.5);
+            //i.lastState = {};
+            this.world.addProjectile(item);
         }
     }
     

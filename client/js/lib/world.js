@@ -1,5 +1,5 @@
-define(['createjs','assets','lib/global','lib/tile','lib/player','lib/worldUi','shared/Map','shared/Item'],
-function(createjs,lib,Global,Tile,Player,worldUi,Map,Item){
+define(['createjs','assets','lib/global','lib/tile','lib/player','lib/worldUi','shared/Map','shared/Projectile','shared/Item','shared/Weapon'],
+function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Item,Weapon){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -89,17 +89,38 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Item){
     }
     
     p.addProjectile = function(proj){
-        proj.pid = this.projcount;
-        this.projectiles[this.projcount] = proj;
-        //var added = this.addChild(proj);
-        proj.spawn();
-        this.projcount++;
-        return proj; 
+        if(proj instanceof Projectile){
+            proj.pid = proj.pid || ++this.projcount;
+            this.projectiles[proj.pid] = proj;
+            proj.spawn();
+            return proj;
+        }
     }
     
     p.removeProjectile = function(proj){
-        proj.unspawn();
-        delete(this.projectiles[proj.pid]);
+        if(proj instanceof Projectile){
+            proj.unspawn();
+            //delete(this.projectiles[proj.pid]);
+        }
+    }
+    
+    p.recreateProjectile = function(s){
+        var proj = false;
+        switch(s.projType){
+            case 'item':
+                switch(s.itemType){
+                    case 'weapon':
+                        proj = new Weapon({pid:s.pid,weaponId:s.weaponId});
+                        break;
+                }
+                break;
+        }
+        if(proj){
+            for(var i in s){
+                proj.state[i] = s[i];
+            }
+        }
+        return proj;
     }
     
     p.testItem = function(){
@@ -114,10 +135,10 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Item){
     
     p.getNearestItem = function(x,y,maxDistance){
         maxDistance = !maxDistance ? 0 : maxDistance;
-        shortestDistance = -1;
-        nearestItem = false;
+        var shortestDistance = -1;
+        var nearestItem = false;
         for(i in this.projectiles){
-            proj = this.projectiles[i];
+            var proj = this.projectiles[i];
             if(proj instanceof Item){
                 distance = Math.sqrt(Math.pow(proj.state.x - x,2) + Math.pow(proj.state.y - y,2));
                 if(shortestDistance<0 || distance < shortestDistance){

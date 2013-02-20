@@ -68,6 +68,20 @@ p.sendTo = function(u){
     if(u instanceof User){
         u.send('/uc ' + this.id + ' ' + this.name);
         u.send('/m ' + JSON.stringify(this.getState()));
+        for(var i=0;i<2;i++){
+            var side = i>0 ? 'l' : 'r';
+            if(u.getItem(side)){
+                var item = u.getItem(side);
+                if(item){
+                    var json = JSON.stringify({
+                        id:this.id,
+                        side:side,
+                        state:item.state
+                    });
+                    u.send("/itemGive " + json);
+                }
+            }
+        }
     }
 }
 

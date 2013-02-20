@@ -11,11 +11,13 @@ var init = function(Entity){ // Class definition
     var Projectile = function(args){
         if(!args){args={};}
         this.super.constructor.call(this,args); // Superclass constructor
+        this.pid = args.pid || 0;
         this.life = -1;
         this.damage = 10;
         this.rotateWithSpeed = true;
         this.hitbox.width = 4;
         this.hitbox.height = 4;
+        this.state.projType = 'abstract';
         this.state.xSpeed = 0;
         this.state.ySpeed = 0;
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 40;
@@ -27,8 +29,8 @@ var init = function(Entity){ // Class definition
             this.state.angle = args.angle || this.state.angle;
             var rads = this.state.angle * (Math.PI/180);
             this.state.flySpeed = args.speed || this.state.flySpeed;
-            this.state.xSpeed = Math.round(Math.cos(rads) * args.speed) || this.state.xSpeed; // Round these if
-            this.state.ySpeed = Math.round(Math.sin(rads) * args.speed) || this.state.ySpeed; // you get problems
+            this.state.xSpeed = Math.round(Math.cos(rads) * args.speed) || this.state.xSpeed;
+            this.state.ySpeed = Math.round(Math.sin(rads) * args.speed) || this.state.ySpeed;
             this.updateRotation();
         }
     }

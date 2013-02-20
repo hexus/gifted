@@ -4,10 +4,15 @@ var deps = ['createjs','assets','lib/global','shared/Projectile'];
 
 var init = function(createjs,lib,Global,Projectile){
     
+    if(node){
+        Projectile = require('./Projectile');
+    }
+    
     var Bullet = function(args){
         if(!node){this.initialize();}
         this.super2.constructor.call(this,args);
         var that = this;
+        this.state.projType = 'bullet';
         this.damage = 40;
         this.life = 60;
         this.isRubbishOnCollide = true;

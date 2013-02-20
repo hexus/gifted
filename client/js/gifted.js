@@ -115,6 +115,7 @@ function($,Global){
                         
                         ui.reset();
                         ui.showMain();
+                        socket.disconnect();
                         socket.reset();
                     }
                 }
