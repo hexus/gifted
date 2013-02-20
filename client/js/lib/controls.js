@@ -205,7 +205,7 @@ function($,Global,Ui,Weapon,Bullet){
             var k = e.keyCode || e.which;
             keysLast[k] = keysDown[k];
             keysDown[k] = true;
-            console.log(k);
+            //console.log(k);
         });
         
         $(window).keyup(function(e){

@@ -194,10 +194,10 @@ p.removeProjectile = function(i){
 
 p.getNearestItem = function(x,y,maxDistance){
     maxDistance = !maxDistance ? 0 : maxDistance;
-    shortestDistance = -1;
-    nearestItem = false;
-    for(i in this.projectiles.get()){
-        proj = this.projectiles.get(i);
+    var shortestDistance = -1;
+    var nearestItem = false;
+    for(var i in this.projectiles.get()){
+        var proj = this.projectiles.get(i);
         if(proj instanceof Item){
             distance = Math.sqrt(Math.pow(proj.state.x - x,2) + Math.pow(proj.state.y - y,2));
             if(shortestDistance<0 || distance < shortestDistance){

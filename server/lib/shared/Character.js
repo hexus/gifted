@@ -93,8 +93,8 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.setItem = function(side,item){
         side = !side ? 'r' : side;
         item = !item ? false : item;
-        var oldItem;
         item.owner = this;
+        var oldItem;
         switch(side){
             case 'l': 
                 oldItem = this.item.left;
@@ -151,7 +151,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         side = !side ? 'r' : side;
         var item = this.setItem(side); // unset
         if(item){
-            item.state.owner = false;
+            item.owner = false;
             item.state.inUse = false;
             item.state.x = this.state.x;
             item.state.y = this.state.y;

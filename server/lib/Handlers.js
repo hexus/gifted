@@ -83,11 +83,15 @@ h.handleData = function(data){ // Called in context of a User
             
             break;
         case "/guntest":
-            this.room.addProjectile(new Weapon({
-                weaponId:1,
+            var gun = new Weapon({
+                weaponId:0,
                 x:this.x,
                 y:this.y
-            }));
+            });
+            this.room.addProjectile(gun);
+            var state = JSON.parse(JSON.stringify(gun.state));
+            state.pid = gun.pid;
+            this.room.send('/pc ' + JSON.stringify(state));
             break;
         default:
           log = false;

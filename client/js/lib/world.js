@@ -106,18 +106,20 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Item,Weapon){
     
     p.recreateProjectile = function(s){
         var proj = false;
-        switch(s.projType){
-            case 'item':
-                switch(s.itemType){
-                    case 'weapon':
-                        proj = new Weapon({pid:s.pid,weaponId:s.weaponId});
-                        break;
+        if(s.pid){
+            switch(s.projType){
+                case 'item':
+                    switch(s.itemType){
+                        case 'weapon':
+                            proj = new Weapon({pid:s.pid,weaponId:s.weaponId});
+                            break;
+                    }
+                    break;
+            }
+            if(proj){
+                for(var i in s){
+                    proj.state[i] = s[i];
                 }
-                break;
-        }
-        if(proj){
-            for(var i in s){
-                proj.state[i] = s[i];
             }
         }
         return proj;
@@ -137,7 +139,7 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Item,Weapon){
         maxDistance = !maxDistance ? 0 : maxDistance;
         var shortestDistance = -1;
         var nearestItem = false;
-        for(i in this.projectiles){
+        for(var i in this.projectiles){
             var proj = this.projectiles[i];
             if(proj instanceof Item){
                 distance = Math.sqrt(Math.pow(proj.state.x - x,2) + Math.pow(proj.state.y - y,2));

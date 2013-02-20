@@ -161,11 +161,10 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                 case "/pc": // Create projectile
                     var s = JSON.parse(dstr);
                     var proj = false;
-                    if(s.pid){
-                        var proj = world.recreateProjectile(s);
-                        if(proj){
-                            world.addProjectile(proj);
-                        }
+                    console.log(s.pid);
+                    var proj = world.recreateProjectile(s);
+                    if(proj){
+                        world.addProjectile(proj);
                     }
                     break;
                 case "/pr":
@@ -175,13 +174,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     break;
                 case "/pd": // Update projectile state
                     var deltas = JSON.parse(dstr);
-                    console.log(dstr);
                     for(var pid in deltas){
-                        if(!world.projectiles[pid]){
-                            var restate = JSON.parse(JSON.stringify(deltas[pid]));
-                            restate.pid = pid;
-                            world.addProjectile(world.recreateProjectile(restate));
-                        }
                         var proj = world.projectiles[pid];
                         for(i in deltas[pid]){
                             if(proj.state[i]!=null && typeof proj.state[i] === typeof deltas[pid][i]){
