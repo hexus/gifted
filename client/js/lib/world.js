@@ -1,5 +1,5 @@
-define(['createjs','assets','lib/global','lib/tile','lib/player','lib/worldUi','shared/Map','shared/Projectile','shared/Item','shared/Weapon'],
-function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Item,Weapon){
+define(['createjs','assets','lib/global','lib/tile','lib/player','lib/worldUi','shared/Map','shared/Projectile','shared/Bullet','shared/Item','shared/Weapon'],
+function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weapon){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -100,7 +100,7 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Item,Weapon){
     p.removeProjectile = function(proj){
         if(proj instanceof Projectile){
             proj.unspawn();
-            //delete(this.projectiles[proj.pid]);
+            delete(this.projectiles[proj.pid]);
         }
     }
     
@@ -114,6 +114,9 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Item,Weapon){
                             proj = new Weapon({pid:pid,weaponId:s.weaponId});
                             break;
                     }
+                    break;
+                case 'bullet':
+                    proj = new Bullet({pid:pid});
                     break;
             }
             if(proj){

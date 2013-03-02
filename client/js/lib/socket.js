@@ -177,13 +177,16 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                         var proj = world.projectiles[pid];
                         if(!proj){ // create projectile if it doesn't exist
                             proj = world.addProjectile(world.recreateProjectile(pid,deltas[pid]));
-                        }
-                        for(var i in deltas[pid]){
-                            if(proj.state[i]!=null && typeof proj.state[i] === typeof deltas[pid][i]){
-                                proj.state[i] = deltas[pid][i];
+                        }else{
+                            for(var i in deltas[pid]){
+                                if(proj){
+                                    if(proj.state[i]!=null && typeof proj.state[i] === typeof deltas[pid][i]){
+                                        proj.state[i] = deltas[pid][i];
+                                    }
+                                }
                             }
+                            //proj.tick();
                         }
-                        proj.tick();
                     }
                     break;
                 case "/itemGive":

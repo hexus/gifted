@@ -263,12 +263,6 @@ function(createjs,lib,Global,Character){
     }
     
     p.itemTick = function(){
-        if(!this.state.isAimingLeft){
-            this.stopUsingItem('l');
-        }
-        if(!this.state.isAimingRight){
-            this.stopUsingItem('r');
-        }
         this.super2.itemTick.call(this);
     }
     

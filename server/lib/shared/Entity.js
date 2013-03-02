@@ -22,6 +22,7 @@ var init = function(createjs,Global){
             height  : args.height || 32
         };
         this.world = Global.world || args.world || null;
+        this.get('room',function(){return this.world;})
         this.get('map',function(){return this.world.map;});
         
         this.x = 0;

@@ -71,7 +71,13 @@ h.handleData = function(data){ // Called in context of a User
             }
             break;
         case "/itemUse":
-            
+            if(d[1]=='l' || d[1]=='r'){
+                if(d[2]==1){
+                    this.useItem(d[1]);
+                }else{
+                    this.stopUsingItem(d[1]);
+                }
+            }
             break;
         case "/guntest":
             var gun = new Weapon({

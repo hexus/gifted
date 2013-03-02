@@ -38,7 +38,10 @@ p.tick = function(){
     	var proj = this.projectiles.get(i);
     	if(proj instanceof Projectile){
         	proj.tick();
-        	if(this.step%3==0 && !(proj instanceof Bullet)){
+            if(proj.isRubbish){
+                this.removeProjectile(this.projectiles[proj]);
+            }
+        	if(this.step%3==0){
         		var projDelta = proj.getStateDelta();
         		var projDeltaSize = 0;
         		for(var d in projDelta){
@@ -184,9 +187,6 @@ p.addProjectile = function(i){
 p.removeProjectile = function(i){
     if(i instanceof Projectile){
         this.projectiles.remove(i);
-        if(!(i instanceof Bullet)){
-            //this.users.send('/pr ' + i.pid);
-        }
     }
 }
 

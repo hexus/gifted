@@ -226,6 +226,12 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     }
     
     p.itemTick = function(){
+        if(!this.state.isAimingLeft){
+            this.stopUsingItem('l');
+        }
+        if(!this.state.isAimingRight){
+            this.stopUsingItem('r');
+        }
         if(this.getItem('l')){
             this.getItem('l').tick();
         }
