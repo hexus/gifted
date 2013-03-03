@@ -10,7 +10,7 @@ var init = function(Entity){ // Class definition
 
     var Projectile = function(args){
         if(!args){args={};}
-        this.super.constructor.call(this,args); // Superclass constructor
+        this.super_Entity.constructor.call(this,args); // Superclass constructor
         this.pid = args.pid || 0;
         this.life = -1;
         this.damage = 10;
@@ -22,11 +22,9 @@ var init = function(Entity){ // Class definition
         this.state.ySpeed = 0;
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 40;
         this.state.direction = 1;
-        this.state.angle = 0;
         
         if(args){
             this.state.direction = args.direction || this.state.direction;
-            this.state.angle = args.angle || this.state.angle;
             var rads = this.state.angle * (Math.PI/180);
             this.state.flySpeed = args.speed || this.state.flySpeed;
             this.state.xSpeed = Math.round(Math.cos(rads) * args.speed) || this.state.xSpeed;
@@ -36,11 +34,11 @@ var init = function(Entity){ // Class definition
     }
     
     var p = Projectile.prototype = new Entity(); // Inheritance
-    p.super = Entity.prototype; // Superclass reference
+    p.super_Entity = Entity.prototype; // Superclass reference
     p.constructor = Projectile;
     
     p.tick = function(){
-        this.super.tick.call(this);
+        this.super_Entity.tick.call(this);
         if(this.life===0){
             this.onDeath();
         }

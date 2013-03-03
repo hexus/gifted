@@ -1,4 +1,4 @@
-(function(){ // Closure
+(function(){
 var node = typeof window === 'undefined'; // Node.js test
 var deps = ['lib/foo','lib/bar']; // RequireJS dependencies
 

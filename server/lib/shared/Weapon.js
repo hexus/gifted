@@ -52,7 +52,6 @@ var init = function(Item,Bullet){
                 angle:ps.aimAngle,//+this.sprayModifier(),
                 speed:40
             });
-            console.log(this.owner);
         }else{
             var ps = this.state;
             var proj = new Bullet({

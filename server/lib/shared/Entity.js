@@ -22,11 +22,12 @@ var init = function(createjs,Global){
             height  : args.height || 32
         };
         this.world = Global.world || args.world || null;
-        this.get('room',function(){return this.world;})
-        this.get('map',function(){return this.world.map;});
-        
-        this.x = 0;
-        this.y = 0;
+        this.get('room',function(){return that.world;})
+        this.get('map',function(){return that.world.map;});
+        this.get('tileH',function(){return that.map.getTileSize();});
+        this.get('tileW',function(){return that.map.getTileSize();});
+        this.get('gravity',function(){return gravity;});
+        this.get('gravSpeed',function(){return gravSpeed;});
         
         this.state = {
             x : args.x || 0,
@@ -39,7 +40,7 @@ var init = function(createjs,Global){
             yOffset : 0,
             Accel : 1,
             direction : 1,
-            angle: 0,
+            angle: args.angle || 0,
             jumpStr : 12,
             onFloor : false,
             isFlying : false,
@@ -50,21 +51,17 @@ var init = function(createjs,Global){
         
         this.lastState = {};
         
+        this.get('x',function(){return that.state.x;});
+        this.set('x',function(v){that.state.x=v;});
+        this.get('y',function(){return that.state.y;});
+        this.set('y',function(v){that.state.y=v;});
+        
         this.rotateWithSpeed = false;
         this.hasCollided = false;
         this.isRubbish = false;
         this.isRubbishOnCollide = false;
         
         this.effects = {};
-        
-        this.get('x',function(){return that.state.x;});
-        this.set('x',function(v){that.state.x=v;});
-        this.get('y',function(){return that.state.y;});
-        this.set('y',function(v){that.state.y=v;});
-        this.get('tileH',function(){return that.map.getTileSize();});
-        this.get('tileW',function(){return that.map.getTileSize();});
-        this.get('gravity',function(){return gravity;});
-        this.get('gravSpeed',function(){return gravSpeed;});
         
         if(Global.debug){
             this.hitboxShape = false;
@@ -106,7 +103,7 @@ var init = function(createjs,Global){
                 case "flyDir":
                     care = this.state.isFlying;
                     break;
-                case "gravCount": case "onFloor": case "angle":
+                case "gravCount": case "onFloor":
                     care = false;
                     break;
             }
@@ -147,6 +144,7 @@ var init = function(createjs,Global){
     }
     
     p.c2 = function(v, Y){ // Returns uncollided coordinate (ie coordinate of tile)
+        this.hasCollided = true;
         var tSize = this.tileW; if(Y){tSize=this.tileH;}
         return Math.floor(v/tSize) * tSize;
     }
@@ -173,7 +171,7 @@ var init = function(createjs,Global){
             
             if(leTile!=null){
                 if(this.map.getSolidArr().indexOf(leTile)>-1){ // Check map's solid array
-                    this.hasCollided = true;
+                    //this.hasCollided = true;
                     return true;
                 }else{
                     return false;
@@ -218,7 +216,11 @@ var init = function(createjs,Global){
                     pTy = Ty+ySpeed;
                     pBy = By+ySpeed;
                 }else{
-                    pTy = Ty-jumpStr;
+                    if(onFloor){
+                        pTy = Ty-jumpStr;
+                    }else{
+                        pTy = Ty-Accel;
+                    }
                     pBy = By+Accel; // jumpStr
                     if(isFlying){
                         pTy = Ty-Accel; // flyspeed
@@ -280,6 +282,7 @@ var init = function(createjs,Global){
                     }
                 }else{ // On a surface
                     onFloor = true;
+                    gravCount = 0;
                     if(ySpeed>=0 || (isFlying && ySpeed<0)){ // if fallin and there's shit below, land on dat shit
                         if((this.chkSolid(cLx,pBy) || this.chkSolid(cRx,pBy)) || this.chkSolid(Cx,pBy)){
                             y = Math.floor(this.c2(pBy) - hh);
@@ -389,8 +392,8 @@ var init = function(createjs,Global){
     }
     
     p.updateRotation = function(){
-        if(this.rotateWithSpeed){
-            with(this.state){
+        with(this.state){
+            if(this.rotateWithSpeed){
                 angle = Math.atan2(ySpeed,xSpeed)*180/Math.PI;
                 this.rotation = direction>0 ? angle : angle-180;
             }

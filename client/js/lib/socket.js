@@ -165,6 +165,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     if(proj){
                         world.addProjectile(proj);
                     }
+                    proj.tick();
                     break;
                 case "/pr":
                     if(d[1]){

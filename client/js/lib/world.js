@@ -123,6 +123,7 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weap
                 for(var i in s){
                     proj.state[i] = s[i];
                 }
+                proj.updateRotation();
             }
         }
         return proj;

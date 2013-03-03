@@ -39,17 +39,18 @@ p.tick = function(){
     	if(proj instanceof Projectile){
         	proj.tick();
             if(proj.isRubbish){
-                this.removeProjectile(this.projectiles[proj]);
-            }
-        	if(this.step%3==0){
-        		var projDelta = proj.getStateDelta();
-        		var projDeltaSize = 0;
-        		for(var d in projDelta){
-        			projDeltaSize++;
-        		}
-        		if(projDeltaSize>0){
-        			projDeltas[i] = projDelta;
-        		}
+                this.removeProjectile(proj);
+            }else{
+            	if(this.step%3==0 && !(proj instanceof Bullet)){
+            		var projDelta = proj.getStateDelta();
+            		var projDeltaSize = 0;
+            		for(var d in projDelta){
+            			projDeltaSize++;
+            		}
+            		if(projDeltaSize>0){
+            			projDeltas[i] = projDelta;
+            		}
+        	   }
     	   }
     	}
     }
@@ -178,15 +179,20 @@ p.addProjectile = function(i){
     if(i instanceof Projectile){
         var proj = this.projectiles.add(i);
         proj.room = proj.world = this;
-        //var state = proj.state;
-        //state.pid = proj.pid;
-        //this.users.send('/pc ' + JSON.stringify(state));
+        if(!(proj instanceof Item)){
+            var state = proj.state;
+            state.pid = proj.pid;
+            this.users.send('/pc ' + JSON.stringify(state));
+        }
     }
 }
 
 p.removeProjectile = function(i){
     if(i instanceof Projectile){
         this.projectiles.remove(i);
+        if(!(i instanceof Item)){
+            
+        }
     }
 }
 

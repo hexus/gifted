@@ -10,7 +10,7 @@ var init = function(createjs,lib,Global,Projectile){
     
     var Bullet = function(args){
         if(!node){this.initialize();}
-        this.super2.constructor.call(this,args);
+        this.super_Projectile.constructor.call(this,args);
         var that = this;
         this.state.projType = 'bullet';
         this.damage = 40;
@@ -25,11 +25,18 @@ var init = function(createjs,lib,Global,Projectile){
     }
        
     var p = Bullet.prototype = new Projectile();
-    p.super2 = Projectile.prototype;
+    p.super_Projectile = Projectile.prototype;
     p.constructor = Bullet;
 
     p.tick = function(){
-        this.super2.tick.call(this);
+        this.super_Projectile.tick.call(this);
+    }
+    
+    p.updateRotation = function(){
+        this.super_Projectile.updateRotation.call(this);
+        with(this.state){
+            this.rotation = direction>0 ? angle : angle-180;
+        }
     }
    
     return Bullet; 
