@@ -17,6 +17,7 @@ var init = function(createjs,lib,Global,Projectile){
         this.life = 60;
         this.isRubbishOnCollide = true;
         this.state.isFlying = true;
+        this.alpha = 0;
         if(!node){
             this.scaleX = this.state.direction;
             this.clip = this.addChild(new lib.mcProjectile());
@@ -30,6 +31,9 @@ var init = function(createjs,lib,Global,Projectile){
 
     p.tick = function(){
         this.super_Projectile.tick.call(this);
+        if(this.alpha<1){
+            this.alpha += 0.1;
+        }
     }
     
     p.updateRotation = function(){

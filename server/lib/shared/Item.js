@@ -20,7 +20,7 @@ var init = function(lib,Projectile){
         
         // Item state additions:
         this.state.inUse = false;
-        this.state.coolDownTime = 8;
+        this.state.coolDownTime = 0;
         this.state.chargeTime = 0;
         // Self-maintained:
         this.state.coolDown = 0;

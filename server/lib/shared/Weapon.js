@@ -16,6 +16,7 @@ var init = function(Item,Bullet){
         this.state.itemType = 'weapon';
         this.state.weaponId = args.weaponId || 0;
         this.state.weaponDamage = 5;
+        this.state.coolDownTime = 7;
         if(!node){
             this.clipInfo = {
                 type:'weaponsRanged',
@@ -23,6 +24,8 @@ var init = function(Item,Bullet){
             }
             this.clip = this.addChild(new lib.weaponsRanged()); 
             this.clip.gotoAndStop(this.clipInfo.frame);
+            window.wep = this.clip;
+            this.clip.muzzle.visible = false;
         }
     }
     

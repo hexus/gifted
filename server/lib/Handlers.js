@@ -81,7 +81,7 @@ h.handleData = function(data){ // Called in context of a User
             break;
         case "/guntest":
             var gun = new Weapon({
-                weaponId:0,
+                weaponId:'pistol',
                 x:this.x,
                 y:this.y
             });

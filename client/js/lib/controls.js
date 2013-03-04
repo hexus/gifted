@@ -164,7 +164,7 @@ function($,Global,Ui,Weapon,Bullet){
                 }else{
                     ps = Global.player.state;
                     Global.wtest = Global.world.addProjectile(new Weapon({
-                        weaponId:0,
+                        weaponId:'pistol',
                         x:ps.x,
                         y:ps.y,
                         //speed:10,

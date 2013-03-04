@@ -118,12 +118,16 @@ function(createjs,lib,Global,Character){
         this.setPart(part,side,'l',!vis);
     }
     
-    p.setItemClip = function(side,item){
-        side = !side ? 'r' : side;
-        var clips = {
+    p.itemClips = function(){
+        return {
             'l':[this.char.larm_l.itemUnder,this.char.larm_d.arm.l.itemUnder],
             'r':[this.char.rarm_l.itemOver,this.char.rarm_d.arm.l.itemOver]
         }
+    }
+    
+    p.setItemClip = function(side,item){
+        side = !side ? 'r' : side;
+        var clips = this.itemClips();
         if(item){
             if(item.clipInfo){
                 var itemType = item.clipInfo.type;
@@ -136,6 +140,9 @@ function(createjs,lib,Global,Character){
                             clip.children[i].visible = false;
                         }
                         clip[itemType].visible = true;
+                        if(itemType=='weaponsRanged'){
+                            clip[itemType].muzzle.visible = false;
+                        }
                     }
                 }
             }
@@ -153,7 +160,6 @@ function(createjs,lib,Global,Character){
         this.setItemClip('l',lItem);
         this.setItemClip('r',rItem);
     }
-
     
     p.tick = function(){
         this.super2.tick.call(this);
@@ -212,8 +218,25 @@ function(createjs,lib,Global,Character){
             }
             
             // Item display
+            var clips = this.itemClips();
+            
             this.setItemClip(leftArm,this.getItem('l'));
             this.setItemClip(rightArm,this.getItem('r'));
+            
+            if(this.getItem('l')){
+                var itemType = this.getItem('l').clipInfo.type;
+                if(itemType=='weaponsRanged'){
+                    if(this.getItem('l').state.inUse && this.getItem('l').state.coolDown==this.getItem('l').state.coolDownTime){
+                        for(c in clips[leftArm]){
+                            clips[leftArm][c][itemType].muzzle.visible = true;
+                        }
+                    }else{
+                        for(c in clips[leftArm]){
+                            clips[leftArm][c][itemType].muzzle.visible = false;
+                        }
+                    }
+                }
+            }
             /*
             this.char.larm_l.wpnUnder.gotoAndStop(this.getItem(leftArm));
             this.char.larm_d.arm.l.wpnUnder.gotoAndStop(this.getItem(leftArm));
