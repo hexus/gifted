@@ -179,8 +179,8 @@ p.addProjectile = function(i){
     if(i instanceof Projectile){
         var proj = this.projectiles.add(i);
         proj.room = proj.world = this;
-        if(!(proj instanceof Item)){
-            var state = proj.state;
+        if(!(proj instanceof Item && proj.owner)){
+            var state = JSON.parse(JSON.stringify(proj.state));
             state.pid = proj.pid;
             this.users.send('/pc ' + JSON.stringify(state));
         }
@@ -190,8 +190,8 @@ p.addProjectile = function(i){
 p.removeProjectile = function(i){
     if(i instanceof Projectile){
         this.projectiles.remove(i);
-        if(!(i instanceof Item)){
-            
+        if(!(i instanceof Item && i.owner) && !(i instanceof Bullet)){
+            this.users.send('/pd ' + i.pid);
         }
     }
 }

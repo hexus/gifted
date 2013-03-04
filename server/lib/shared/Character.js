@@ -99,14 +99,12 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         if(item){
             item.owner = this;
         }
-        var oldItem;
+        var oldItem = this.getItem(side);
         switch(side){
             case 'l': 
-                oldItem = this.item.left;
                 this.item.left = item;
                 break;
             case 'r':
-                oldItem = this.item.right;
                 this.item.right = item;
                 break;
         }
@@ -139,13 +137,14 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.pickUpItem = function(side){
         side = !side ? 'r' : side;
         if(!this.getItem(side)){
-            var item = this.world.removeNearestItem(
+            var item = this.world.getNearestItem(
                 this.state.x,
                 this.state.y,
                 Math.round(this.hitbox.width + this.hitbox.height / 2)
             );
             if(item){
                 this.setItem(side,item);
+                this.world.removeProjectile(item);
                 return item;
             }
         }
@@ -154,17 +153,17 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     p.dropItem = function(side){
         side = !side ? 'r' : side;
-        var item = this.setItem(side); // unset
-        if(item){
-            item.owner = false;
+        var item = this.getItem(side);
+        if(item){            
             item.state.inUse = false;
             item.state.x = this.state.x;
             item.state.y = this.state.y;
             item.state.xSpeed = Math.round(this.state.xSpeed * 0.5);
             item.state.ySpeed = Math.round(this.state.ySpeed * 0.5);
-            //i.lastState = {};
             this.world.addProjectile(item);
+            item.owner = false;
         }
+        this.setItem(side); // unset
     }
     
     p.pickUpOrDropItem = function(side){

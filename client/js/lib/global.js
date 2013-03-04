@@ -4,7 +4,8 @@ function(){
         debug:true, // Debug mode
         debugObj:{  // Debug output object
             out:{},
-            showHitboxes:false
+            showHitboxes:false,
+            showRays:false
         }, 
         ticker:null,// CreateJS Ticker
         stage:null, // CreateJS Stage

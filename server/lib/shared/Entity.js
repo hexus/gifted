@@ -63,8 +63,9 @@ var init = function(createjs,Global){
         
         this.effects = {};
         
-        if(Global.debug){
+        if(!node && Global.debug){
             this.hitboxShape = false;
+            this.rayPoints = this.addChild(new createjs.Container());
         }
     }
     
@@ -143,6 +144,35 @@ var init = function(createjs,Global){
         }
     }
     
+    // Bresenham's line algorithm
+    p.getRay = function(){
+        var x0 = this.x;
+        var y0 = this.y;
+        var x1 = x0 + this.state.xSpeed;
+        var y1 = y0 + this.state.ySpeed;
+        
+        var dx = Math.abs(x1-x0);
+        var dy = Math.abs(y1-y0);
+        var sx = x0 < x1 ? 1 : -1;
+        var sy = y0 < y1 ? 1 : -1;
+        var err = dx-dy;
+        
+        var ray = [];
+        while(x0!=x1 || y0!=y1){
+            ray.push([x0,y0]);
+            var e2 = 2*err;
+            if(e2>-dy){
+                err = err - dy;
+                x0 += sx;
+            }
+            if(e2<dx){
+                err = err + dx;
+                y0 += sy;
+            }
+        }
+        return ray;
+    }
+    
     p.c2 = function(v, Y){ // Returns uncollided coordinate (ie coordinate of tile)
         this.hasCollided = true;
         var tSize = this.tileW; if(Y){tSize=this.tileH;}
@@ -187,13 +217,32 @@ var init = function(createjs,Global){
     
     p.tick = function(){
         
-        if(Global.debug && Global.debugObj.showHitboxes && !this.hitboxShape){
-            var g = new createjs.Graphics();
-            g.beginStroke("#F0F").beginFill("#F44").drawRect(-this.hitbox.width*0.5,-this.hitbox.height*0.5,this.hitbox.width,this.hitbox.height);
-            var s = new createjs.Shape(g);
-            s.alpha = 0.5;
-            s.x = s.y = 0;
-            this.hitboxShape = this.addChild(s);
+        if(!node && Global.debug){
+            if(Global.debugObj.showHitboxes && !this.hitboxShape){
+                var g = new createjs.Graphics();
+                g.beginStroke("#F0F").beginFill("#F44").drawRect(-this.hitbox.width*0.5,-this.hitbox.height*0.5,this.hitbox.width,this.hitbox.height);
+                var s = new createjs.Shape(g);
+                s.alpha = 0.5;
+                s.x = s.y = 0;
+                this.hitboxShape = this.addChild(s);
+            }
+            
+            // rays
+            if(Global.debugObj.showRays){
+                this.rayPoints.removeAllChildren();
+                this.rayPoints.rotation = this.scaleX>0 ? -this.rotation : this.rotation;
+                this.rayPoints.scaleX = -this.scaleX;
+                this.rayPoints.scaleY = -this.scaleY;
+                var ray = this.getRay();
+                for(var i=0;i<ray.length;i++){
+                    var g = new createjs.Graphics();
+                    g.f("#F44").dc(0,0,1);
+                    var s = new createjs.Shape(g);
+                    s.x = this.x-ray[i][0];
+                    s.y = this.y-ray[i][1];
+                    this.rayPoints.addChild(s);
+                }
+            }
         }
         
         if(this.life>0){
@@ -286,10 +335,11 @@ var init = function(createjs,Global){
                     if(ySpeed>=0 || (isFlying && ySpeed<0)){ // if fallin and there's shit below, land on dat shit
                         if((this.chkSolid(cLx,pBy) || this.chkSolid(cRx,pBy)) || this.chkSolid(Cx,pBy)){
                             y = Math.floor(this.c2(pBy) - hh);
+                            ySpeed = 0;
                         }
                     }
                     if((!isFlying && ySpeed!=0) || (isFlying && ySpeed>0)){
-                        ySpeed = 0;
+                        //ySpeed = 0;
                     }
                     if(ySpeed<0){ // Move up if there's not too much in the way above
                         if((this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && this.chkSolid(Cx,pTy)){
