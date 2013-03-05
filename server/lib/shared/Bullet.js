@@ -1,11 +1,13 @@
 (function(){
 var node = typeof window === 'undefined';
-var deps = ['createjs','assets','lib/global','shared/Projectile'];
+var deps = ['createjs','assets','lib/global','shared/Entity','shared/Projectile','shared/Effect'];
 
-var init = function(createjs,lib,Global,Projectile){
+var init = function(createjs,lib,Global,Entity,Projectile,Effect){
     
     if(node){
+        Entity = require('./Entity');
         Projectile = require('./Projectile');
+        Effect = require('./Effect');
     }
     
     var Bullet = function(args){
@@ -22,7 +24,6 @@ var init = function(createjs,lib,Global,Projectile){
             this.scaleX = this.state.direction;
             this.clip = this.addChild(new lib.mcProjectile());
         }
-        //this.tick();
     }
        
     var p = Bullet.prototype = new Projectile();
@@ -40,6 +41,15 @@ var init = function(createjs,lib,Global,Projectile){
         this.super_Projectile.updateRotation.call(this);
         with(this.state){
             this.rotation = direction>0 ? angle : angle-180;
+        }
+    }
+    
+    p.onContact = function(e){
+        if(e instanceof Entity){
+            e.applyEffect(new Effect({
+                health:-10
+            }));
+            this.isRubbish = true;
         }
     }
    

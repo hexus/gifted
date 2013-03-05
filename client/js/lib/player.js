@@ -223,20 +223,26 @@ function(createjs,lib,Global,Character){
             this.setItemClip(leftArm,this.getItem('l'));
             this.setItemClip(rightArm,this.getItem('r'));
             
-            if(this.getItem('l')){
-                var itemType = this.getItem('l').clipInfo.type;
-                if(itemType=='weaponsRanged'){
-                    if(this.getItem('l').state.inUse && this.getItem('l').state.coolDown==this.getItem('l').state.coolDownTime){
-                        for(c in clips[leftArm]){
-                            clips[leftArm][c][itemType].muzzle.visible = true;
-                        }
-                    }else{
-                        for(c in clips[leftArm]){
-                            clips[leftArm][c][itemType].muzzle.visible = false;
+            // Muzzle flashes
+            for(var side in [0,1]){
+                side = side>0 ? 'r' : 'l';
+                var side2 = side=='r' ? rightArm : leftArm;
+                if(this.getItem(side)){
+                    var itemType = this.getItem(side).clipInfo.type;
+                    if(itemType=='weaponsRanged'){
+                        if(this.getItem(side).state.inUse && this.getItem(side).state.coolDown==this.getItem(side).state.coolDownTime){
+                            for(c in clips[side2]){
+                                clips[side2][c][itemType].muzzle.visible = true;
+                            }
+                        }else{
+                            for(c in clips[side2]){
+                                clips[side2][c][itemType].muzzle.visible = false;
+                            }
                         }
                     }
                 }
             }
+            
             /*
             this.char.larm_l.wpnUnder.gotoAndStop(this.getItem(leftArm));
             this.char.larm_d.arm.l.wpnUnder.gotoAndStop(this.getItem(leftArm));

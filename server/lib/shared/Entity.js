@@ -1,10 +1,11 @@
 (function(){
 var node = typeof window === 'undefined'; // JSLint can suck my balls
-var deps = ['createjs','lib/global']; // RequireJS dependencies
+var deps = ['createjs','lib/global','shared/Effect']; // RequireJS dependencies
 
-var init = function(createjs,Global){
+var init = function(createjs,Global,Effect){
     if(node){
         Global = require('../Global');
+        Effect = require('./Effect');
     }
     
     var gravity = 1, gravSpeed = 1;
@@ -61,7 +62,7 @@ var init = function(createjs,Global){
         this.isRubbish = false;
         this.isRubbishOnCollide = false;
         
-        this.effects = {};
+        this.effects = [];
         
         if(!node && Global.debug){
             this.hitboxShape = false;
@@ -74,6 +75,12 @@ var init = function(createjs,Global){
         p = Entity.prototype = new createjs.Container();
     }
     p.constructor = Entity;
+    
+    p.applyEffect = function(e){
+        if(e instanceof Effect){
+            this.effects.push(e);
+        }
+    }
     
     p.getDelta = function(a,b,readonly){ // Might be useful later
         var delta = {};
@@ -173,13 +180,19 @@ var init = function(createjs,Global){
         return ray;
     }
     
+    p.chkCollision = function(x,y){
+        var cX = (x > this.state.x - Math.round(this.hitbox.width/2)) && (x < this.state.x + Math.round(this.hitbox.width/2));
+        var cY = (y > this.state.y - Math.round(this.hitbox.height/2)) && (y < this.state.y + Math.round(this.hitbox.height/2));
+        return (cX && cY);
+    }
+    
     p.c2 = function(v, Y){ // Returns uncollided coordinate (ie coordinate of tile)
         this.hasCollided = true;
         var tSize = this.tileW; if(Y){tSize=this.tileH;}
         return Math.floor(v/tSize) * tSize;
     }
     
-    p.chkSolid = function(xCord,yCord){
+    p.chkSolid = function(xCord,yCord){ // Why the fuck isn't this in Map?
         var cords = this.map.convertCords(xCord,yCord); // Check and Region coords
         var cx = cords["x"],
             cy = cords["y"],
@@ -247,6 +260,20 @@ var init = function(createjs,Global){
         
         if(this.life>0){
             this.life--;
+        }
+        
+        // Effects management
+        for(var e in this.effects){
+            var ef = this.effects[e];
+            if(ef){
+                for(var a in ef.state.affects){
+                    this.state[a] += ef.state.affects[a]; // Apply effect
+                }
+                ef.state.life--;
+                if(ef.state.life<1){
+                    var r = this.effects.splice(e,1); // Delete expended effects
+                }
+            }
         }
         
         if(!this.isRubbish){
@@ -379,46 +406,6 @@ var init = function(createjs,Global){
                     }
                 }
                 
-                // Effects management
-                    mod = {};
-                    for(var e in this.effects){
-                        var k;
-                        var ef = effects[e];
-                        //trace("e: " + e + " ef: " + ef.type + " dur: " + ef.durationCount);
-                        if(ef.durationCount>0){
-                            switch(ef.type){
-                                case 2: k = "xLim"; break;
-                                case 3: k = "xForce"; break;
-                                case 4: k = "yForce"; break;
-                            }
-                            if(k){
-                                if(!mod[k]){mod[k] = 0;} // initialise
-                                mod[k] += ef.amount; // modify
-                            }
-                            ef.durationCount--;
-                        }
-                        world.debug("e",e);
-                        world.debug("ef",ef.type.toString());
-                        world.debug("ed",ef.durationCount);
-                        if(ef.durationCount<1){
-                            var r = effects.splice(e,1); // Delete expended effects
-                        }
-                    }
-                
-                // Enforce limits
-                    var xLim = isFlying ? flySpeed : xLimit;
-                    xLim += mod["xLim"] ? mod["xLim"] : 0;
-                    var yLim = isFlying ? flySpeed : yLimit;
-                    yLim += mod["yLim"] ? mod["yLim"] : 0;
-                    if(xLim<1){xLim = 1;} // Ensure they aren't
-                    if(yLim<1){yLim = 1;} // negative limits
-                    if(Math.abs(xSpeed)>xLim){ xSpeed = xSpeed > 0 ? xLim : -xLim; }
-                    if(Math.abs(ySpeed)>yLim){ ySpeed = ySpeed > 0 ? yLim : -yLim; }
-                
-                // Apply force effects
-                    xSpeed += mod["xForce"] ? mod["xForce"] : 0;
-                    ySpeed += mod["yForce"] ? mod["yForce"] : 0;
-                
                 // Apply movement based on above calculations
                     x += xSpeed;
                     y += ySpeed;
@@ -426,6 +413,14 @@ var init = function(createjs,Global){
                     if(xSpeed!=0||ySpeed!=0){
                         this.updateRotation();
                     }
+                    
+                // Enforce limits
+                    var xLim = isFlying ? flySpeed : xLimit;
+                    var yLim = isFlying ? flySpeed : yLimit;
+                    if(xLim<1){xLim = 1;} // Ensure they aren't
+                    if(yLim<1){yLim = 1;} // negative limits
+                    if(Math.abs(xSpeed)>xLim){ xSpeed = xSpeed > 0 ? xLim : -xLim; }
+                    if(Math.abs(ySpeed)>yLim){ ySpeed = ySpeed > 0 ? yLim : -yLim; }
             }
             
             this.x = this.state.x;

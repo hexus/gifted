@@ -52,10 +52,12 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weap
         for(u in this.users){
             this.users[u].tick();
         }
-        for(proj in this.projectiles){
-            this.projectiles[proj].tick();
-            if(this.projectiles[proj].isRubbish){
-                this.removeProjectile(this.projectiles[proj]);
+        for(p in this.projectiles){
+            var proj = this.projectiles[p];
+            proj.tick();
+            this.bulletCollisions(proj);
+            if(proj.isRubbish){
+                this.removeProjectile(proj);
             }
         }
         this.iScroll();
@@ -66,6 +68,25 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weap
         this.overlay.x = this.view.x - this.scrW * 0.5;
         this.overlay.y = this.view.y - this.scrH * 0.5;
         this.overlay.tick();
+    }
+    
+    p.bulletCollisions = function(proj){
+        if(proj instanceof Bullet){
+            var ray = proj.getRay();
+            var collidee = false;
+            for(var r in ray){
+                if(!collidee){
+                    for(var u in this.users){
+                        var user = this.users[u];
+                        var c = user.chkCollision(ray[r][0],ray[r][1]);
+                        if(c){
+                            proj.onContact(user);
+                            collidee = user;
+                        }
+                    }
+                }
+            }
+        }
     }
     
     p.generateMap = function(){
