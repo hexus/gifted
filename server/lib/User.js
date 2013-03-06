@@ -95,7 +95,7 @@ p.send = function(str){
 p.sendTo = function(u){
     if(u instanceof User){
         u.send('/uc ' + this.id + ' ' + this.name);
-        u.send('/m ' + JSON.stringify(this.getState()));
+        u.send('/m ' + JSON.stringify({this.id:this.getState()}));
         for(var i=0;i<2;i++){
             var side = i>0 ? 'r' : 'l';
             var item = this.getItem(side);
