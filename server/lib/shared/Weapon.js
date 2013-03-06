@@ -1,8 +1,8 @@
 (function(){
 var node = typeof window === 'undefined';
-var deps = ['shared/Item','shared/Bullet'];
+var deps = ['lib/global','shared/Item','shared/Bullet'];
 
-var init = function(Item,Bullet){
+var init = function(Global,Item,Bullet){
     
     if(node){
         Item = require('./Item');
@@ -46,26 +46,34 @@ var init = function(Item,Bullet){
     
     p.use = function(){ // fire
         this.super3.use.call(this);
-        if(this.owner){
-            var ps = this.owner.state;
-            var proj = new Bullet({
-                x:ps.x,
-                y:ps.y-15,
-                direction:ps.aimDir,
-                angle:ps.aimAngle,//+this.sprayModifier(),
-                speed:40
-            });
-        }else{
-            var ps = this.state;
-            var proj = new Bullet({
-                x:ps.x,
-                y:ps.y,
-                direction:ps.direction,
-                angle:ps.angle,//+this.sprayModifier(),
-                speed:40
-            });
+        var doCreate = true;
+        if(!node && Global.socket){ // Authoritative server
+            if(Global.socket.connected){
+                doCreate = false;
+            }
         }
-        this.world.addProjectile(proj);
+        if(doCreate){
+            if(this.owner){
+                var ps = this.owner.state;
+                var proj = new Bullet({
+                    x:ps.x,
+                    y:ps.y-15,
+                    direction:ps.aimDir,
+                    angle:ps.aimAngle,//+this.sprayModifier(),
+                    speed:40
+                });
+            }else{
+                var ps = this.state;
+                var proj = new Bullet({
+                    x:ps.x,
+                    y:ps.y,
+                    direction:ps.direction,
+                    angle:ps.angle,//+this.sprayModifier(),
+                    speed:40
+                });
+            }
+            this.world.addProjectile(proj);
+        }
     }
     
     return Weapon;

@@ -10,7 +10,6 @@ var init = function(createjs,lib,Global){
     var Effect = function(args){
         if(!args){args={};}
         var that = this;
-        this.target = null;
         this.state = {};
         this.state.duration = args.duration || 1; // how many steps to stay active
         this.state.affects = {

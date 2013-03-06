@@ -32,12 +32,34 @@ p.tick = function(){
     this.step++;
     this.ontick.call(this);
     
+    // User tick and deltas
+    var userDeltas = {};
+    for(var u in this.users.get()){
+        var user = this.users.get(u);
+        if(user instanceof User){
+            user.tick();
+            if(!user.inLobby){
+                if(this.step%3==0){
+                    var userDelta = user.getStateDelta();
+                    var userDeltaSize = 0;
+                    for(var d in userDelta){
+                        userDeltaSize++;
+                    }
+                    if(userDeltaSize>0){
+                        userDeltas[u] = userDelta;
+                    }
+                }
+            }
+        }
+    }
+    
     // Projectile tick and deltas
     var projDeltas = {};
     for(var i in this.projectiles.get()){
     	var proj = this.projectiles.get(i);
     	if(proj instanceof Projectile){
         	proj.tick();
+        	this.bulletCollisions(proj);
             if(proj.isRubbish){
                 this.removeProjectile(proj);
             }else{
@@ -59,17 +81,25 @@ p.tick = function(){
         var user = this.users.get(u);
         if(user instanceof User){
             if(!user.inLobby){
-                user.tick();
                 if(this.step%3==0){
-                    // User delta
-                    var delta = user.getStateDelta();
-                    var deltaSize = 0;
-                    for(var i in delta){
-                        deltaSize++;
+                    // User deltas
+                    var userDeltasSize = 0;
+                    for(var i in userDeltas){
+                        userDeltasSize++;
                     }
-                    if(deltaSize>0){
-                        delta.id = u;//user.id;
-                        user.room.send('/m '+JSON.stringify(delta),user.inLobby,user);
+                    if(userDeltasSize>0){
+                        var userDeltasMod = JSON.parse(JSON.stringify(userDeltas));
+                        delete(userDeltasMod[u]);
+                        if(userDeltas[u] && user.affected){ // Filter self-delta
+                            var share = ['x','y','xSpeed','ySpeed','health'];
+                            userDeltasMod[u] = {};
+                            for(var i in share){
+                                if(userDeltas[u][share[i]]!=null){
+                                    userDeltasMod[u][share[i]] = userDeltas[u][share[i]];
+                                }
+                            }
+                        }
+                        user.send('/m '+JSON.stringify(userDeltasMod));
                     }
                     
                     // Projectile deltas
@@ -220,4 +250,23 @@ p.removeNearestItem = function(x,y,maxDistance){
         this.removeProjectile(item);
     }
     return item;
+}
+
+p.bulletCollisions = function(proj){
+    if(proj instanceof Bullet){
+        var ray = proj.getRay();
+        var collidee = false;
+        for(var r in ray){
+            if(!collidee){
+                for(var u in this.users.get()){
+                    var user = this.users.get(u);
+                    var c = user.chkCollision(ray[r][0],ray[r][1]);
+                    if(c){
+                        proj.onContact(user);
+                        collidee = user;
+                    }
+                }
+            }
+        }
+    }
 }

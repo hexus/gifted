@@ -57,12 +57,14 @@ var init = function(createjs,Global,Effect){
         this.get('y',function(){return that.state.y;});
         this.set('y',function(v){that.state.y=v;});
         
-        this.rotateWithSpeed = false;
-        this.hasCollided = false;
+        this.life = -1;
         this.isRubbish = false;
+        this.hasCollided = false;
         this.isRubbishOnCollide = false;
+        this.rotateWithSpeed = false;
         
         this.effects = [];
+        this.affected = false;
         
         if(!node && Global.debug){
             this.hitboxShape = false;
@@ -78,6 +80,7 @@ var init = function(createjs,Global,Effect){
     
     p.applyEffect = function(e){
         if(e instanceof Effect){
+            console.log(e);
             this.effects.push(e);
         }
     }
@@ -263,15 +266,19 @@ var init = function(createjs,Global,Effect){
         }
         
         // Effects management
+        this.affected = false;
         for(var e in this.effects){
             var ef = this.effects[e];
             if(ef){
+                this.affected = true;
                 for(var a in ef.state.affects){
-                    this.state[a] += ef.state.affects[a]; // Apply effect
+                    if(this.state[a]!=null){
+                        this.state[a] += ef.state.affects[a]; // Apply effect
+                    }
                 }
                 ef.state.life--;
                 if(ef.state.life<1){
-                    var r = this.effects.splice(e,1); // Delete expended effects
+                    this.effects.splice(e,1); // Delete expended effects
                 }
             }
         }

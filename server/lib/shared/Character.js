@@ -25,11 +25,6 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.state.moveUp = false;
         this.state.moveDown = false;
         
-        this.item = {
-            left:false,
-            right:false
-        }
-        
         var _aimAngle = 0,_aimDir = 1, _isAimingLeft = false, _isAimingRight = false;
         
         this.state.__defineGetter__('isAiming',function(){
@@ -59,6 +54,13 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.state.__defineSetter__('aimDir',function(d){
             _aimDir = (d>0) ? 1 : -1;
         });
+        
+        this.item = {
+            left:false,
+            right:false
+        }
+        
+        this.state.isUsing = {'l':false,'r':false};
     }
     
     var p = Character.prototype = new Entity(); // Inheritance
@@ -121,7 +123,8 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         i = this.getItem(side);
         if(i){
             if((side=='l' && this.state.isAimingLeft) || (side=='r' && this.state.isAimingRight)){
-                i.state.inUse = true;
+                //i.state.inUse = true;
+                this.state.isUsing[side] = true;
             }
         }
     }
@@ -130,7 +133,8 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         side = !side ? 'r' : side;
         i = this.getItem(side);
         if(i){
-            i.state.inUse = false;
+            //i.state.inUse = false;
+            this.state.isUsing[side] = false;
         }
     }
     
@@ -181,43 +185,54 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.jump = function(){ with(this.state){if(onFloor && !isFlying){this.jump = true;}} }
     
     p.tick = function(){
-        if(this.state.health>0){
-            this.itemTick();
-            with(this){
-                if(state.moveUp && state.onFloor && !upDown && !state.isFlying){
-                    jump = true;
-                    upDown = true;
+        if(this.state.health<1){
+            this.state.isFlying = false;
+            this.state.isAimingLeft = false;
+            this.state.isAimingRight = false;
+            this.state.moveLeft = false;
+            this.state.moveRight = false;
+            this.state.moveUp = false;
+            this.state.moveDown = false;
+            this.state.isUsing['l'] = false;
+            this.state.isUsing['r'] = false;
+        }
+        
+        this.itemTick();
+        
+        with(this){
+            if(state.moveUp && state.onFloor && !upDown && !state.isFlying){
+                jump = true;
+                upDown = true;
+            }
+            
+            if(upDown && !state.moveUp){
+                upDown = false;
+            }
+            
+            // Movement booleans
+            if((state.moveLeft && !state.moveRight) || (state.moveRight && !state.moveLeft)){
+                state.direction = state.moveLeft ? -1 : 1;
+                state.xSpeed += state.direction*state.Accel;
+            }else if(Math.abs(state.xSpeed)>state.Accel){
+                state.xSpeed -= state.direction*state.Accel;
+            }else{
+                state.xSpeed = 0;
+            }
+            
+            // Y Booleans
+            if(!state.isFlying){
+                if(jump){
+                    state.ySpeed = -state.jumpStr;
+                    jump = false;
                 }
-                
-                if(upDown && !state.moveUp){
-                    upDown = false;
-                }
-                
-                // Movement booleans
-                if((state.moveLeft && !state.moveRight) || (state.moveRight && !state.moveLeft)){
-                    state.direction = state.moveLeft ? -1 : 1;
-                    state.xSpeed += state.direction*state.Accel;
-                }else if(Math.abs(state.xSpeed)>state.Accel){
-                    state.xSpeed -= state.direction*state.Accel;
+            }else{
+                if((state.moveUp && !state.moveDown) || (!state.moveUp && state.moveDown)){
+                    state.flyDir = (state.moveUp) ? -1 : 1;
+                    state.ySpeed += state.flyDir*state.Accel;
+                }else if(Math.abs(state.ySpeed)>state.Accel){
+                    state.ySpeed -= state.flyDir*state.Accel;
                 }else{
-                    state.xSpeed = 0;
-                }
-                
-                // Y Booleans
-                if(!state.isFlying){
-                    if(jump){
-                        state.ySpeed = -state.jumpStr;
-                        jump = false;
-                    }
-                }else{
-                    if((state.moveUp && !state.moveDown) || (!state.moveUp && state.moveDown)){
-                        state.flyDir = (state.moveUp) ? -1 : 1;
-                        state.ySpeed += state.flyDir*state.Accel;
-                    }else if(Math.abs(state.ySpeed)>state.Accel){
-                        state.ySpeed -= state.flyDir*state.Accel;
-                    }else{
-                        state.ySpeed = 0;
-                    }
+                    state.ySpeed = 0;
                 }
             }
         }
@@ -225,12 +240,22 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     }
     
     p.itemTick = function(){
+        var i;
         if(!this.state.isAimingLeft){
             this.stopUsingItem('l');
+        }else{
+            if(i = this.getItem('l')){
+                i.state.inUse = this.state.isUsing['l'];
+            }
         }
         if(!this.state.isAimingRight){
             this.stopUsingItem('r');
+        }else{
+            if(i = this.getItem('r')){
+                i.state.inUse = this.state.isUsing['r'];
+            }
         }
+
         if(this.getItem('l')){
             this.getItem('l').tick();
         }

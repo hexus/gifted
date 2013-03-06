@@ -114,34 +114,30 @@ function($,Global,Ui,Weapon,Bullet){
         useLeft : {
             key:'mouse0',
             down:function(){
+                Global.player.useItem('l');
                 if(connected()){
                     Global.socket.send('/itemUse l 1');
-                }else{
-                    Global.player.useItem('l');
                 }
             },
             up:function(){
+                Global.player.stopUsingItem('l');
                 if(connected()){
                     Global.socket.send('/itemUse l 0');
-                }else{
-                    Global.player.stopUsingItem('l');
                 }
             }
         },
         useRight : {
             key:'mouse2',
             down:function(){
+                Global.player.useItem('r');
                 if(connected()){
                     Global.socket.send('/itemUse r 1');
-                }else{
-                    Global.player.useItem('r');
                 }
             },
             up:function(){
+                Global.player.stopUsingItem('r');
                 if(connected()){
                     Global.socket.send('/itemUse r 0');
-                }else{
-                    Global.player.stopUsingItem('r');
                 }
             }
         },

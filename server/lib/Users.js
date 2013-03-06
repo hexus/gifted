@@ -70,19 +70,12 @@ p.send = function(str,ex){
             }
             c();
         },error);
-        
-        /* // Synchronous
-        for(var i in this){
-            if(this[i] instanceof User){
-                this[i].send(str);
-            }
-        }*/
     }
 }
 
 p.sendUser = function(u){
 	u = this.resolve(u);
-	this.send('/uc ' + u.id + ' ' + u.name, u); // Send user to all excluding self
+	this.send('/uc ' + u.id + ' ' + u.name,u); // Send user to all excluding self
 }
 
 p.sendTo = function(u){ // Send users to given user
@@ -99,13 +92,6 @@ p.sendTo = function(u){ // Send users to given user
             }
             c();
         },error);
-        
-        /* // Synchronous
-        for(var i in this){
-            if(this[i] instanceof User){
-                if(i!=u){u.send('/uc ' + users[i].id + " " + users[i].name)};
-            }
-        } */
     }
 }
 

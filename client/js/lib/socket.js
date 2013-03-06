@@ -145,16 +145,19 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     Ui.print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
                     break;
                 case "/m": // Update player state (move)
-                    var s = JSON.parse(dstr);
-                    if(s.id){
-                        if(world.users[s.id]){
-                            var user = world.users[s.id];
+                    var deltas = JSON.parse(dstr);
+                    for(var d in deltas){
+                        var s = deltas[d];
+                        if(world.users[d]){
+                            var user = world.users[d];
                             for(i in s){
                                 if(user.state[i]!=null && typeof user.state[i] === typeof s[i]){
                                     user.state[i] = s[i];
                                 }
                             }
-                            user.tick(); // Keep physics in check immediately
+                            if(!user.thisPlayer){
+                                user.tick(); // Keep physics in check immediately
+                            }
                         }
                     }
                     break;

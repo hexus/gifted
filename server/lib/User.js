@@ -39,6 +39,16 @@ p.getState = function(){
     return state;
 }
 
+p.getSelfDelta = function(){
+    var state = {id:this.id};
+    var share = ['xSpeed','ySpeed','health'];
+    var currentState = JSON.parse(JSON.stringify(this.state));
+    for(var i in share){
+        state[i] = currentState[share[i]];
+    }
+    return state;
+}
+
 p.pickUpItem = function(side){
     this.super_Character.pickUpItem.call(this,side);
     var item = this.getItem(side);

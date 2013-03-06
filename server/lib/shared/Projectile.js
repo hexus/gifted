@@ -12,8 +12,6 @@ var init = function(Entity){ // Class definition
         if(!args){args={};}
         this.super_Entity.constructor.call(this,args); // Superclass constructor
         this.pid = args.pid || 0;
-        this.life = -1;
-        this.damage = 10;
         this.rotateWithSpeed = true;
         this.hitbox.width = 4;
         this.hitbox.height = 4;
@@ -25,8 +23,8 @@ var init = function(Entity){ // Class definition
         
         if(args){
             this.state.direction = args.direction || this.state.direction;
-            var rads = this.state.angle * (Math.PI/180);
             this.state.flySpeed = args.speed || this.state.flySpeed;
+            var rads = this.state.angle * (Math.PI/180);
             this.state.xSpeed = Math.round(Math.cos(rads) * args.speed) || this.state.xSpeed;
             this.state.ySpeed = Math.round(Math.sin(rads) * args.speed) || this.state.ySpeed;
             this.updateRotation();
@@ -40,7 +38,9 @@ var init = function(Entity){ // Class definition
     p.tick = function(){
         this.super_Entity.tick.call(this);
         if(this.life===0){
-            this.onDeath();
+            if(typeof this.onDeath === 'function'){
+                this.onDeath();
+            }
         }
         if(!node){
             this.scaleX = this.state.direction>0 ? 1 : -1;
