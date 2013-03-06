@@ -7,6 +7,16 @@ var Bullet = require('./shared/Bullet');
 var Item = require('./shared/Item');
 var Map = require('./shared/Map');
 
+Object.size = function(obj) { // This saves lines
+    var size = 0;
+    for(var key in obj) {
+        if(obj[key]!=null){
+            size++;
+        }
+    }
+    return size;
+};
+
 var Room = function(args){
     var that = this;
     
@@ -22,6 +32,7 @@ var Room = function(args){
     this.tickSpeed = 1/this.fps*1000;
     this.timer = setInterval(function(){that.tick();},this.tickSpeed);
     this.ontick = function(){};
+    this.streamSpeed = 3;
 }
 
 var p = Room.prototype;
@@ -39,13 +50,9 @@ p.tick = function(){
         if(user instanceof User){
             user.tick();
             if(!user.inLobby){
-                if(this.step%3==0){
+                if(this.step%this.streamSpeed==0){
                     var userDelta = user.getStateDelta();
-                    var userDeltaSize = 0;
-                    for(var d in userDelta){
-                        userDeltaSize++;
-                    }
-                    if(userDeltaSize>0){
+                    if(Object.size(userDelta)>0){
                         userDeltas[u] = userDelta;
                     }
                 }
@@ -63,13 +70,9 @@ p.tick = function(){
             if(proj.isRubbish){
                 this.removeProjectile(proj);
             }else{
-            	if(this.step%3==0 && !(proj instanceof Bullet)){
+            	if(this.step%this.streamSpeed==0 && !(proj instanceof Bullet)){
             		var projDelta = proj.getStateDelta();
-            		var projDeltaSize = 0;
-            		for(var d in projDelta){
-            			projDeltaSize++;
-            		}
-            		if(projDeltaSize>0){
+            		if(Object.size(projDelta)>0){
             			projDeltas[i] = projDelta;
             		}
         	   }
@@ -81,36 +84,32 @@ p.tick = function(){
         var user = this.users.get(u);
         if(user instanceof User){
             if(!user.inLobby){
-                if(this.step%3==0){
-                    // User deltas
-                    var userDeltasSize = 0;
-                    for(var i in userDeltas){
-                        userDeltasSize++;
-                    }
-                    if(userDeltasSize>0){
-                        var userDeltasMod = JSON.parse(JSON.stringify(userDeltas));
-                        delete(userDeltasMod[u]);
-                        if(userDeltas[u] && user.affected){ // Filter self-delta
-                            var share = ['x','y','xSpeed','ySpeed','health'];
-                            userDeltasMod[u] = {};
-                            for(var i in share){
-                                if(userDeltas[u][share[i]]!=null){
-                                    userDeltasMod[u][share[i]] = userDeltas[u][share[i]];
-                                }
+                // User Deltas
+                if(Object.size(userDeltas)>0){
+                    var userDeltasMod = JSON.parse(JSON.stringify(userDeltas));
+                    delete(userDeltasMod[u]); // Don't send to self by default
+                    if(userDeltas[u] && user.sendSelf){ // Include self-delta if send-self is true
+                        user.sendSelf = false;
+                        userDeltasMod[u] = userDeltas[u];
+                        // old filtering
+                        /*var share = ['x','y','xSpeed','ySpeed','health'];
+                        userDeltasMod[u] = {};
+                        for(var i in share){
+                            if(userDeltas[u][share[i]]!=null){
+                                userDeltasMod[u][share[i]] = userDeltas[u][share[i]];
                             }
-                        }
+                        }*/
+                    }
+                    if(Object.size(userDeltasMod)>0){
                         user.send('/m '+JSON.stringify(userDeltasMod));
                     }
-                    
-                    // Projectile deltas
-                    var projDeltasSize = 0;
-                    for(var j in projDeltas){
-                        projDeltasSize++;
-                    }
-                    if(projDeltasSize>0){
-                        this.send('/pd '+JSON.stringify(projDeltas));
-                    }
                 }
+                
+                // Projectile deltas
+                if(Object.size(projDeltas)>0){
+                    this.send('/pd '+JSON.stringify(projDeltas));
+                }
+                
                 if(this.step%32==0){
                     this.ping();
                 }

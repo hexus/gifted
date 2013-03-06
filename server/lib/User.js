@@ -24,12 +24,18 @@ var User = function(args){
     this.state.aimAngle = 0;
     this.state.aimDir = 1;
     this.state.outfit = {headwear:0};
+    this.sendSelf = false;
 }
 
 var p = User.prototype = new Character();
 p.super_Character = Character.prototype;
 
 p.tick = function(){
+    for(var e in this.effects){ // inform user about changes to self on next delta update
+        if(this.effects[e]!=null){
+            this.sendSelf = true;
+        }
+    }
     this.super_Character.tick.call(this);
 }
 

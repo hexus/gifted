@@ -265,11 +265,9 @@ var init = function(createjs,Global,Effect){
         }
         
         // Effects management
-        this.affected = false;
         for(var e in this.effects){
             var ef = this.effects[e];
             if(ef){
-                this.affected = true;
                 for(var a in ef.state.affects){
                     if(this.state[a]!=null){
                         this.state[a] += ef.state.affects[a]; // Apply effect
@@ -355,7 +353,7 @@ var init = function(createjs,Global,Effect){
                     if(ySpeed<=0){ // if travellin upwards and there's shit above, stop dis shit
                         if( !(this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && !this.chkSolid(Cx,pTy) ){
                             // nudge character a bit if there ain't that much shit above
-                            if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw -1); }
+                            if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw - 1); }
                             if(this.chkSolid(Lx,Ty) && !this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Lx) + this.tileW + hw); }
                         }else{
                             ySpeed = 0;
