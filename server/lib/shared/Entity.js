@@ -80,7 +80,6 @@ var init = function(createjs,Global,Effect){
     
     p.applyEffect = function(e){
         if(e instanceof Effect){
-            console.log(e);
             this.effects.push(e);
         }
     }

@@ -243,17 +243,16 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         var i;
         if(!this.state.isAimingLeft){
             this.stopUsingItem('l');
-        }else{
-            if(i = this.getItem('l')){
-                i.state.inUse = this.state.isUsing['l'];
-            }
         }
+        if(i = this.getItem('l')){
+            i.state.inUse = this.state.isUsing['l'];
+        }
+        
         if(!this.state.isAimingRight){
             this.stopUsingItem('r');
-        }else{
-            if(i = this.getItem('r')){
-                i.state.inUse = this.state.isUsing['r'];
-            }
+        }
+        if(i = this.getItem('r')){
+            i.state.inUse = this.state.isUsing['r'];
         }
 
         if(this.getItem('l')){
