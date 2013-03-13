@@ -42,7 +42,7 @@ db.create = function(callback){
         if(err){
         	console.log("Database Creation " + err);
         }
-        console.log(config.db.database + 'created');
+        console.log(config.db.database + ' created');
         callback();
     });
 }

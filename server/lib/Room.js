@@ -90,15 +90,15 @@ p.tick = function(){
                     delete(userDeltasMod[u]); // Don't send to self by default
                     if(userDeltas[u] && user.sendSelf){ // Include self-delta if send-self is true
                         user.sendSelf = false;
-                        userDeltasMod[u] = userDeltas[u];
-                        // old filtering
-                        /*var share = ['x','y','xSpeed','ySpeed','health'];
+                        //userDeltasMod[u] = userDeltas[u];
+                        // Filtering
+                        var share = ['x','y','xSpeed','ySpeed','health'];
                         userDeltasMod[u] = {};
                         for(var i in share){
                             if(userDeltas[u][share[i]]!=null){
                                 userDeltasMod[u][share[i]] = userDeltas[u][share[i]];
                             }
-                        }*/
+                        }
                     }
                     if(Object.size(userDeltasMod)>0){
                         user.send('/m '+JSON.stringify(userDeltasMod));

@@ -22,7 +22,7 @@ try{
 
 env = (env) ? env : ((process.env)?process.env:false);
 c.version = readJson('./package.json').version  || "Unknown"; 
-c.httpPort = c.static.httpPort || (c.live ? 8080 : 80);
+c.httpPort = c.live ? 8080 : c.static.httpPort || 80;
 c.db = {
     host        : env.DOTCLOUD_DB_MYSQL_HOST || 'localhost',
     port        : env.DOTCLOUD_DB_MYSQL_PORT || 3306,
@@ -37,8 +37,8 @@ c.worlds = c.static.worlds || [
 	"Buren"
 ];
 c.clientPath = c.basePath+"client/index.html";
-c.listenPort = c.static.tcpPort || env.PORT_GAME || 7000;
-c.listenPort2 = c.static.websocketPort || env.PORT_GAME2 || 7001;
+c.listenPort = env.PORT_GAME || c.static.tcpPort || 7000;
+c.listenPort2 = env.PORT_GAME2 || c.static.websocketPort || 7001;
 c.socketPort = env.DOTCLOUD_SERVER_GAME2_PORT || c.listenPort2;
 c.socketUrl = "//" + (env.DOTCLOUD_SERVER_GAME_HOST || "localhost") + ":" + c.socketPort;
 c.clientUrl = "/client/";//"http://" + (env.DOTCLOUD_SERVER_HTTP_HOST || "localhost") + "/client/";
