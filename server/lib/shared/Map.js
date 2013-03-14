@@ -159,7 +159,7 @@ var init = function(){
         this.turn = function(force){
             force = !!force;
             var newDir = that.direction;
-            if(Math.random()<that.turnChances[newDir%2?'y':'x']){
+            if((Math.random()<that.turnChances[newDir%2?'y':'x']) || force){
                 if(Math.random()<0.5){
                     newDir++;
                 }else{
@@ -171,6 +171,9 @@ var init = function(){
                 that.direction = newDir;
             }else{
                 that.turn(force);
+            }
+            if(that.life>0){
+                that.life--;
             }
         }
         this.move = function(){
@@ -187,7 +190,7 @@ var init = function(){
                 case 3: // Up
                    that.y--;
                    break;
-           }
+            }
             if(that.life>0){
                 that.life--;
             }
@@ -245,7 +248,9 @@ var init = function(){
             }
         }
         this.age = function(){
-            that.life = that.afterlife;
+            if(that.life<0 || that.life>that.afterlife){
+                that.life = that.afterlife;
+            }
         }
     }
     
@@ -283,7 +288,7 @@ var init = function(){
     	
     	var topSpawn = {
     		x : Math.round(fullWidth * 0.5),
-    		y : Math.round(fullHeight - heights[Math.round(heights.length*0.5)]) - 2
+    		y : Math.round(fullHeight - heights[Math.round(fullWidth*0.5)]) - 2
     	};
     	
     	for(var y=0;y<fullHeight;y++){
@@ -338,21 +343,20 @@ var init = function(){
     	});
     	
     	// Iterate miners
-	    for(m in miners){
-	        m = miners[m];
+	    for(var miner in miners){
+	        m = miners[miner];
 	        while(m.life!=0){
 	            m.turn();
     	        m.move();
-    	        if(!(m.y<0 || m.y>fullHeight)){
+    	        if(m.y>0 && m.y<fullHeight){
     	            if((m.x < lowSpawn.x-lowSpawn.width/2 || m.x > lowSpawn.x+lowSpawn.width/2-1) ||
     	            (m.y < lowSpawn.y-lowSpawn.height/2-1 || m.y > lowSpawn.y+lowSpawn.height/2+1)){
     	                m.dig();
-        	        }
+                    }
     	        }else{
-    	            m.turn();
+    	            m.turn(true);
     	        }
-    	        if(m.y < fullHeight - heights[m.x]){ // Reached surface
-    	            //m.life = 50;
+    	        if(m.y < fullHeight - Math.round(heights[((m.x % fullWidth) + fullWidth) % fullWidth])){ // Reached surface
     	            m.age();
     	        }
 	        }

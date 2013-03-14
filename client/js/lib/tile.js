@@ -61,7 +61,7 @@ function(createjs,lib,Global){
     
     Tile.buildSheet = function(scale){ // Static
         if(!scale){scale = globalScale;}
-        globalScale = scale;
+        globalScale = scale; // Increase resolution of tiles
         var tileSheetBuilder = new createjs.SpriteSheetBuilder();
         tileSheetBuilder.addMovieClip(new lib.giftedclienttiles(),new createjs.Rectangle(-4,-4,72,72),globalScale);
         tileSheetBuilder.build();
@@ -69,10 +69,6 @@ function(createjs,lib,Global){
     };
     
     var p = Tile.prototype = new createjs.Container();
-    
-    p.tick = function(){
-        
-    }
     
     p.valueOf = function(){
         return parseInt(this.frame);
