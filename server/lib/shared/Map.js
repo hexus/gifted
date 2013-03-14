@@ -149,10 +149,13 @@ var init = function(){
         this.map = args.map || null;
         this.life = args.life || 10000;
         this.width = args.width || 0;
+        this.borderChance = args.borderChance || 0;
+        this.borderLeft = args.borderLeft || false;
+        this.borderRight = args.borderRight || false;
         this.direction = args.direction || 0;
         this.directionLimit = args.directionLimit || [0,1,2,3]; // >,v,<,^
         this.turnChances = args.turnChances || {x:0.5,y:0.5}; // x/y
-        this.afterlife = args.afterlife || 100;
+        this.afterlife = args.afterlife || 10;
         this.turn = function(force){
             force = !!force;
             var newDir = that.direction;
@@ -189,25 +192,55 @@ var init = function(){
                 that.life--;
             }
         }
-        this.clearTile = function(x,y){
+        this.setTile = function(x,y,v){
+        	v = !v ? 0 : v;
             var c = that.map.convertCords(x,y,true);
-            that.map.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
+            that.map.setTile(c['rx'],c['ry'],c['x'],c['y'],v);
         }
         this.dig = function(){
             width = that.width;
-            that.clearTile(that.x,that.y);
+            that.setTile(that.x,that.y);
             if(width>0){
                 for(var w=1;w<width+1;w++){
                     switch(m.direction){
                         case 0: case 2:
-                            that.clearTile(that.x,that.y-w);
-                            that.clearTile(that.x,that.y+w);
+                            that.setTile(that.x,that.y-w);
+                            that.setTile(that.x,that.y+w);
                             break;
                         case 1: case 3:
-                            that.clearTile(that.x-w,that.y);
-                            that.clearTile(that.x+w,that.y);
+                            that.setTile(that.x-w,that.y);
+                            that.setTile(that.x+w,that.y);
                             break;
                     }
+                }
+                // Border
+                if(Math.random()<that.borderChance){
+	                switch(m.direction){
+	                	case 0: 
+	                		if(that.borderLeft!==false){
+	                			that.setTile(that.x,that.y-width-1,that.borderLeft);
+	                		}
+	                		if(that.borderRight!==false){
+	                			that.setTile(that.x,that.y+width+1,that.borderRight);
+	                		}
+	                		break;
+	                	case 2:
+	                		if(that.borderLeft!==false){
+	                			that.setTile(that.x,that.y+width+1,that.borderLeft);
+	                		}
+	                		if(that.borderRight!==false){
+	                			that.setTile(that.x,that.y-width-1,that.borderRight);
+	                		}
+	                		break;
+	                	case 3:
+	                		if(that.borderLeft!==false){
+	                			that.setTile(that.x-width-1,that.y,that.borderLeft);
+	                		}
+	                		if(that.borderRight!==false){
+	                			that.setTile(that.x+width+1,that.y,that.borderRight);
+	                		}
+	                		break;
+	                }
                 }
             }
         }
@@ -285,19 +318,26 @@ var init = function(){
     	
     	// Let's dig!
     	var miners = {};
-    	miners[0] = new mapMiner({
-    	    map:this, x:lowSpawn.x + Math.floor(lowSpawn.width/2)-1, y:lowSpawn.y, life:-1,
-    	    direction:0, directionLimit:[0,3], width:1, turnChances:{x:0.4,y:0.9}
-    	});
-    	miners[1] = new mapMiner({
-    	    map:this, x:lowSpawn.x - Math.ceil(lowSpawn.width/2), y:lowSpawn.y, life:-1,
-    	    direction:2, directionLimit:[2,3], width:1, turnChances:{x:0.4,y:0.9}
-    	});
-        miners[2] = new mapMiner({
+    	
+    	// Large random cave(s)
+        miners[0] = new mapMiner({
             map:this, x:lowSpawn.x, y:lowSpawn.y, life:50000,
             direction:3, width:1, turnChances:{x:0.5,y:0.8}
         });
+        
+        // Tunnels from spawn
+    	miners[1] = new mapMiner({
+    	    map:this, x:lowSpawn.x + Math.floor(lowSpawn.width/2)-1, y:lowSpawn.y, life:-1,
+    	    direction:0, directionLimit:[0,3], width:1, turnChances:{x:0.4,y:0.9},
+    	    borderChance:0.9, borderRight:7
+    	});
+    	miners[2] = new mapMiner({
+    	    map:this, x:lowSpawn.x - Math.ceil(lowSpawn.width/2), y:lowSpawn.y, life:-1,
+    	    direction:2, directionLimit:[2,3], width:1, turnChances:{x:0.4,y:0.9},
+    	    borderChance:0.9, borderLeft:7
+    	});
     	
+    	// Iterate miners
 	    for(m in miners){
 	        m = miners[m];
 	        while(m.life!=0){
@@ -465,6 +505,10 @@ var init = function(){
             var tile = flat[i/4];
             var colour = {r:0,g:0,b:0,a:255};
             switch(tile){
+            	case 7:
+            		colour.r = 160;
+            		colour.g = colour.b = 180;
+            		break;
                 case 9:
                     colour.r = colour.g = colour.b = 66;
                     break;
