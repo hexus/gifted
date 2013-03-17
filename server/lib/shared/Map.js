@@ -69,15 +69,51 @@ var init = function(){
     		return false;
     	}
     	this.getTile = function(rX,rY,tX,tY){
+    	    if((rX!=null&&rY!=null) && (tX==null&&tY==null)){
+    	        var c = this.convertCords(rX,rY,true);
+    	        return this.getTile(c['rx'],c['ry'],c['x'],c['y']);
+    	    }
     		if(this.checkTile(rX,rY,tX,tY)){
     			return regions[rX][rY][tX][tY];
     		}
     	}
     	this.setTile = function(rX,rY,tX,tY,v){
+            if((rX!=null&&rY!=null) && tY==null){
+                var c = this.convertCords(rX,rY,true);
+                return this.setTile(c['rx'],c['ry'],c['x'],c['y'],tX);
+            }
     		if(this.checkTile(rX,rY,tX,tY)){
     		    regions[rX][rY][tX][tY] = v;
     		}
     	}
+        this.eachTile = function(d){
+            if(typeof(d)==='function'){
+                var list = [];
+                for(var y=0;y<worldSize.height*regionSize.height;y++){
+                    for(var x=0;x<worldSize.width*regionSize.width;x++){
+                        var t = {
+                            x:x,
+                            y:y,
+                            v:this.getTile(x,y),
+                            nbhd:[
+                                this.getTile(x+1,y),
+                                this.getTile(x+1,y+1),
+                                this.getTile(x,y+1),
+                                this.getTile(x-1,y+1),
+                                this.getTile(x-1,y),
+                                this.getTile(x-1,y-1),
+                                this.getTile(x,y-1),
+                                this.getTile(x+1,y-1)
+                            ]
+                        }
+                        list.push(t);
+                    }
+                }
+                for(var l in list){
+                    d.call(this,list[l].x,list[l].y,list[l].v,list[l].nbhd);
+                }
+            }
+        }
     	this.setWorldSize = function(w,h){
     	    worldSize.width = w;
     	    worldSize.height = h;
@@ -291,19 +327,6 @@ var init = function(){
     		y : Math.round(fullHeight - heights[Math.round(fullWidth*0.5)]) - 2
     	};
     	
-    	for(var y=0;y<fullHeight;y++){
-    		for(var x=0;x<fullWidth;x++){
-    			var regX = Math.floor(x / rSize.width) % wSize.width;
-    			var regY = Math.floor(y / rSize.height) % wSize.height;
-    			var tileX = x % rSize.width;
-    			var tileY = y % rSize.height;
-    			if(y >= fullHeight - heights[x]){
-    				this.setTile(regX,regY,tileX,tileY,9);
-    			}
-    		}
-    	}
-    	
-    	
     	var lowSpawnSize = {width:16,height:4};
         var lowSpawn = {
             x : topSpawn.x-Math.round(lowSpawnSize.width/2),
@@ -314,53 +337,134 @@ var init = function(){
         
         this.setSpawn(lowSpawn.x,lowSpawn.y);
     	
-    	for(var i=lowSpawn.x-Math.round(lowSpawn.width/2);i<lowSpawn.x+Math.floor(lowSpawn.width/2);i++){
-    	    for(var j=lowSpawn.y-Math.round(lowSpawn.height/2);j<lowSpawn.y+Math.floor(lowSpawn.height/2);j++){
-    	        var c = this.convertCords(i,j,true);
-    	        this.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
-    	    }    	    
-    	}
+        this.eachTile(function(x,y){
+            if(y >= fullHeight - heights[x]){
+                this.setTile(x,y,9);
+            }
+        });
     	
     	// Let's dig!
     	var miners = {};
     	
+    	function iterateMiners(){
+            for(var miner in miners){
+                m = miners[miner];
+                if(m){
+                    while(m.life!=0){
+                        m.turn();
+                        m.move();
+                        if(m.y>0 && m.y<fullHeight){
+                            if((m.x < lowSpawn.x-(lowSpawn.width/2) || m.x > lowSpawn.x+(lowSpawn.width/2)-1) ||
+                            (m.y < lowSpawn.y-(lowSpawn.height/2)-1 || m.y > lowSpawn.y+(lowSpawn.height/2)+1)){
+                                m.dig();
+                            }
+                        }else{
+                            m.turn(true);
+                        }
+                        if(m.y < fullHeight - Math.round(heights[((m.x % fullWidth) + fullWidth) % fullWidth])){ // Reached surface
+                            m.age();
+                        }
+                    }
+                }
+            }
+            miners = {};
+    	}
+    	
+    	var caveNum = 20;
+    	var caveDist = Math.round(fullWidth/caveNum);
     	// Large random cave(s)
-        miners[0] = new mapMiner({
-            map:this, x:lowSpawn.x, y:lowSpawn.y, life:50000,
-            direction:3, width:1, turnChances:{x:0.5,y:0.8}
+    	for(var i=0;i<caveNum;i++){
+            miners['cave'+i] = new mapMiner({
+                map:this, x:caveDist*i, y:lowSpawn.y, life:20000,
+                direction:3, width:1, turnChances:{x:0.5,y:0.8}
+            });
+        }
+        
+        iterateMiners();
+        
+        // Fill caves randomly
+        this.eachTile(function(x,y,v){
+            if(y >= fullHeight - heights[x]){
+                if(v==0){
+                    if(Math.random()<0.4){
+                        this.setTile(x,y,9);
+                    }
+                }
+            }
         });
         
+        // Cellular automataaaaa
+        for(var i=0;i<2;i++){
+            this.eachTile(function(x,y,v,nbhd){
+                if(y > fullHeight - heights[x]){
+                    var n = 0;
+                    for(var j in nbhd){
+                        if(nbhd[j]>0){
+                            n++;
+                        }
+                    }
+                    if((v==9 && n>4) || (v==0 && n>5) || n<1){
+                        this.setTile(x,y,9);
+                    }else{
+                        this.setTile(x,y,0);
+                    }
+                }
+            });
+        }
+        
+        for(var i=0;i<3;i++){
+            this.eachTile(function(x,y,v,nbhd){
+                if(y > fullHeight - heights[x]){
+                    var n = 0;
+                    for(var j in nbhd){
+                        if(nbhd[j]>0){
+                            n++;
+                        }
+                    }
+                    if(n<3){
+                        this.setTile(x,y,0);
+                    }
+                    if(v==1 && nbhd[2]<1 & nbhd[6]<1){
+                        this.setTile(x,y,0);
+                    }
+                    if(v==0 && nbhd[2]>0 && nbhd[6]>0){
+                        this.setTile(x,y-1,0);
+                        this.setTile(x,y+1,0);
+                    }
+                }
+            });
+        }
+        
+        // Carve spawn
+        for(var i=lowSpawn.x-Math.round(lowSpawn.width/2);i<lowSpawn.x+Math.round(lowSpawn.width/2);i++){
+            for(var j=lowSpawn.y-Math.round(lowSpawn.height/2);j<lowSpawn.y+Math.round(lowSpawn.height/2);j++){
+                var c = this.convertCords(i,j,true);
+                this.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
+            }           
+        }
+        
         // Tunnels from spawn
-    	miners[1] = new mapMiner({
+    	miners['tunnelLeft'] = new mapMiner({
     	    map:this, x:lowSpawn.x + Math.floor(lowSpawn.width/2)-1, y:lowSpawn.y, life:-1,
-    	    direction:0, directionLimit:[0,3], width:1, turnChances:{x:0.4,y:0.9},
-    	    borderChance:0.9, borderRight:7
+    	    direction:0, directionLimit:[0,3], width:2, turnChances:{x:0.4,y:0.9},
+    	    borderChance:0.8, borderRight:7
     	});
-    	miners[2] = new mapMiner({
-    	    map:this, x:lowSpawn.x - Math.ceil(lowSpawn.width/2), y:lowSpawn.y, life:-1,
-    	    direction:2, directionLimit:[2,3], width:1, turnChances:{x:0.4,y:0.9},
-    	    borderChance:0.9, borderLeft:7
+    	miners['tunnelRight'] = new mapMiner({
+    	    map:this, x:lowSpawn.x - Math.floor(lowSpawn.width/2), y:lowSpawn.y, life:-1,
+    	    direction:2, directionLimit:[2,3], width:2, turnChances:{x:0.4,y:0.9},
+    	    borderChance:0.8, borderLeft:7
     	});
     	
-    	// Iterate miners
-	    for(var miner in miners){
-	        m = miners[miner];
-	        while(m.life!=0){
-	            m.turn();
-    	        m.move();
-    	        if(m.y>0 && m.y<fullHeight){
-    	            if((m.x < lowSpawn.x-lowSpawn.width/2 || m.x > lowSpawn.x+lowSpawn.width/2-1) ||
-    	            (m.y < lowSpawn.y-lowSpawn.height/2-1 || m.y > lowSpawn.y+lowSpawn.height/2+1)){
-    	                m.dig();
-                    }
-    	        }else{
-    	            m.turn(true);
-    	        }
-    	        if(m.y < fullHeight - Math.round(heights[((m.x % fullWidth) + fullWidth) % fullWidth])){ // Reached surface
-    	            m.age();
-    	        }
-	        }
-    	}
+    	iterateMiners();
+    	
+    	// Post-smoothing (cellular automata)
+        for(var y=0;y<fullHeight;y++){
+            for(var x=0;x<fullWidth;x++){
+                // get neighbourhood
+                // remove if too few neighbours
+            }
+        }
+    	
 
     	// Done.
     }
@@ -509,10 +613,20 @@ var init = function(){
             var tile = flat[i/4];
             var colour = {r:0,g:0,b:0,a:255};
             switch(tile){
+                case 6:
+                    colour.r = 220;
+                    colour.g = 210;
+                    colour.b = 160;
+                    break;
             	case 7:
             		colour.r = 160;
             		colour.g = colour.b = 180;
             		break;
+                case 8:
+                    colour.r = 150;
+                    colour.g = 130;
+                    colour.b = 50;
+                    break;
                 case 9:
                     colour.r = colour.g = colour.b = 66;
                     break;

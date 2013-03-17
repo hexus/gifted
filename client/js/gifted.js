@@ -63,6 +63,7 @@ function($,Global){
                 player = Global.player = new Player();
                 users = Global.users = {};
                 
+                stage.snapToPixelEnabled = true;
                 stage.addChild(world);
                 stage.addChild(player);
                 

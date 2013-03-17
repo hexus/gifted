@@ -22,6 +22,7 @@ function(createjs,lib,Global,Character){
         
         this.char = this.clip.playerChar;
         this.char.head.wear.stop();
+        this.char.torso.stop();
         this.char.larm_l.itemOver.visible = false;
         this.char.larm_l.itemUnder.visible = true;
         this.char.rarm_l.itemOver.visible = true;
@@ -42,7 +43,8 @@ function(createjs,lib,Global,Character){
         this.setAnim("static");
         
         this.state.outfit = {
-            headwear:0
+            headwear:0,
+            torso:0
         }
         
         this.setItemClips(); // hides
@@ -82,6 +84,9 @@ function(createjs,lib,Global,Character){
             switch(part){
                 case 'headwear':
                     this.char.head.wear.gotoAndStop(this.state.outfit[part]);
+                    break;
+                case 'torso':
+                    this.char.torso.gotoAndStop(this.state.outfit[part]);
                     break;
             }
         }
