@@ -86,33 +86,51 @@ var init = function(){
     		    regions[rX][rY][tX][tY] = v;
     		}
     	}
-        this.eachTile = function(d){
+    	this.eachTile = function(d){ // Arg should have signature d(x,y,v)
+    	    if(typeof(d)==='function'){
+                for(var y=0;y<worldSize.height*regionSize.height;y++){
+                    for(var x=0;x<worldSize.width*regionSize.width;x++){
+                        d.call(this,x,y,this.getTile(x,y));
+                    }
+                }
+            }                    
+    	}
+        this.eachTileNbhd = function(d){ // Slower for neighbourhood (nbhd), arg should have signature d(x,y,v,nbhd,n)
             if(typeof(d)==='function'){
                 var list = [];
                 for(var y=0;y<worldSize.height*regionSize.height;y++){
                     for(var x=0;x<worldSize.width*regionSize.width;x++){
-                        var t = {
+                        var nbhd = this.getTileNbhd(x,y)
+                        var n = 0;
+                        for(var j in nbhd){
+                            if(nbhd[j]>0){n++;}
+                        }
+                        var tile = {
                             x:x,
                             y:y,
                             v:this.getTile(x,y),
-                            nbhd:[
-                                this.getTile(x+1,y),
-                                this.getTile(x+1,y+1),
-                                this.getTile(x,y+1),
-                                this.getTile(x-1,y+1),
-                                this.getTile(x-1,y),
-                                this.getTile(x-1,y-1),
-                                this.getTile(x,y-1),
-                                this.getTile(x+1,y-1)
-                            ]
+                            nbhd:nbhd,
+                            n:n
                         }
-                        list.push(t);
+                        list.push(tile);
                     }
                 }
                 for(var l in list){
-                    d.call(this,list[l].x,list[l].y,list[l].v,list[l].nbhd);
+                    d.call(this,list[l].x,list[l].y,list[l].v,list[l].nbhd,list[l].n);
                 }
             }
+        }
+        this.getTileNbhd = function(x,y){
+            return [
+                this.getTile(x+1,y),
+                this.getTile(x+1,y+1),
+                this.getTile(x,y+1),
+                this.getTile(x-1,y+1),
+                this.getTile(x-1,y),
+                this.getTile(x-1,y-1),
+                this.getTile(x,y-1),
+                this.getTile(x+1,y-1)
+            ];
         }
     	this.setWorldSize = function(w,h){
     	    worldSize.width = w;
@@ -395,15 +413,9 @@ var init = function(){
         
         // Cellular automataaaaa
         for(var i=0;i<2;i++){
-            this.eachTile(function(x,y,v,nbhd){
+            this.eachTileNbhd(function(x,y,v,nbhd,n){
                 if(y > fullHeight - heights[x]){
-                    var n = 0;
-                    for(var j in nbhd){
-                        if(nbhd[j]>0){
-                            n++;
-                        }
-                    }
-                    if((v==9 && n>4) || (v==0 && n>5) || n<1){
+                    if((v==9 && n>5) || (v==0 && n>5) || n<1){
                         this.setTile(x,y,9);
                     }else{
                         this.setTile(x,y,0);
@@ -412,24 +424,19 @@ var init = function(){
             });
         }
         
-        for(var i=0;i<3;i++){
-            this.eachTile(function(x,y,v,nbhd){
+        for(var i=0;i<2;i++){
+            this.eachTileNbhd(function(x,y,v,nbhd,n){
                 if(y > fullHeight - heights[x]){
-                    var n = 0;
-                    for(var j in nbhd){
-                        if(nbhd[j]>0){
-                            n++;
-                        }
-                    }
-                    if(n<3){
-                        this.setTile(x,y,0);
-                    }
-                    if(v==1 && nbhd[2]<1 & nbhd[6]<1){
+                    if((v==1 && nbhd[2]==0 && nbhd[6]==0) || n<3){
                         this.setTile(x,y,0);
                     }
                     if(v==0 && nbhd[2]>0 && nbhd[6]>0){
                         this.setTile(x,y-1,0);
                         this.setTile(x,y+1,0);
+                    }
+                    if(v==0 && nbhd[0]>0 && nbhd[4]>0){
+                        this.setTile(x-1,y,0);
+                        this.setTile(x+1,y,0);
                     }
                 }
             });
