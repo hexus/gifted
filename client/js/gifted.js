@@ -13,9 +13,9 @@ requirejs.config({
         
         // Local libs
         'jquery':'jquery-1.8.2',
-        'easeljs':'easeljs-0.5.0.min',
+        'easeljs':'easeljs-0.6.0.min',
         'tweenjs':'tweenjs-0.3.0.min',
-        'movieclip':'movieclip-0.5.0.min',
+        'movieclip':'movieclip-0.6.0.min',
         'preloadjs':'preloadjs-0.2.0.min',
         
         // Dynamic libs

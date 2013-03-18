@@ -56,7 +56,7 @@ function(createjs,lib,Global,Character){
             return Global.stage.mouseX/that.world.scale - (that.world.x/that.world.scale + that.x);
         });
         this.get('mouseY',function(){
-            return Global.stage.mouseY/that.world.scale - (that.world.y/that.world.scale + that.y) + 10;
+            return Global.stage.mouseY/that.world.scale - (that.world.y/that.world.scale + that.y);
         });
     }
     

@@ -40,6 +40,7 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weap
         this.scrollTarget = this.addChild(this.defaultTarget);
         this.scrollSensitivity = 0.36;
         this.update = {rate:6,count:0};
+        this.cScale = 1;
         
         this.mapContainer = this.addChild(new createjs.Container());
         this.entityContainer = this.addChild(new createjs.Container());
@@ -421,6 +422,15 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weap
         if(times>1){
             times--;
             this.updateDisplay(x,y,scale,times);
+        }else{
+            // Caching = performance boost
+            this.mapContainer.cache(
+                x-((scrW/2)/scale),
+                y-((scrH/2)/scale),
+                (scrW/scale),
+                (scrH/scale),
+                scale
+            );
         }
         
     }
