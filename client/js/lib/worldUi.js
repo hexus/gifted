@@ -50,8 +50,8 @@ function(createjs,lib,Global){
         
         this.minimap.scaleX = this.minimap.scaleY = scale;
         this.minimap.map.sourceRect = new createjs.Rectangle(x,y,dimen,dimen);
-        this.minimap.player.x = ((tX/tSize) - x);
-        this.minimap.player.y = ((tY/tSize) - y);
+        this.minimap.player.x = (tX/tSize) - x;
+        this.minimap.player.y = (tY/tSize) - y;
         
         this.fullmap.scaleX = this.fullmap.scaleY = this.world.scrW/this.mapCanvas.width;
         var fullWidth = this.world.map.getWorldSize().width * this.world.map.getRegionSize().width;
