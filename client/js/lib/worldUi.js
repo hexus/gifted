@@ -35,8 +35,6 @@ function(createjs,lib,Global){
     p.constructor = worldUi;
     
     p.tick = function(){
-        //this.scaleX = this.scaleY = this.world.scale;
-        
         var tSize = this.world.map.getTileSize();
         var wX = this.world.view.x;
         var wY = this.world.view.y;
@@ -57,7 +55,8 @@ function(createjs,lib,Global){
         this.minimap.player.x = (tX/tSize) - x;
         this.minimap.player.y = (tY/tSize) - y;
         
-        this.fullmap.scaleX = this.fullmap.scaleY = this.world.scrW/this.mapCanvas.width;
+        //this.fullmap.scaleX = this.fullmap.scaleY = this.world.scrW/this.mapCanvas.width;
+        this.fullmap.scaleX = this.fullmap.scaleY = (Global.stage.canvas.width/this.scaleX)/this.mapCanvas.width;
         var fullWidth = this.world.map.getWorldSize().width * this.world.map.getRegionSize().width;
         var fullHeight = this.world.map.getWorldSize().height * this.world.map.getRegionSize().height;
         this.fullmap.map.x = -this.mapCanvas.width/2; // Center
