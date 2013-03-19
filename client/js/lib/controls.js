@@ -144,12 +144,12 @@ function($,Global,Ui,Weapon,Bullet){
         showMap : {
             key:77,
             down:function(){
-                Global.world.overlay.fullmap.visible = true;
-                Global.world.overlay.minimap.visible = false;
+                Global.worldUi.fullmap.visible = true;
+                Global.worldUi.minimap.visible = false;
             },
             up:function(){
-                Global.world.overlay.fullmap.visible = false;
-                Global.world.overlay.minimap.visible = true;
+                Global.worldUi.fullmap.visible = false;
+                Global.worldUi.minimap.visible = true;
             }
         },
         createGun : {

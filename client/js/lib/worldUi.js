@@ -4,6 +4,8 @@ function(createjs,lib,Global){
         this.initialize();
         //this.alpha = 0.8;
         
+        this.x = this.y = 0;
+        
         this.world = world;
         this.mapCanvas = null;
         this.createMapCanvas();
@@ -33,6 +35,8 @@ function(createjs,lib,Global){
     p.constructor = worldUi;
     
     p.tick = function(){
+        //this.scaleX = this.scaleY = this.world.scale;
+        
         var tSize = this.world.map.getTileSize();
         var wX = this.world.view.x;
         var wY = this.world.view.y;

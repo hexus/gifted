@@ -1,5 +1,5 @@
-define(['createjs','assets','lib/global','lib/tile','lib/player','lib/worldUi','shared/Map','shared/Projectile','shared/Bullet','shared/Item','shared/Weapon'],
-function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weapon){
+define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map','shared/Projectile','shared/Bullet','shared/Item','shared/Weapon'],
+function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -18,7 +18,7 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weap
         this.projcount = 0;
         
         this.map = map;
-        this.outerMargin = 4;
+        this.outerMargin = 3;
         this.tileScale = this.map.getTileSize()/62;
         
         this.set('scale',function(v){
@@ -39,11 +39,10 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weap
         this.defaultTarget = new createjs.Container();
         this.scrollTarget = this.addChild(this.defaultTarget);
         this.scrollSensitivity = 0.36;
-        this.update = {rate:6,count:0};
+        this.update = {rate:8,count:0};
         
         this.mapContainer = this.addChild(new createjs.Container());
         this.entityContainer = this.addChild(new createjs.Container());
-        this.overlay = this.addChild(new worldUi(this));
     }
     
     var p = World.prototype = new createjs.Container();
@@ -61,13 +60,6 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weap
             }
         }
         this.iScroll();
-        this.overlayTick();
-    }
-    
-    p.overlayTick = function(){
-        this.overlay.x = this.view.x - this.scrW * 0.5;
-        this.overlay.y = this.view.y - this.scrH * 0.5;
-        this.overlay.tick();
     }
     
     p.bulletCollisions = function(proj){
@@ -91,7 +83,7 @@ function(createjs,lib,Global,Tile,Player,worldUi,Map,Projectile,Bullet,Item,Weap
     
     p.generateMap = function(){
         this.map.generate();
-        this.overlay.updateMap();
+        Global.worldUi.updateMap();
     }
     
     p.addPlayer = function(id,u){

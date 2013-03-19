@@ -48,8 +48,8 @@ function($,Global){
              'socket.io':socketUrl+'/socket.io/socket.io'
             }
         });
-        require(['createjs','assets','lib/ui','lib/controls','lib/player','lib/world'],
-        function(createjs,lib,Ui,Controls,Player,World){
+        require(['createjs','assets','lib/ui','lib/controls','lib/player','lib/world','lib/worldUi'],
+        function(createjs,lib,Ui,Controls,Player,World,worldUi){
             function init(){
                 var canvas, stage, socket, player, id, users, world, aspect=2.35, debugStr;
                 
@@ -60,11 +60,13 @@ function($,Global){
                 ticker = Global.ticker = createjs.Ticker;
                 stage = Global.stage = new createjs.Stage(canvas);
                 world = Global.world = new World();
+                worldUi = Global.worldUi = new worldUi(world);
                 player = Global.player = new Player();
                 users = Global.users = {};
                 
                 stage.snapToPixelEnabled = true;
                 stage.addChild(world);
+                stage.addChild(worldUi);
                 stage.addChild(player);
                 
                 Global.ui = Ui;
@@ -77,6 +79,7 @@ function($,Global){
                     if(Ui.selected()==='world'){
                         Controls.tick();
                         Global.world.tick(timeElapsed,paused);
+                        Global.worldUi.tick();
                         if(ticker.getTicks()%3==0){
                             var newDelta = Global.player.getStateDelta();
                             var deltaSize = 0;

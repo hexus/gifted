@@ -1,10 +1,10 @@
 define(['jquery','createjs','lib/global','lib/socket','shared/Bullet','shared/Weapon'],
 function($,createjs,Global,Socket,Bullet,Weapon){
     
-    var Ui = {}, dom,stage,socket,player,world,selected;
+    var Ui = {}, dom,stage,socket,player,world,worldUi,selected;
     
     Ui.init = function(){
-
+        
         var original = {
             width: parseInt($('#client').css('width')),
             height:parseInt($('#client').css('height'))
@@ -23,6 +23,7 @@ function($,createjs,Global,Socket,Bullet,Weapon){
                'height':Math.round($(window).width()/original.aspect)+'px'
             });
             world.scale = $(window).width()/original.width;
+            worldUi.scaleX = worldUi.scaleY = $(window).width()/original.width;
         });
         
         Ui.reset();
@@ -97,7 +98,8 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         socketUrl = Global.sUrl,
         socket = Global.socket,
         player = Global.player,
-        world = Global.world;
+        world = Global.world,
+        worldUi = Global.worldUi;
         
         $('.screen').each(function(k,v){
             dom[v.id] = new createjs.DOMElement($('#'+v.id)[0]);
