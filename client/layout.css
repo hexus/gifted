@@ -4,12 +4,23 @@ html,body{
     overflow:hidden;
 }
 textarea{resize:none;padding:0;}
+input{font-size:100%;}
 input[type=text]{padding:0 2px;}
 
 #wrap{}
 .screen{width:100%;}
 .screen div {float:left;}
 
+#loading{
+    top:50%;
+    left:50%;
+    width:400px;
+    height:200px;
+    margin-left:-200px;
+    margin-top:-200px;
+    position:absolute;
+    text-align:center;
+}
 #client{
     opacity:0;
 	position: absolute;
@@ -26,7 +37,7 @@ input[type=text]{padding:0 2px;}
     padding:0 4px;
 }
 #canvas{}
-#mainMenu,#worldList{z-index:1337;height:50%;top:25%;text-align:center;}
+#mainMenu,#worldList{z-index:1337;height:50%;top:25%;text-align:center;font-size:200%;}
 #lobby{height:100%;}
     #chat{position:relative;width:63%;height:95%;left:35%;}
     #chat #msg{width:80%;}

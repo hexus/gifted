@@ -45,9 +45,10 @@ function($,Global){
         $('#worldList, #mp').removeAttr('disabled');
         requirejs.config({ // Update config
             paths:{
-             'socket.io':socketUrl+'/socket.io/socket.io'
+                'socket.io':socketUrl+'/socket.io/socket.io'
             }
         });
+        $('#loading').show({easing:'linear'});
         require(['createjs','assets','lib/ui','lib/controls','lib/player','lib/world','lib/worldUi'],
         function(createjs,lib,Ui,Controls,Player,World,worldUi){
             function init(){

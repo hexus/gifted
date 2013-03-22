@@ -29,12 +29,18 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         Ui.reset();
         
         $("#sp").click(function(){
+            
             if(world){
-                world.generateMap();
-                var p = world.map.getProperties();
-                world.addPlayer(Global.player.gid,Global.player);
-                world.focusOn(Global.player);
-                Ui.showWorld();
+                $('#client').hide();
+                var cb = function(){
+                    world.generateMap();
+                    var p = world.map.getProperties();
+                    world.addPlayer(Global.player.gid,Global.player);
+                    world.focusOn(Global.player);
+                    Ui.showWorld();
+                    $('#client').show();
+                };
+                Ui.showLoading(cb);
             }
         });
         
@@ -87,7 +93,6 @@ function($,createjs,Global,Socket,Bullet,Weapon){
             socket.send('/r 1');
         });
         
-        Ui.hideAll();
         $('#client').fadeTo('slow',1);
         Ui.showMain();
     }
@@ -115,12 +120,21 @@ function($,createjs,Global,Socket,Bullet,Weapon){
     }
     
     Ui.hideAll = function(){
+        $('#loading').hide();
         $('#mainMenu').hide();
         $('#worldList').hide();
         $('#lobby').hide();
         player.visible = false;
         world.visible = false;
+        worldUi.visible = false;
         //createjs.Ticker.removeListener(world);
+    }
+    
+    Ui.showLoading = function(cb){
+        selected = 'loading';
+        Ui.hideAll();
+        $('#loading h2').html('generating world');
+        $('#loading').show({easing:'linear',complete:cb});
     }
     
     Ui.showMain = function(){
@@ -158,6 +172,7 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         player.scaleX = player.scaleY = 1;
         player.visible = true;
         world.visible = true;
+        worldUi.visible = true;
     }
     
     Ui.selected = function(){

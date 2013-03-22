@@ -7,7 +7,7 @@ var init = function(){
         var db = require('../DB');
     }
     
-    var solidarr = [3, 4, 5, 6, 7, 8, 9, 10];
+    var solidarr = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13];
     
     var Map = function(name){
     	var that = this;
@@ -86,38 +86,43 @@ var init = function(){
     		    regions[rX][rY][tX][tY] = v;
     		}
     	}
-    	this.eachTile = function(d){ // Arg should have signature d(x,y,v)
+    	this.eachTile = function(d,under){ // Arg should have signature d(x,y,v)
     	    if(typeof(d)==='function'){
                 for(var y=0;y<worldSize.height*regionSize.height;y++){
                     for(var x=0;x<worldSize.width*regionSize.width;x++){
-                        d.call(this,x,y,this.getTile(x,y));
+                        if(!under || (under && y > (worldSize.height*regionSize.height) - this.heights[x])){ // saves time
+                            d.call(this,x,y,this.getTile(x,y));
+                        }
                     }
                 }
-            }                    
+            }
     	}
-        this.eachTileNbhd = function(d){ // Slower for neighbourhood (nbhd), arg should have signature d(x,y,v,nbhd,n)
+        this.eachTileNbhd = function(d,under){ // Much slower for neighbourhood, arg should have signature d(x,y,v,n)
             if(typeof(d)==='function'){
                 var list = [];
                 for(var y=0;y<worldSize.height*regionSize.height;y++){
                     for(var x=0;x<worldSize.width*regionSize.width;x++){
-                        var nbhd = this.getTileNbhd(x,y)
-                        var n = 0;
-                        for(var j in nbhd){
-                            if(nbhd[j]>0){n++;}
+                        if(!under || (under && y > (worldSize.height*regionSize.height) - this.heights[x])){ // saves time
+                            var nbhd = this.getTileNbhd(x,y);
+                            var n = 0;
+                            for(var j in nbhd){
+                                if(nbhd[j]>0){n++;}
+                            }
+                            var tile = {
+                                x:x,
+                                y:y,
+                                v:this.getTile(x,y),
+                                nbhd:nbhd,
+                                n:n
+                            }
+                            list.push(tile);
                         }
-                        var tile = {
-                            x:x,
-                            y:y,
-                            v:this.getTile(x,y),
-                            nbhd:nbhd,
-                            n:n
-                        }
-                        list.push(tile);
                     }
                 }
                 for(var l in list){
-                    d.call(this,list[l].x,list[l].y,list[l].v,list[l].nbhd,list[l].n);
+                    d.call(this,list[l].x,list[l].y,list[l].v,list[l].n,list[l].nbhd);
                 }
+                delete(list);
             }
         }
         this.getTileNbhd = function(x,y){
@@ -209,7 +214,7 @@ var init = function(){
         this.direction = args.direction || 0;
         this.directionLimit = args.directionLimit || [0,1,2,3]; // >,v,<,^
         this.turnChances = args.turnChances || {x:0.5,y:0.5}; // x/y
-        this.afterlife = args.afterlife || 10;
+        this.afterlife = args.afterlife || 1;
         this.turn = function(force){
             force = !!force;
             var newDir = that.direction;
@@ -317,7 +322,7 @@ var init = function(){
             rSize = this.getRegionSize(),
             fullWidth = wSize.width * rSize.width,
             fullHeight = wSize.height * rSize.height,
-            heights = [],
+            heights = this.heights = [],
             smoothWidth = 20,
             smooth = 3;
     	
@@ -337,7 +342,7 @@ var init = function(){
     			}
     			newHeights[j] = sum / smoothWidth;
     		}
-    		heights = newHeights;
+    		heights = this.heights = newHeights;
     	}
     	
     	var topSpawn = {
@@ -356,10 +361,8 @@ var init = function(){
         this.setSpawn(lowSpawn.x,lowSpawn.y);
     	
         this.eachTile(function(x,y){
-            if(y >= fullHeight - heights[x]){
-                this.setTile(x,y,9);
-            }
-        });
+            this.setTile(x,y,9);
+        },true);
     	
     	// Let's dig!
     	var miners = {};
@@ -388,7 +391,7 @@ var init = function(){
             miners = {};
     	}
     	
-    	var caveNum = 20;
+    	var caveNum = 26;
     	var caveDist = Math.round(fullWidth/caveNum);
     	// Large random cave(s)
     	for(var i=0;i<caveNum;i++){
@@ -402,44 +405,41 @@ var init = function(){
         
         // Fill caves randomly
         this.eachTile(function(x,y,v){
-            if(y >= fullHeight - heights[x]){
-                if(v==0){
-                    if(Math.random()<0.4){
-                        this.setTile(x,y,9);
-                    }
+            if(v==0){
+                if(Math.random()<0.4){
+                    this.setTile(x,y,9);
                 }
             }
-        });
+        },true);
         
         // Cellular automataaaaa
         for(var i=0;i<2;i++){
-            this.eachTileNbhd(function(x,y,v,nbhd,n){
-                if(y > fullHeight - heights[x]){
-                    if((v==9 && n>5) || (v==0 && n>5) || n<1){
-                        this.setTile(x,y,9);
-                    }else{
-                        this.setTile(x,y,0);
-                    }
+            this.eachTileNbhd(function(x,y,v,n,nbhd){
+                if(n>5 || n<1){
+                    this.setTile(x,y,9);
+                }else{
+                    this.setTile(x,y,0);
                 }
-            });
+            },true);
         }
         
         for(var i=0;i<2;i++){
-            this.eachTileNbhd(function(x,y,v,nbhd,n){
-                if(y > fullHeight - heights[x]){
-                    if((v==1 && nbhd[2]==0 && nbhd[6]==0) || n<3){
-                        this.setTile(x,y,0);
-                    }
-                    if(v==0 && nbhd[2]>0 && nbhd[6]>0){
-                        this.setTile(x,y-1,0);
-                        this.setTile(x,y+1,0);
-                    }
-                    if(v==0 && nbhd[0]>0 && nbhd[4]>0){
-                        this.setTile(x-1,y,0);
-                        this.setTile(x+1,y,0);
-                    }
+            this.eachTileNbhd(function(x,y,v,n,nbhd){
+                if(n<3){
+                    this.setTile(x,y,0);
                 }
-            });
+                if((v==1 && nbhd[2]==0 && nbhd[6]==0) || n<3){
+                    this.setTile(x,y,0);
+                }
+                if(v==0 && nbhd[2]>0 && nbhd[6]>0){
+                    this.setTile(x,y-1,0);
+                    this.setTile(x,y+1,0);
+                }
+                if(v==0 && nbhd[0]>0 && nbhd[4]>0){
+                    this.setTile(x-1,y,0);
+                    this.setTile(x+1,y,0);
+                }
+            },true);
         }
         
         // Carve spawn
@@ -454,22 +454,46 @@ var init = function(){
     	miners['tunnelLeft'] = new mapMiner({
     	    map:this, x:lowSpawn.x + Math.floor(lowSpawn.width/2)-1, y:lowSpawn.y, life:-1,
     	    direction:0, directionLimit:[0,3], width:2, turnChances:{x:0.4,y:0.9},
-    	    borderChance:0.8, borderRight:7
+    	    borderChance:0.8, borderRight:13
     	});
     	miners['tunnelRight'] = new mapMiner({
     	    map:this, x:lowSpawn.x - Math.floor(lowSpawn.width/2), y:lowSpawn.y, life:-1,
     	    direction:2, directionLimit:[2,3], width:2, turnChances:{x:0.4,y:0.9},
-    	    borderChance:0.8, borderLeft:7
+    	    borderChance:0.8, borderLeft:13
     	});
     	
     	iterateMiners();
     	
-    	// Post-smoothing (cellular automata)
-        for(var y=0;y<fullHeight;y++){
-            for(var x=0;x<fullWidth;x++){
-                // get neighbourhood
-                // remove if too few neighbours
+    	// Painting
+        this.eachTile(function(x,y,v){
+            if(v!=13){
+                var heightDif = Math.abs(fullHeight - heights[x] - y);
+                var t = 0;
+                if(v>0){
+                    t = 5;
+                    if(heightDif>3){
+                        t = 11;
+                    }
+                    if(heightDif>15){
+                        t = 6;
+                    }
+                    if(heightDif>30){
+                        t = 9;
+                    }
+                    this.setTile(x,y,t);
+                }else{
+                    if(heightDif>30){
+                        t = 12;
+                    }
+                }
+                if(t){
+                    this.setTile(x,y,t);
+                }
             }
+        },true);
+        
+        for(var h in heights){
+            console.log((fullHeight - heights[h]));
         }
     	
 
@@ -620,6 +644,11 @@ var init = function(){
             var tile = flat[i/4];
             var colour = {r:0,g:0,b:0,a:255};
             switch(tile){
+                case 5:
+                    colour.r = 60;
+                    colour.g = 130;
+                    colour.b = 20;
+                    break;
                 case 6:
                     colour.r = 220;
                     colour.g = 210;
@@ -636,6 +665,11 @@ var init = function(){
                     break;
                 case 9:
                     colour.r = colour.g = colour.b = 66;
+                    break;
+                case 11:
+                    colour.r = 100;
+                    colour.g = 60;
+                    colour.b = 40;
                     break;
                 default:
                     colour.r = colour.g = colour.b = 236;
