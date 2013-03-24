@@ -493,7 +493,7 @@ var init = function(){
         },true);
         
         for(var h in heights){
-            console.log((fullHeight - heights[h]));
+            //console.log((fullHeight - heights[h]));
         }
     	
 

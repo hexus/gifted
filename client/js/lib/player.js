@@ -20,6 +20,8 @@ function(createjs,lib,Global,Character){
             height:this.clip.playerHitbox.nominalBounds.height
         };
         
+        this.hitboxFull = JSON.parse(JSON.stringify(this.hitbox));
+        
         this.char = this.clip.playerChar;
         this.char.head.wear.stop();
         this.char.torso.stop();
@@ -63,6 +65,12 @@ function(createjs,lib,Global,Character){
     var p = Player.prototype = new Character();
     p.super2 = Character.prototype;
     p.constructor = Player;
+    
+    p.currentLabel = function(){
+        var cl = this.lastAnim;
+        var cf = this.char.currentFrame;
+        return cl;
+    }
     
     p.setAnim = function(label){
         with(this){
@@ -262,21 +270,52 @@ function(createjs,lib,Global,Character){
             // Animation
             if(onFloor){
                 if(xSpeed!=0){
-                    if((xSpeed>0 && this.state.aimDir>0) || (xSpeed<0 && this.state.aimDir<0)){
-                        this.setAnim("running");
+                    if(!crouch){
+                        if((xSpeed>0 && this.state.aimDir>0) || (xSpeed<0 && this.state.aimDir<0)){
+                            this.setAnim("running");
+                        }else{
+                            this.setAnim("running_back");
+                        }
                     }else{
-                        this.setAnim("running_back");
+                        this.setAnim("crouch_move");
                     }
                 }else{
-                    this.setAnim("static");
+                    if(!crouch){
+                        if(this.lastAnim.indexOf("crouch")>-1){
+                            this.setAnim("static_from_crouch");
+                        }else{
+                            if(this.lastAnim!="static_from_crouch"){
+                                this.setAnim("static");
+                            }
+                        }
+                    }else{
+                        if(this.lastAnim.indexOf("crouchjump")==0){
+                            this.setAnim("crouch_from_crouchjump")
+                        }else{
+                            if(this.lastAnim.indexOf("static")>-1){
+                                this.setAnim("crouch_from_static");
+                            }else{
+                                if(this.lastAnim.indexOf("crouch")<0 || this.lastAnim=="crouch_move"){
+                                    this.setAnim("crouch");
+                                }
+                            }
+                        }
+                    }
                 }
             }else{
-                if(ySpeed!=0){
-                    if(ySpeed<0){
-                        this.setAnim("jumping");
-                    }else if(ySpeed>(yLimit/5) || (ySpeed>0 && isFlying)){
-                        this.setAnim("falling");
+                if(crouch){
+                    this.setAnim('crouchjump_from_jumping');
+                    if(this.lastAnim!="crouchjump_from_jumping"){
+                        this.setAnim('crouchjump');
                     }
+                }else{
+                    //if(ySpeed!=0){
+                        if(ySpeed<0){
+                            this.setAnim("jumping");
+                        }else if(ySpeed>(yLimit/5) || (ySpeed>0 && isFlying)){
+                            this.setAnim("falling");
+                        }
+                    //}
                 }
                 if(xSpeed!=0){
                     if(isFlying && ySpeed<flySpeed/2 && ySpeed>-flySpeed/2){

@@ -24,6 +24,9 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.state.moveRight = false;
         this.state.moveUp = false;
         this.state.moveDown = false;
+        this.state.crouch = false;
+        
+        this.hitboxFull = JSON.parse(JSON.stringify(this.hitbox));
         
         var _aimAngle = 0,_aimDir = 1, _isAimingLeft = false, _isAimingRight = false;
         
@@ -193,6 +196,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
             this.state.moveRight = false;
             this.state.moveUp = false;
             this.state.moveDown = false;
+            this.state.crouch = false;
             this.state.isUsing['l'] = false;
             this.state.isUsing['r'] = false;
         }
@@ -200,6 +204,25 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.itemTick();
         
         with(this){
+            if(state.moveDown && !state.isFlying){
+                if(!state.crouch && state.onFloor){
+                    this.y += Math.floor(this.hitboxFull.height/4);
+                }
+                state.crouch = true;
+            }else{
+                if(state.crouch && state.onFloor){
+                    this.y -= Math.floor(this.hitboxFull.height/4);
+                }
+                state.crouch = false;
+            }
+            
+            if(state.crouch){
+                this.hitbox.height = Math.floor(this.hitboxFull.height/2);
+            }else{
+                // if no collisions above
+                this.hitbox.height = this.hitboxFull.height; 
+            }
+            
             if(state.moveUp && state.onFloor && !upDown && !state.isFlying){
                 jump = true;
                 upDown = true;

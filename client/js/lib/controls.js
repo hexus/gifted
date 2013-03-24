@@ -21,15 +21,9 @@ function($,Global,Ui,Weapon,Bullet){
         down : {
             key:83,
             down:function(){
-                if(!Global.player.state.isFlying){ // debug
-                    Global.player.hitbox.height = 30;
-                }
                 Global.player.state.moveDown = true;
             },
             up:function(){
-                if(!Global.player.state.isFlying){ // debug
-                    Global.player.hitbox.height = 60;
-                }
                 Global.player.state.moveDown = false;
             }
         },
