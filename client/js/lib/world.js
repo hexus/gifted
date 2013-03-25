@@ -263,17 +263,15 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
             dx = cords['x'],
             dy = cords['y'];
         var newtile = this.map.getTile(rx,ry,dx,dy);
+        var at = this.map.getSolidArr().indexOf(newtile)<0 ? 0 : this.mapContainer.getNumChildren();
         if(newtile instanceof Tile){
             v = newtile.frame;
             if(v>0){
-                if(!this.mapContainer.contains(newtile)){
-                    this.mapContainer.addChild(newtile);
-                }
+                this.mapContainer.addChildAt(newtile,at);
             }
         }else{
             v = newtile;
             if(v>0){
-                var at = this.map.getSolidArr().indexOf(v)<0 ? 0 : this.mapContainer.getNumChildren()-1;
                 newtile = new Tile();
                 newtile = this.mapContainer.addChildAt(newtile,at);
                 this.map.setTile(rx,ry,dx,dy,newtile);

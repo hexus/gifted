@@ -121,6 +121,7 @@ function($,createjs,Global,Socket,Bullet,Weapon){
     
     Ui.hideAll = function(){
         $('#loading').hide();
+        $('#client').show();
         $('#mainMenu').hide();
         $('#worldList').hide();
         $('#lobby').hide();
@@ -133,8 +134,12 @@ function($,createjs,Global,Socket,Bullet,Weapon){
     Ui.showLoading = function(text,cb){
         selected = 'loading';
         Ui.hideAll();
+        $('#client').hide();
         $('#loading h2').html(text);
-        $('#loading').show({easing:'linear',complete:cb});
+        $('#loading').show({
+            easing:'linear',
+            complete:cb
+        });
     }
     
     Ui.showMain = function(){
