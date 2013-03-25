@@ -263,15 +263,17 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
             dx = cords['x'],
             dy = cords['y'];
         var newtile = this.map.getTile(rx,ry,dx,dy);
-        var at = this.map.getSolidArr().indexOf(newtile)<0 ? 0 : this.mapContainer.getNumChildren();
+        var at = 0;
         if(newtile instanceof Tile){
             v = newtile.frame;
             if(v>0){
+                at = this.map.getSolidArr().indexOf(v)<0 ? 0 : this.mapContainer.getNumChildren();
                 this.mapContainer.addChildAt(newtile,at);
             }
         }else{
             v = newtile;
             if(v>0){
+                at = this.map.getSolidArr().indexOf(v)<0 ? 0 : this.mapContainer.getNumChildren();
                 newtile = new Tile();
                 newtile = this.mapContainer.addChildAt(newtile,at);
                 this.map.setTile(rx,ry,dx,dy,newtile);
@@ -414,13 +416,7 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
             this.updateDisplay(x,y,scale,times);
         }else{
             // Caching = performance boost
-            this.mapContainer.cache(
-                dX1*tSize,
-                dY1*tSize,
-                (dX2-dX1)*tSize,
-                (dY2-dY1)*tSize,
-                scale
-            );
+            this.mapContainer.cache(dX1*tSize,dY1*tSize,(dX2-dX1)*tSize,(dY2-dY1)*tSize,scale);
         }
         
     }

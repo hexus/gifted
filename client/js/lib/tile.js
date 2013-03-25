@@ -27,15 +27,9 @@ function(createjs,lib,Global){
             _f = parseInt(f) || 0;
             var getFrame = Global.tiles.getFrame(_f);
             if(getFrame){
-                if(that.clip){
-                    if(that.clip.parent){
-                        that.clip.parent.removeChild(that.clip);
-                    }
-                }
-                that.clip = new createjs.Bitmap(getFrame.image); // This is very fast
-                that.clip.sourceRect = getFrame.rect;
-                that.addChild(that.clip);
-                that.clip.scaleX = that.clip.scaleY = that.scale;
+                that.image = getFrame.image;
+                that.sourceRect = getFrame.rect;
+                that.scaleX = that.scaleY = that.scale;
             }
         });
         
@@ -45,9 +39,7 @@ function(createjs,lib,Global){
         this.set('scale',function(s){
             if(_scale!=s){
                 _scale = s;
-                if(that.clip){
-                    that.clip.scaleX = that.clip.scaleY = that.scale;
-                }
+                that.scaleX = that.scaleY = that.scale;
             }
         });
         
@@ -68,7 +60,7 @@ function(createjs,lib,Global){
         Global.tiles = tileSheetBuilder.spriteSheet;
     };
     
-    var p = Tile.prototype = new createjs.Container();
+    var p = Tile.prototype = new createjs.Bitmap();
     
     p.valueOf = function(){
         return parseInt(this.frame);
