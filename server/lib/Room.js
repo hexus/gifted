@@ -95,8 +95,8 @@ p.tick = function(){
                         var share = ['x','y','xSpeed','ySpeed','health'];
                         userDeltasMod[u] = {};
                         for(var i in share){
-                            if(userDeltas[u][share[i]]!=null){
-                                userDeltasMod[u][share[i]] = userDeltas[u][share[i]];
+                            if(this.users.get(u).state[share[i]]!=null){ // send all instead of just delta
+                                userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
                             }
                         }
                     }

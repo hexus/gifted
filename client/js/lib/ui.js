@@ -40,7 +40,7 @@ function($,createjs,Global,Socket,Bullet,Weapon){
                     Ui.showWorld();
                     $('#client').show();
                 };
-                Ui.showLoading(cb);
+                Ui.showLoading('generating world',cb);
             }
         });
         
@@ -130,10 +130,10 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         //createjs.Ticker.removeListener(world);
     }
     
-    Ui.showLoading = function(cb){
+    Ui.showLoading = function(text,cb){
         selected = 'loading';
         Ui.hideAll();
-        $('#loading h2').html('generating world');
+        $('#loading h2').html(text);
         $('#loading').show({easing:'linear',complete:cb});
     }
     
@@ -163,10 +163,6 @@ function($,createjs,Global,Socket,Bullet,Weapon){
     }
     
     Ui.showWorld = function(){
-        if(selected=='lobby'){
-            player.state.x = 0;
-            player.state.y = 0;
-        }
         selected = 'world';
         Ui.hideAll();
         player.scaleX = player.scaleY = 1;

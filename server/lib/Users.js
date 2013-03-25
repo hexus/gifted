@@ -57,7 +57,7 @@ p.ping = function(){
 }
 
 p.send = function(str,ex){
-    if(empty(ex)){ex=null;} // exlusion
+    if(empty(ex)){ex=null;} // exclusion
     if(!empty(str)){
         async.forEach(this.collection,function(i,c){ // Parallel baby (only takes arrays >:/)
             if(i instanceof User){
@@ -85,6 +85,8 @@ p.sendTo = function(u){ // Send users to given user
             if(i instanceof User){
                 if(i!=u){
                     i.sendTo(u);
+                }else{
+                    u.sendSelf = true;
                 }
             }else{
                 delete(this.collection[i.id]);

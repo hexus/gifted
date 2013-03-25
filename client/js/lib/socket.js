@@ -116,8 +116,9 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                 case "/r": // Approval to move to into world or back to lobby
                     if(Ui.selected()==='lobby'){
                         if(d[1]=='1'){
-                            Ui.showWorld();
-                            socket.send('/info-request json');
+                            Ui.showLoading("receiving world",function(){
+                                socket.send('/info-request json');    
+                            });
                         }
                     }else if(Ui.selected()==='world'){
                         if(d[1]=='0'){
@@ -130,10 +131,10 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     break;
                 case "/wd": // World data (map)
                     world.map.expand(dstr);
-                    world.overlay.updateMap();
+                    Global.worldUi.updateMap();
                     world.addPlayer(player.gid,player);
                     world.focusOn(player);
-                    // Ui.hideLoadingScreen(); // Implement a loading overlay!
+                    Ui.showWorld(); // Implement a loading overlay!
                     logData = false;
                     break;
                 case "/ping":
