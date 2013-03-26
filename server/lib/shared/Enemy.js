@@ -12,6 +12,7 @@ var init = function(lib,Global,Character){
         if(!args){args={};}
         this.super2.constructor.call(this,args);
         this.hitbox.width = this.hitbox.height = 30;
+        this.state.entityType = 'flybot';
         this.state.isFlying = true;
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 10;
     }

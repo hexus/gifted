@@ -14,7 +14,6 @@ var init = function(Entity){ // Class definition
         this.rotateWithSpeed = true;
         this.hitbox.width = 4;
         this.hitbox.height = 4;
-        this.state.projType = 'abstract';
         this.state.xSpeed = 0;
         this.state.ySpeed = 0;
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 40;

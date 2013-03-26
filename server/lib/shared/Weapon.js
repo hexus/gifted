@@ -12,8 +12,7 @@ var init = function(Global,Item,Bullet){
     var Weapon = function(args){ // Further abstract?!
         if(!args){args={};}
         this.super3.constructor.call(this,args);
-        this.state.projType = 'item';
-        this.state.itemType = 'weapon';
+        this.state.entityType = 'weapon';
         this.state.weaponId = args.weaponId || 0;
         this.state.weaponDamage = 5;
         this.state.coolDownTime = 7;
@@ -56,6 +55,7 @@ var init = function(Global,Item,Bullet){
             if(this.owner){
                 var ps = this.owner.state;
                 var proj = new Bullet({
+                    owner:this.owner,
                     x:ps.x,
                     y:ps.y-15,
                     direction:ps.aimDir,

@@ -72,8 +72,9 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Flybot){
                         var user = this.users[u];
                         var c = user.chkCollision(ray[r][0],ray[r][1]);
                         if(c){
-                            e.onContact(user);
-                            collidee = user;
+                            if(e.onContact(user)){
+                                collidee = user;
+                            }
                         }
                     }
                     for(var eid in this.entities){ // anything that isn't a player
@@ -81,8 +82,9 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Flybot){
                         if(entity!=e){ // if it's not itself
                             var c = entity.chkCollision(ray[r][0],ray[r][1]);
                             if(c){
-                                e.onContact(entity);
-                                collidee = entity;
+                                if(e.onContact(entity)){
+                                    collidee = entity;
+                                }
                             }
                         }
                     }
@@ -102,8 +104,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Flybot){
             u.world = this;
             u.spawn();
         }
-        var f = this.addEntity(new Flybot());
-        f.spawn();
+        //var f = this.addEntity(new Flybot());
     }
     
     p.removePlayer = function(id){

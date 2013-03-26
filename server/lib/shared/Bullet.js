@@ -1,11 +1,12 @@
 (function(){
 var node = typeof window === 'undefined';
-var deps = ['createjs','assets','lib/global','shared/Entity','shared/Projectile','shared/Effect'];
+var deps = ['createjs','assets','lib/global','shared/Entity','shared/Character','shared/Projectile','shared/Effect'];
 
-var init = function(createjs,lib,Global,Entity,Projectile,Effect){
+var init = function(createjs,lib,Global,Entity,Character,Projectile,Effect){
     
     if(node){
         Entity = require('./Entity');
+        Character = require('./Character');
         Projectile = require('./Projectile');
         Effect = require('./Effect');
     }
@@ -15,8 +16,9 @@ var init = function(createjs,lib,Global,Entity,Projectile,Effect){
         this.super_Projectile.constructor.call(this,args);
         var that = this;
         this.life = 60;
+        this.owner = args.owner || false;
         this.isRubbishOnCollide = true;
-        this.state.projType = 'bullet';
+        this.state.entityType = 'bullet';
         this.state.isFlying = true;
         this.state.damage = 10;
         this.state.knockback = 5;
@@ -46,8 +48,9 @@ var init = function(createjs,lib,Global,Entity,Projectile,Effect){
     }
     
     p.onContact = function(e){
-        if(e instanceof Entity){
-            var doApply = true;
+        var doApply = false;
+        if(e instanceof Character && e!=this.owner){
+            doApply = true;
             if(!node && Global.socket){ // Authoritative server
                 if(Global.socket.connected){
                     doApply = false;
@@ -60,9 +63,10 @@ var init = function(createjs,lib,Global,Entity,Projectile,Effect){
                     xSpeed:Math.round(Math.cos(rads) * 5),
                     ySpeed:Math.round(Math.sin(rads) * 5)
                 }));
+                this.isRubbish = true;
             }
-            this.isRubbish = true;
         }
+        return doApply;
     }
    
     return Bullet; 
