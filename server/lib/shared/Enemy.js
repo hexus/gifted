@@ -14,7 +14,7 @@ var init = function(lib,Global,Character){
         this.hitbox.width = this.hitbox.height = 30;
         this.state.entityType = 'flybot';
         this.state.isFlying = true;
-        this.state.xLimit = this.state.yLimit = this.state.flySpeed = 10;
+        this.state.xLimit = this.state.yLimit = this.state.flySpeed = 3;
     }
     
     var p = Enemy.prototype = new Character();
@@ -23,19 +23,23 @@ var init = function(lib,Global,Character){
     
     p.tick = function(){
         this.super2.tick.call(this);
-        if(!node){ // Client side
-            doAiTick = true;
+        doAiTick = true;
+        if(!node){
             if(Global.socket){
                 if(Global.socket.connected){
                     doAiTick = false;
                 }
             }
-            if(doAiTick){
-                this.aiTick();
-            }
-        }else{ // Server side
-            this.aiTick(); 
         }
+        if(doAiTick && this.state.health>0){
+            this.aiTick();
+        }
+        if(this.state.health<1){
+            if(this.spawnerParent){
+                this.spawnerParent.leave(this);
+            }
+        }
+        
     }
     
     p.aiTick = function(){

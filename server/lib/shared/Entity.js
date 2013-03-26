@@ -70,6 +70,12 @@ var init = function(createjs,Global,Effect){
             this.hitboxShape = false;
             this.rayPoints = this.addChild(new createjs.Container());
         }
+        
+        if(this.life===0){
+            if(typeof this.onDeath === 'function'){
+                this.onDeath();
+            }
+        }
     }
     
     var p = Entity.prototype;
@@ -436,6 +442,14 @@ var init = function(createjs,Global,Effect){
             this.state.xSpeed = 0;
             this.state.ySpeed = 0;
             this.state.isFlying = true;
+            if(typeof this.onDeath === 'function'){
+                this.onDeath();
+            }
+            if(this.spawnerParent){
+                if(typeof this.spawnerParent.leave === 'function'){
+                    this.spawnerParent.leave(this);
+                }
+            }
         }
         //this.streamTick();
     }

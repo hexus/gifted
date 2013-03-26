@@ -56,6 +56,9 @@ var init = function(createjs,lib,Global,Entity,Character,Projectile,Effect){
                     doApply = false;
                 }
             }
+            if(e.state.health<1){
+                doApply = false;
+            }
             if(doApply){
                 var rads = this.state.angle * Math.PI/180;
                 e.applyEffect(new Effect({

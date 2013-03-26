@@ -164,7 +164,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     break;
                 case "/ec": // Create entity
                     var s = JSON.parse(dstr);
-                    var e = world.recreateEntity(s.eid,s);
+                    var e = world.recreateEntity(s);
                     if(e){
                         world.addEntity(e);
                         e.tick();
@@ -180,7 +180,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     for(var eid in deltas){
                         var e = world.entities[eid];
                         if(!e){ // create entity if it doesn't exist
-                            e = world.addEntity(world.recreateEntity(eid,deltas[eid]));
+                            e = world.addEntity(world.recreateEntity(deltas[eid],eid));
                         }else{
                             for(var i in deltas[eid]){
                                 if(e){
@@ -195,7 +195,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     break;
                 case "/itemGive":
                     var json = JSON.parse(dstr);
-                    var item = world.recreateEntity(json.eid,json.state);
+                    var item = world.recreateEntity(json.state,json.eid);
                     users[json.id].setItem(json.side,item);
                     break;
                 case "/itemTake":

@@ -1,5 +1,5 @@
-define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map','shared/Entity','shared/Bullet','shared/Item','shared/Weapon','shared/Enemy/Flybot'],
-function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Flybot){
+define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map','shared/Entity','shared/Bullet','shared/Item','shared/Weapon','shared/Spawner','shared/Enemy/Flybot'],
+function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,Flybot){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -96,6 +96,9 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Flybot){
     p.generateMap = function(){
         this.map.generate();
         Global.worldUi.updateMap();
+        this.addEntity(new Spawner({egg:{
+            entityType:'flybot'
+        }}));
     }
     
     p.addPlayer = function(id,u){
@@ -130,27 +133,31 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Flybot){
         }
     }
     
-    p.recreateEntity = function(eid,s){
+    p.recreateEntity = function(s,eid){
+        if(eid){
+            s.eid = eid;
+        }
         var e = false;
-        if(eid>0){
-            switch(s.projType){
-                case 'item':
-                    switch(s.itemType){
-                        case 'weapon':
-                            e = new Weapon({eid:eid,weaponId:s.weaponId});
-                            break;
-                    }
-                    break;
-                case 'bullet':
-                    e = new Bullet({eid:eid});
-                    break;
+        switch(s.entityType){
+            case 'weapon':
+                args.weaponId = s.weaponId;
+                e = new Weapon(s);
+                break;
+            case 'bullet':
+                e = new Bullet(s);
+                break;
+            case 'spawner':
+                e = new Spawner(s);
+                break;
+            case 'flybot':
+                e = new Flybot(s);
+                break;
+        }
+        if(e){
+            for(var i in s){
+                e.state[i] = s[i];
             }
-            if(e){
-                for(var i in s){
-                    e.state[i] = s[i];
-                }
-                e.updateRotation();
-            }
+            e.updateRotation();
         }
         return e;
     }

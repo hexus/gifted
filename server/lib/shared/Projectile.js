@@ -35,18 +35,9 @@ var init = function(Entity){ // Class definition
     
     p.tick = function(){
         this.super_Entity.tick.call(this);
-        if(this.life===0){
-            if(typeof this.onDeath === 'function'){
-                this.onDeath();
-            }
-        }
         if(!node){
             this.scaleX = this.state.direction>0 ? 1 : -1;
         }
-    }
-    
-    p.onDeath = function(){
-        
     }
     
     return Projectile;

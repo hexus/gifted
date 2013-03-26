@@ -14,14 +14,18 @@ var init = function(lib,Global,Entity){
         this.cooldownTime = 32;
         this.cooldown = this.cooldownTime;
         this.hitbox.width = this.hitbox.height = 40;
-        this.eggs = args.eggs || [];
+        this.egg = args.egg || [];
         this.babbies = [];
+        this.babbyLimit = 3;
         this.state.entityType = 'spawner';
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 10;
+        if(!node){
+            this.clip = this.addChild(new lib.mcSpawner()).clip;
+        }
     }
     
     var p = Spawner.prototype = new Entity();
-    p.super2 = Character.prototype;
+    p.super2 = Entity.prototype;
     p.constructor = Spawner;
     
     p.tick = function(){
@@ -33,19 +37,40 @@ var init = function(lib,Global,Entity){
             }
         }
         if(doSpawn){
-            cooldown--;
-            if(cooldown<1){
-                this.birth();
-                this.cooldown = this.cooldownTime;
+            if(this.babbies.length<this.babbyLimit){
+                this.cooldown--;
+                if(this.cooldown<1){
+                    this.birth();
+                    this.cooldown = this.cooldownTime;
+                }
             }
         }
     }
     
     p.birth = function(){
-        
+        if(this.cooldown==0 && this.egg){
+            var egg = JSON.parse(JSON.stringify(this.egg));
+            if(egg.entityType!='spawner'){
+                egg.x = this.x;
+                egg.y = this.y;
+                var babby = this.world.addEntity(this.world.recreateEntity(egg));
+                babby.spawnerParent = this;
+                this.babbies.push(babby);
+                this.clip.gotoAndPlay('closing');
+            }
+        }
     }
     
-    return Enemy;
+    p.leave = function(babby){
+        for(var b in this.babbies){
+            var gotBabby = this.babbies.indexOf(babby);
+            if(gotBabby>-1){
+                this.babbies.splice(gotBabby,1); // index of babby shouldn't be important
+            }
+        }
+    }
+    
+    return Spawner;
 }
 
 if(node){ // Server side

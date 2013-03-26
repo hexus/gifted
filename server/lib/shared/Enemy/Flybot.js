@@ -12,8 +12,7 @@ var init = function(lib,Enemy){
         if(!args){args={};}
         this.super3.constructor.call(this,args);
         if(!node){
-            this.clip = this.addChild(new lib.mcFlybot());
-            this.char = this.clip.flybotChar;
+            this.char = this.addChild(new lib.mcFlybot()).flybotChar;
             this.turret = this.char.turret;
         }
     }
@@ -32,6 +31,8 @@ var init = function(lib,Enemy){
     p.aiTick = function(){
         this.super3.aiTick.call(this);
         this.state.aimAngle = (this.state.aimAngle + 1) % 360;
+        this.state.xSpeed += -this.state.flySpeed+Math.round(Math.random()*(this.state.flySpeed*2));
+        this.state.ySpeed += -this.state.flySpeed+Math.round(Math.random()*(this.state.flySpeed*2));
     }
     
     return Flybot;
