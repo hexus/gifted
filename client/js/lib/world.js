@@ -1,5 +1,5 @@
-define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map','shared/Projectile','shared/Bullet','shared/Item','shared/Weapon'],
-function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
+define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map','shared/Entity','shared/Bullet','shared/Item','shared/Weapon','shared/Enemy/Flybot'],
+function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Flybot){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -14,8 +14,8 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
         this.id = 0;
         this.name = '';
         this.users = {};
-        this.projectiles = {};
-        this.projcount = 0;
+        this.entities = {};
+        this.entitycount = 0;
         
         this.map = map;
         this.outerMargin = 3;
@@ -48,23 +48,23 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
     var p = World.prototype = new createjs.Container();
     
     p.tick = function(timeElapsed,paused){
-        for(u in this.users){
+        for(var u in this.users){
             this.users[u].tick();
         }
-        for(p in this.projectiles){
-            var proj = this.projectiles[p];
-            proj.tick();
-            this.bulletCollisions(proj);
-            if(proj.isRubbish){
-                this.removeProjectile(proj);
+        for(var e in this.entities){
+            var entity = this.entities[e];
+            entity.tick();
+            this.bulletCollisions(entity);
+            if(entity.isRubbish){
+                this.removeEntity(entity);
             }
         }
         this.iScroll();
     }
     
-    p.bulletCollisions = function(proj){
-        if(proj instanceof Bullet){
-            var ray = proj.getRay();
+    p.bulletCollisions = function(e){
+        if(e instanceof Bullet){
+            var ray = e.getRay();
             var collidee = false;
             for(var r in ray){
                 if(!collidee){
@@ -72,8 +72,18 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
                         var user = this.users[u];
                         var c = user.chkCollision(ray[r][0],ray[r][1]);
                         if(c){
-                            proj.onContact(user);
+                            e.onContact(user);
                             collidee = user;
+                        }
+                    }
+                    for(var eid in this.entities){ // anything that isn't a player
+                        var entity = this.entities[eid];
+                        if(entity!=e){ // if it's not itself
+                            var c = entity.chkCollision(ray[r][0],ray[r][1]);
+                            if(c){
+                                e.onContact(entity);
+                                collidee = entity;
+                            }
                         }
                     }
                 }
@@ -92,6 +102,8 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
             u.world = this;
             u.spawn();
         }
+        var f = this.addEntity(new Flybot());
+        f.spawn();
     }
     
     p.removePlayer = function(id){
@@ -101,50 +113,50 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
         }
     }
     
-    p.addProjectile = function(proj){
-        if(proj instanceof Projectile){
-            proj.pid = proj.pid || ++this.projcount;
-            this.projectiles[proj.pid] = proj;
-            proj.spawn();
-            return proj;
+    p.addEntity = function(e){
+        if(e instanceof Entity){
+            e.eid = e.eid || ++this.entitycount;
+            this.entities[e.eid] = e;
+            e.spawn();
+            return e;
         }
     }
     
-    p.removeProjectile = function(proj){
-        if(proj instanceof Projectile){
-            proj.unspawn();
-            delete(this.projectiles[proj.pid]);
+    p.removeEntity = function(e){
+        if(e instanceof Entity){
+            e.unspawn();
+            delete(this.entities[e.eid]);
         }
     }
     
-    p.recreateProjectile = function(pid,s){
-        var proj = false;
-        if(pid>0){
+    p.recreateEntity = function(eid,s){
+        var e = false;
+        if(eid>0){
             switch(s.projType){
                 case 'item':
                     switch(s.itemType){
                         case 'weapon':
-                            proj = new Weapon({pid:pid,weaponId:s.weaponId});
+                            e = new Weapon({eid:eid,weaponId:s.weaponId});
                             break;
                     }
                     break;
                 case 'bullet':
-                    proj = new Bullet({pid:pid});
+                    e = new Bullet({eid:eid});
                     break;
             }
-            if(proj){
+            if(e){
                 for(var i in s){
-                    proj.state[i] = s[i];
+                    e.state[i] = s[i];
                 }
-                proj.updateRotation();
+                e.updateRotation();
             }
         }
-        return proj;
+        return e;
     }
     
     p.testItem = function(){
         ps = Global.player.state;
-        Global.wtest = this.addProjectile(new Weapon({
+        Global.wtest = this.addEntity(new Weapon({
             wid:0,
             x:this.map.getSpawn().x,
             y:this.map.getSpawn().y,
@@ -156,13 +168,13 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
         maxDistance = !maxDistance ? 0 : maxDistance;
         var shortestDistance = -1;
         var nearestItem = false;
-        for(var i in this.projectiles){
-            var proj = this.projectiles[i];
-            if(proj instanceof Item){
-                distance = Math.sqrt(Math.pow(proj.state.x - x,2) + Math.pow(proj.state.y - y,2));
+        for(var i in this.entities){
+            var e = this.entities[i];
+            if(e instanceof Item){
+                distance = Math.sqrt(Math.pow(e.state.x - x,2) + Math.pow(e.state.y - y,2));
                 if(shortestDistance<0 || distance < shortestDistance){
                     if(distance < maxDistance || maxDistance === 0){
-                        nearestItem = proj;
+                        nearestItem = e;
                     }
                 }
             }
@@ -173,7 +185,7 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
     p.removeNearestItem = function(x,y,maxDistance){
         var item = this.getNearestItem(x,y,maxDistance);
         if(item){
-            this.removeProjectile(item);
+            this.removeEntity(item);
         }
         return item;
     }
@@ -385,10 +397,10 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
                 for(var m=0; m<Math.abs(dy1rel); m++){
                     for(var n=((dX1<deltas[0])?dX1:deltas[0]); n<((dX2>deltas[1])?dX2:deltas[1]); n++){
                         var addY,remY;
-                        if(dy1rel>0){ // Left
+                        if(dy1rel>0){ // Top
                             remY = deltas[2]+m;
                             addY = deltas[3]+m;
-                        }else{ // Right
+                        }else{ // Bottom
                             remY = deltas[3]-m;
                             addY = deltas[2]-m;
                         }
@@ -396,7 +408,7 @@ function(createjs,lib,Global,Tile,Player,Map,Projectile,Bullet,Item,Weapon){
                         remTile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
                         this.removeTile(remTile);
                         if(n>=dX1 && n<=dX2){
-                            cord = this.map.convertCords(n,addY,true); 
+                            cord = this.map.convertCords(n,addY,true);
                             var tile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
                             this.addTile(n,addY,tile);
                         }

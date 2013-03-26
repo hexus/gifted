@@ -1,8 +1,8 @@
 var empty = require('./Helpers').empty;
 var User = require('./User');
 var Users = require('./Users');
-var Projectile = require('./shared/Projectile');
-var Projectiles = require('./Projectiles');
+var Entity = require('./shared/Entity');
+var Entities = require('./Entities');
 var Bullet = require('./shared/Bullet');
 var Item = require('./shared/Item');
 var Map = require('./shared/Map');
@@ -25,7 +25,7 @@ var Room = function(args){
     this.map = args.map || new Map(this.name);
     this.lobbyUsers = new Users(); // Users in room lobby
     this.users = new Users(); // Users in room world
-    this.projectiles = new Projectiles();
+    this.entities = new Entities();
     
     this.fps = args.fps || 32;
     this.step = 0;
@@ -60,20 +60,20 @@ p.tick = function(){
         }
     }
     
-    // Projectile tick and deltas
-    var projDeltas = {};
-    for(var i in this.projectiles.get()){
-    	var proj = this.projectiles.get(i);
-    	if(proj instanceof Projectile){
-        	proj.tick();
-        	this.bulletCollisions(proj);
-            if(proj.isRubbish){
-                this.removeProjectile(proj);
+    // Entity tick and deltas
+    var eDeltas = {};
+    for(var i in this.entities.get()){
+    	var e = this.entities.get(i);
+    	if(e instanceof Entity){
+        	e.tick();
+        	this.bulletCollisions(e);
+            if(e.isRubbish){
+                this.removeEntity(e);
             }else{
-            	if(this.step%this.streamSpeed==0 && !(proj instanceof Bullet)){
-            		var projDelta = proj.getStateDelta();
-            		if(Object.size(projDelta)>0){
-            			projDeltas[i] = projDelta;
+            	if(this.step%this.streamSpeed==0 && !(e instanceof Bullet)){
+            		var eDelta = e.getStateDelta();
+            		if(Object.size(eDelta)>0){
+            			eDeltas[i] = eDelta;
             		}
         	   }
     	   }
@@ -105,9 +105,9 @@ p.tick = function(){
                     }
                 }
                 
-                // Projectile deltas
-                if(Object.size(projDeltas)>0){
-                    this.send('/pd '+JSON.stringify(projDeltas));
+                // Entity deltas
+                if(Object.size(eDeltas)>0){
+                    this.send('/ed '+JSON.stringify(eDeltas));
                 }
                 
                 if(this.step%32==0){
@@ -159,12 +159,12 @@ p.joinUser = function(u,lobby){
             space.sendTo(u);
 		}else{
             u.spawn();
-            for(var i in this.projectiles.get()){
-                var proj = this.projectiles.get(i);
-                if(proj){
-                    var projState = JSON.parse(JSON.stringify(proj.state));
-                    projState.pid = proj.pid;
-                    u.send('/pc ' + JSON.stringify(projState));
+            for(var i in this.entities.get()){
+                var e = this.entities.get(i);
+                if(e){
+                    var eState = JSON.parse(JSON.stringify(e.state));
+                    eState.eid = e.eid;
+                    u.send('/ec ' + JSON.stringify(eState));
                 }
             }
 		}
@@ -204,23 +204,23 @@ p.leaveUser = function(u){
 	}
 }
 
-p.addProjectile = function(i){
-    if(i instanceof Projectile){
-        var proj = this.projectiles.add(i);
-        proj.room = proj.world = this;
-        if(!(proj instanceof Item && proj.owner)){
-            var state = JSON.parse(JSON.stringify(proj.state));
-            state.pid = proj.pid;
-            this.users.send('/pc ' + JSON.stringify(state));
+p.addEntity = function(i){
+    if(i instanceof Entity){
+        var e = this.entities.add(i);
+        e.room = e.world = this;
+        if(!(e instanceof Item && e.owner)){
+            var state = JSON.parse(JSON.stringify(e.state));
+            state.eid = e.eid;
+            this.users.send('/ec ' + JSON.stringify(state));
         }
     }
 }
 
-p.removeProjectile = function(i){
-    if(i instanceof Projectile){
-        this.projectiles.remove(i);
+p.removeEntity = function(i){
+    if(i instanceof Entity){
+        this.entities.remove(i);
         if(!(i instanceof Item && i.owner) && !(i instanceof Bullet)){
-            this.users.send('/pd ' + i.pid);
+            this.users.send('/ed ' + i.eid);
         }
     }
 }
@@ -229,13 +229,13 @@ p.getNearestItem = function(x,y,maxDistance){
     maxDistance = !maxDistance ? 0 : maxDistance;
     var shortestDistance = -1;
     var nearestItem = false;
-    for(var i in this.projectiles.get()){
-        var proj = this.projectiles.get(i);
-        if(proj instanceof Item){
-            var distance = Math.sqrt(Math.pow(proj.state.x - x,2) + Math.pow(proj.state.y - y,2));
+    for(var i in this.entities.get()){
+        var e = this.entities.get(i);
+        if(e instanceof Item){
+            var distance = Math.sqrt(Math.pow(e.state.x - x,2) + Math.pow(e.state.y - y,2));
             if(shortestDistance<0 || distance < shortestDistance){
                 if(distance < maxDistance || maxDistance === 0){
-                    nearestItem = proj;
+                    nearestItem = e;
                 }
             }
         }
@@ -246,14 +246,14 @@ p.getNearestItem = function(x,y,maxDistance){
 p.removeNearestItem = function(x,y,maxDistance){
     var item = this.getNearestItem(x,y,maxDistance);
     if(item){
-        this.removeProjectile(item);
+        this.removeEntity(item);
     }
     return item;
 }
 
-p.bulletCollisions = function(proj){
-    if(proj instanceof Bullet){
-        var ray = proj.getRay();
+p.bulletCollisions = function(e){
+    if(e instanceof Bullet){
+        var ray = e.getRay();
         var collidee = false;
         for(var r in ray){
             if(!collidee){
@@ -261,7 +261,7 @@ p.bulletCollisions = function(proj){
                     var user = this.users.get(u);
                     var c = user.chkCollision(ray[r][0],ray[r][1]);
                     if(c){
-                        proj.onContact(user);
+                        e.onContact(user);
                         collidee = user;
                     }
                 }

@@ -17,7 +17,7 @@ var init = function(createjs,Global,Effect){
         this.set = this.__defineSetter__;
         var that = this;
         
-        this.eid = 0;
+        this.eid = args.eid || 0;
         this.hitbox = {
             width   : args.width || 32,
             height  : args.height || 32

@@ -151,7 +151,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
             );
             if(item){
                 this.setItem(side,item);
-                this.world.removeProjectile(item);
+                this.world.removeEntity(item);
                 return item;
             }
         }
@@ -167,7 +167,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
             item.state.y = this.state.y;
             item.state.xSpeed = Math.round(this.state.xSpeed * 0.5);
             item.state.ySpeed = Math.round(this.state.ySpeed * 0.5);
-            this.world.addProjectile(item);
+            this.world.addEntity(item);
             item.owner = false;
         }
         this.setItem(side); // unset

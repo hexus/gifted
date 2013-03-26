@@ -153,7 +153,7 @@ function($,Global,Ui,Weapon,Bullet){
                     Global.socket.send('/guntest');
                 }else{
                     ps = Global.player.state;
-                    Global.wtest = Global.world.addProjectile(new Weapon({
+                    Global.wtest = Global.world.addEntity(new Weapon({
                         weaponId:'pistol',
                         x:ps.x,
                         y:ps.y,

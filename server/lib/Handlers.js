@@ -85,7 +85,7 @@ h.handleData = function(data){ // Called in context of a User
                 x:this.x,
                 y:this.y
             });
-            this.room.addProjectile(gun);
+            this.room.addEntity(gun);
             break;
         default:
           log = false;

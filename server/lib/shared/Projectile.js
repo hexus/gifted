@@ -11,7 +11,6 @@ var init = function(Entity){ // Class definition
     var Projectile = function(args){
         if(!args){args={};}
         this.super_Entity.constructor.call(this,args); // Superclass constructor
-        this.pid = args.pid || 0;
         this.rotateWithSpeed = true;
         this.hitbox.width = 4;
         this.hitbox.height = 4;

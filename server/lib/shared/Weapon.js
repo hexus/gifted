@@ -72,7 +72,7 @@ var init = function(Global,Item,Bullet){
                     speed:40
                 });
             }
-            this.world.addProjectile(proj);
+            this.world.addEntity(proj);
         }
     }
     

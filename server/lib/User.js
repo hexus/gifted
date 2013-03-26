@@ -63,7 +63,7 @@ p.pickUpItem = function(side){
         var json = JSON.stringify({
             id:this.id,
             side:side,
-            pid:item.pid
+            eid:item.eid
         });
         this.room.send("/itemTake " + json);
     }
@@ -112,7 +112,7 @@ p.sendTo = function(u){
                 var json = JSON.stringify({
                     id:this.id,
                     side:side,
-                    pid:item.pid,
+                    eid:item.eid,
                     state:item.state
                 });
                 u.send("/itemGive " + json);

@@ -162,49 +162,48 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                         }
                     }
                     break;
-                case "/pc": // Create projectile
+                case "/ec": // Create entity
                     var s = JSON.parse(dstr);
-                    var proj = false;
-                    var proj = world.recreateProjectile(s.pid,s);
-                    if(proj){
-                        world.addProjectile(proj);
+                    var e = world.recreateEntity(s.eid,s);
+                    if(e){
+                        world.addEntity(e);
+                        e.tick();
                     }
-                    proj.tick();
                     break;
-                case "/pr":
+                case "/er":
                     if(d[1]){
-                        world.removeProjectile(world.projectiles[d[1]]);
+                        world.removeEntity(world.entities[d[1]]);
                     }
                     break;
-                case "/pd": // Update projectile state
+                case "/ed": // Update entity state
                     var deltas = JSON.parse(dstr);
-                    for(var pid in deltas){
-                        var proj = world.projectiles[pid];
-                        if(!proj){ // create projectile if it doesn't exist
-                            proj = world.addProjectile(world.recreateProjectile(pid,deltas[pid]));
+                    for(var eid in deltas){
+                        var e = world.entities[eid];
+                        if(!e){ // create entity if it doesn't exist
+                            e = world.addEntity(world.recreateEntity(eid,deltas[eid]));
                         }else{
-                            for(var i in deltas[pid]){
-                                if(proj){
-                                    if(proj.state[i]!=null && typeof proj.state[i] === typeof deltas[pid][i]){
-                                        proj.state[i] = deltas[pid][i];
+                            for(var i in deltas[eid]){
+                                if(e){
+                                    if(e.state[i]!=null && typeof e.state[i] === typeof deltas[eid][i]){
+                                        e.state[i] = deltas[eid][i];
                                     }
                                 }
                             }
-                            //proj.tick();
+                            //e.tick();
                         }
                     }
                     break;
                 case "/itemGive":
                     var json = JSON.parse(dstr);
-                    var item = world.recreateProjectile(json.pid,json.state);
+                    var item = world.recreateEntity(json.eid,json.state);
                     users[json.id].setItem(json.side,item);
                     break;
                 case "/itemTake":
                     var json = JSON.parse(dstr);
-                    var item = world.projectiles[json.pid];
+                    var item = world.entities[json.eid];
                     if(item){
                         users[json.id].setItem(json.side,item);
-                        world.removeProjectile(item);
+                        world.removeEntity(item);
                     }
                     break;
                 case "/itemDrop":
