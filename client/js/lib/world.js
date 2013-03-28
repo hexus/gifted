@@ -140,7 +140,6 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         var e = false;
         switch(s.entityType){
             case 'weapon':
-                args.weaponId = s.weaponId;
                 e = new Weapon(s);
                 break;
             case 'bullet':
@@ -172,22 +171,40 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         }));
     }
     
+    p.getNearestPlayer = function(x,y,maxDistance){
+        return this.getNearestEntity(Player,x,y,maxDistance);
+    }
+    
     p.getNearestItem = function(x,y,maxDistance){
+        return this.getNearestEntity(Item,x,y,maxDistance);
+    }
+    
+    p.getNearestEntity = function(Class,x,y,maxDistance){
+        if(!Class){Class=false;}
         maxDistance = !maxDistance ? 0 : maxDistance;
+        var collection = Class === Player ? this.users : this.entities;
         var shortestDistance = -1;
-        var nearestItem = false;
-        for(var i in this.entities){
-            var e = this.entities[i];
-            if(e instanceof Item){
+        var nearest = false;
+        for(var i in collection){
+            var e = collection[i];
+            if(e instanceof Class || !Class){
                 distance = Math.sqrt(Math.pow(e.state.x - x,2) + Math.pow(e.state.y - y,2));
                 if(shortestDistance<0 || distance < shortestDistance){
                     if(distance < maxDistance || maxDistance === 0){
-                        nearestItem = e;
+                        nearest = e;
                     }
                 }
             }
         }
-        return nearestItem;
+        return nearest;
+    }
+    
+    p.getDistance = function(e,f){
+        var distance = false;
+        if(e instanceof Entity && f instanceof Entity){
+            distance = Math.sqrt(Math.pow(e.state.x - f.state.x,2) + Math.pow(e.state.y - f.state.y,2));
+        }
+        return distance;
     }
     
     p.removeNearestItem = function(x,y,maxDistance){

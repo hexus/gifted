@@ -1,14 +1,15 @@
 (function(){
 var node = typeof window === 'undefined';
-var deps = ['createjs','assets','lib/global','shared/Entity','shared/Character','shared/Projectile','shared/Effect'];
+var deps = ['createjs','assets','lib/global','shared/Entity','shared/Character','shared/Projectile','shared/Effect','shared/Spawner'];
 
-var init = function(createjs,lib,Global,Entity,Character,Projectile,Effect){
+var init = function(createjs,lib,Global,Entity,Character,Projectile,Effect,Spawner){
     
     if(node){
         Entity = require('./Entity');
         Character = require('./Character');
         Projectile = require('./Projectile');
         Effect = require('./Effect');
+        Spawner = require('./Spawner');
     }
     
     var Bullet = function(args){
@@ -49,7 +50,7 @@ var init = function(createjs,lib,Global,Entity,Character,Projectile,Effect){
     
     p.onContact = function(e){
         var doApply = false;
-        if(e instanceof Character && e!=this.owner){
+        if((e instanceof Character || e instanceof Spawner) && e!=this.owner){
             doApply = true;
             if(!node && Global.socket){ // Authoritative server
                 if(Global.socket.connected){
@@ -60,12 +61,13 @@ var init = function(createjs,lib,Global,Entity,Character,Projectile,Effect){
                 doApply = false;
             }
             if(doApply){
-                var rads = this.state.angle * Math.PI/180;
-                e.applyEffect(new Effect({
-                    health:-this.state.damage,
-                    xSpeed:Math.round(Math.cos(rads) * 5),
-                    ySpeed:Math.round(Math.sin(rads) * 5)
-                }));
+                var effect = {health:-this.state.damage};
+                if(e instanceof Character){ // Only knock back characters
+                    var rads = this.state.angle * Math.PI/180;
+                    effect.xSpeed = Math.round(Math.cos(rads) * this.state.knockback);
+                    effect.ySpeed = Math.round(Math.sin(rads) * this.state.knockback);
+                }
+                e.applyEffect(new Effect(effect));
                 this.isRubbish = true;
             }
         }

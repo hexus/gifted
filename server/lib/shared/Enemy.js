@@ -11,10 +11,19 @@ var init = function(lib,Global,Character){
     var Enemy = function(args){ // Abstract
         if(!args){args={};}
         this.super2.constructor.call(this,args);
+        this.target = false;
+        this.freemove = true;
         this.hitbox.width = this.hitbox.height = 30;
         this.state.entityType = 'flybot';
         this.state.isFlying = true;
-        this.state.xLimit = this.state.yLimit = this.state.flySpeed = 3;
+        this.state.xLimit = this.state.flySpeed = 4;
+        this.state.yLimit = 14;
+        this.state.ai = {
+            sightRange:400,
+            loseInterest:600,
+            keepDistance:150
+            
+        }
     }
     
     var p = Enemy.prototype = new Character();

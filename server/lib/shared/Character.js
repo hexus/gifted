@@ -25,6 +25,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.state.moveUp = false;
         this.state.moveDown = false;
         this.state.crouch = false;
+        this.freemove = false;
         
         this.hitboxFull = JSON.parse(JSON.stringify(this.hitbox));
         
@@ -161,7 +162,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     p.dropItem = function(side){
         side = !side ? 'r' : side;
         var item = this.getItem(side);
-        if(item){            
+        if(item){
             item.state.inUse = false;
             item.state.x = this.state.x;
             item.state.y = this.state.y;
@@ -220,7 +221,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
                 this.hitbox.height = Math.floor(this.hitboxFull.height/2);
             }else{
                 // if no collisions above
-                this.hitbox.height = this.hitboxFull.height; 
+                this.hitbox.height = this.hitboxFull.height;
             }
             
             if(state.moveUp && state.onFloor && !upDown && !state.isFlying){
@@ -235,7 +236,9 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
             // Movement booleans
             if((state.moveLeft && !state.moveRight) || (state.moveRight && !state.moveLeft)){
                 state.direction = state.moveLeft ? -1 : 1;
-                state.xSpeed += state.direction*state.Accel;
+                if(!this.freemove){
+                    state.xSpeed += state.direction*state.Accel;
+                }
             }else if(Math.abs(state.xSpeed)>state.Accel){
                 state.xSpeed -= state.direction*state.Accel;
             }else{
@@ -251,7 +254,9 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
             }else{
                 if((state.moveUp && !state.moveDown) || (!state.moveUp && state.moveDown)){
                     state.flyDir = (state.moveUp) ? -1 : 1;
-                    state.ySpeed += state.flyDir*state.Accel;
+                    if(!this.freemove){
+                        state.ySpeed += state.flyDir*state.Accel;
+                    }
                 }else if(Math.abs(state.ySpeed)>state.Accel){
                     state.ySpeed -= state.flyDir*state.Accel;
                 }else{

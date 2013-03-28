@@ -16,9 +16,10 @@ var init = function(lib,Global,Entity){
         this.hitbox.width = this.hitbox.height = 40;
         this.egg = args.egg || [];
         this.babbies = [];
-        this.babbyLimit = 3;
+        this.babbyLimit = 1;
         this.state.entityType = 'spawner';
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 10;
+        this.state.health = 300;
         if(!node){
             this.clip = this.addChild(new lib.mcSpawner()).clip;
         }
@@ -30,18 +31,20 @@ var init = function(lib,Global,Entity){
     
     p.tick = function(){
         this.super2.tick.call(this);
-        doSpawn = true;
-        if(!node && Global.socket){
-            if(Global.socket.connected){
-                doSpawn = false;
+        if(this.state.health>0){
+            doSpawn = true;
+            if(!node && Global.socket){
+                if(Global.socket.connected){
+                    doSpawn = false;
+                }
             }
-        }
-        if(doSpawn){
-            if(this.babbies.length<this.babbyLimit){
-                this.cooldown--;
-                if(this.cooldown<1){
-                    this.birth();
-                    this.cooldown = this.cooldownTime;
+            if(doSpawn){
+                if(this.babbies.length<this.babbyLimit){
+                    this.cooldown--;
+                    if(this.cooldown<1){
+                        this.birth();
+                        this.cooldown = this.cooldownTime;
+                    }
                 }
             }
         }
