@@ -185,6 +185,14 @@ var init = function(createjs,Global,Effect){
                 y0 += sy;
             }
         }
+        
+        // Delete half of the line
+        for(var i in ray){
+            if(i%2==0){
+                delete(ray[i]);
+            }
+        }
+        
         return ray;
     }
     

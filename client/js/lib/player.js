@@ -60,6 +60,8 @@ function(createjs,lib,Global,Character){
         this.get('mouseY',function(){
             return Global.stage.mouseY/that.world.scale - (that.world.y/that.world.scale + that.y) + 10;
         });
+        
+        //this.char.shadow = new createjs.Shadow('#FFF',0,0,20);
     }
     
     var p = Player.prototype = new Character();

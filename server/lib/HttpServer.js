@@ -83,12 +83,12 @@ var server = http.createServer(function(request, response) { // One day this wil
                     var acceptEncoding = request.headers['accept-encoding'] || '';
                     
                     if(req[3]=='shared'){ // shared module request
-                        url = 'server/lib/shared/';
+                        url = 'server/lib/shared';
                         for(var i=4;i<req.length;i++){
                             url += '/'+req[i]; 
                         }
                     }
-                    console.log(url);
+                    //console.log(url);
                     
                     try{
                         if(acceptEncoding.match(/\bgzip\b/)){

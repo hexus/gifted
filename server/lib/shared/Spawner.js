@@ -13,21 +13,32 @@ var init = function(lib,Global,Entity){
         this.super2.constructor.call(this,args);
         this.cooldownTime = 32;
         this.cooldown = this.cooldownTime;
-        this.hitbox.width = this.hitbox.height = 40;
+        this.hitbox.width = 24;
+        this.hitbox.height = 62;
         this.egg = args.egg || [];
         this.babbies = [];
-        this.babbyLimit = 1;
+        this.babbyLimit = 6;
         this.state.entityType = 'spawner';
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 10;
         this.state.health = 300;
+        this.deadcache = false;
         if(!node){
-            this.clip = this.addChild(new lib.mcSpawner()).clip;
+            this.clip = this.addChild(new lib.mcSpawner()).spawnerClip;
+            this.cacheBase();
         }
     }
     
     var p = Spawner.prototype = new Entity();
     p.super2 = Entity.prototype;
     p.constructor = Spawner;
+    
+    p.cacheBase = function(){
+        this.clip.base.cache(-this.hitbox.width/2,-this.hitbox.height/2,this.hitbox.width,this.hitbox.height,this.world.scale);
+    }
+    
+    p.cacheClip = function(){
+        this.clip.cache(-this.hitbox.width/2,-this.hitbox.height/2,this.hitbox.width,this.hitbox.height,this.world.scale);
+    }
     
     p.tick = function(){
         this.super2.tick.call(this);
@@ -47,6 +58,12 @@ var init = function(lib,Global,Entity){
                     }
                 }
             }
+        }else{
+            if(!node && !this.deadcache){
+                this.clip.gotoAndStop('dead');
+                this.cacheClip();
+                this.deadcache = true;
+            }
         }
     }
     
@@ -59,7 +76,9 @@ var init = function(lib,Global,Entity){
                 var babby = this.world.addEntity(this.world.recreateEntity(egg));
                 babby.spawnerParent = this;
                 this.babbies.push(babby);
-                this.clip.gotoAndPlay('closing');
+                if(!node){
+                    this.clip.gotoAndPlay('closing');
+                }
             }
         }
     }

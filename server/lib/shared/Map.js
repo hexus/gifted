@@ -19,7 +19,7 @@ var init = function(){
     	
     	var regions = [];
     	
-    	this.load();
+    	//this.load();
     	
     	this.getProperties = function(){
     		return {
@@ -165,10 +165,11 @@ var init = function(){
     	]
     }
     
-    m.load = function(){
+    m.load = function(cb){
         if(node){
             var that = this;
             db.connection.query("SELECT * FROM worlds WHERE name='"+that.name+"'",function(err,rows){
+                var success = false;
                 if(rows){
                     if(rows.length>0){
                         var world = rows[0];
@@ -179,12 +180,16 @@ var init = function(){
                         });
                         that.expand(world.map); // Needs to be LONGTEXT in MySQL
                         console.log('Loaded world \''+that.name+'\'');
+                        success = true;
                     }else{
-                        that.generate();
-                        that.save();
+                        success = false; // Not found
                     }
                 }else{
                     console.log(err);
+                    success = false; // Other error
+                }
+                if(typeof cb === 'function'){
+                    cb(success);
                 }
             });
         }
@@ -358,7 +363,7 @@ var init = function(){
             height: 4
         }
         
-        this.setSpawn(lowSpawn.x,lowSpawn.y);
+        this.setSpawn(topSpawn.x,topSpawn.y);
     	
         this.eachTile(function(x,y){
             this.setTile(x,y,9);
@@ -464,6 +469,35 @@ var init = function(){
     	
     	iterateMiners();
     	
+    	// Flood fill
+    	var q = [];
+    	q[0] = [0,0];
+    	while(q.length>0){
+    	    var n = q[q.length-1];
+    	    q.splice(q.length-1,1);
+    	    if(this.getTile(n[0],n[1])==0){
+    	        this.setTile(n[0],n[1],7);
+    	        q.push([n[0]+1,n[1]]);
+    	        q.push([n[0],n[1]+1]);
+    	        q.push([n[0]-1,n[1]]);
+    	        q.push([n[0],n[1]-1]);
+    	    }
+    	}
+    	
+    	// Fill in disconnected caves
+    	this.eachTile(function(x,y,v){
+    	    if(v==0){
+    	        this.setTile(x,y,9);
+    	    }
+    	});
+    	
+    	// Undo flood fill
+    	this.eachTile(function(x,y,v){
+    	    if(v==7){
+    	        this.setTile(x,y);
+    	    }
+    	});
+    	
     	// Painting
         this.eachTile(function(x,y,v){
             if(v!=13){
@@ -474,10 +508,10 @@ var init = function(){
                     if(heightDif>3){
                         t = 11;
                     }
-                    if(heightDif>15){
-                        t = 6;
-                    }
                     if(heightDif>30){
+                        t = Math.random()<(heightDif-30)/10 ? 9 : 11;
+                    }
+                    if(heightDif>40){
                         t = 9;
                     }
                     this.setTile(x,y,t);
@@ -491,11 +525,6 @@ var init = function(){
                 }
             }
         },true);
-        
-        for(var h in heights){
-            //console.log((fullHeight - heights[h]));
-        }
-    	
 
     	// Done.
     }
@@ -663,7 +692,7 @@ var init = function(){
                     colour.g = 130;
                     colour.b = 50;
                     break;
-                case 9:
+                case 9: case 13:
                     colour.r = colour.g = colour.b = 66;
                     break;
                 case 11:

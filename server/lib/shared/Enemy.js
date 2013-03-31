@@ -18,9 +18,10 @@ var init = function(lib,Global,Character){
         this.state.isFlying = true;
         this.state.xLimit = this.state.flySpeed = 4;
         this.state.yLimit = 14;
+        this.state.jumpStr = 8;
         this.state.ai = {
-            sightRange:400,
-            loseInterest:600,
+            sightRange:300,
+            loseInterest:500,
             keepDistance:150
             
         }

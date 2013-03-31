@@ -3,7 +3,10 @@ var User = require('./User');
 var Users = require('./Users');
 var Entity = require('./shared/Entity');
 var Entities = require('./Entities');
+var Weapon = require('./shared/Weapon');
 var Bullet = require('./shared/Bullet');
+var Spawner = require('./shared/Spawner');
+var Flybot = require('./shared/Enemy/Flybot');
 var Item = require('./shared/Item');
 var Map = require('./shared/Map');
 
@@ -26,6 +29,7 @@ var Room = function(args){
     this.lobbyUsers = new Users(); // Users in room lobby
     this.users = new Users(); // Users in room world
     this.entities = new Entities();
+    this.generateMap();
     
     this.fps = args.fps || 32;
     this.step = 0;
@@ -33,6 +37,7 @@ var Room = function(args){
     this.timer = setInterval(function(){that.tick();},this.tickSpeed);
     this.ontick = function(){};
     this.streamSpeed = 3;
+    this.importantStates = ['entityType','x','y','xSpeed','ySpeed','health'];
 }
 
 var p = Room.prototype;
@@ -42,6 +47,9 @@ module.exports = Room;
 p.tick = function(){
     this.step++;
     this.ontick.call(this);
+    var share = this.importantStates; 
+    var streamTick = this.step%this.streamSpeed==0;
+    var fpsTick = this.step%(this.fps*2)==0; // every two seconds
     
     // User tick and deltas
     var userDeltas = {};
@@ -50,10 +58,18 @@ p.tick = function(){
         if(user instanceof User){
             user.tick();
             if(!user.inLobby){
-                if(this.step%this.streamSpeed==0){
+                if(streamTick || fpsTick){
                     var userDelta = user.getStateDelta();
                     if(Object.size(userDelta)>0){
                         userDeltas[u] = userDelta;
+                        if(fpsTick){
+                            if(!userDeltas[u]){
+                                userDeltas[u] = {};
+                            }
+                            for(var s in share){
+                                userDeltas[u][share[s]] = user.state[share[s]];
+                            }
+                        }
                     }
                 }
             }
@@ -70,33 +86,51 @@ p.tick = function(){
             if(e.isRubbish){
                 this.removeEntity(e);
             }else{
-            	if(this.step%this.streamSpeed==0 && !(e instanceof Bullet)){
+            	if((streamTick && !(e instanceof Bullet)) || fpsTick){
             		var eDelta = e.getStateDelta();
             		if(Object.size(eDelta)>0){
             			eDeltas[i] = eDelta;
+                        if(fpsTick){
+                            if(!eDeltas[i]){
+                                eDeltas[i] = {};
+                            }
+                            for(var s in share){
+                                eDeltas[i][share[s]] = e.state[share[s]];
+                            }
+                        }
             		}
-        	   }
-    	   }
-    	}
+                }
+            }
+        }
     }
     
-    for(u in this.users.get()){
+    for(var u in this.users.get()){
         var user = this.users.get(u);
         if(user instanceof User){
             if(!user.inLobby){
+                // Aoi time
+                var aoi = this.getAoi(user.x,user.y);
+                
                 // User Deltas
                 if(Object.size(userDeltas)>0){
                     var userDeltasMod = JSON.parse(JSON.stringify(userDeltas));
                     delete(userDeltasMod[u]); // Don't send to self by default
-                    if(userDeltas[u] && user.sendSelf){ // Include self-delta if send-self is true
+                    if(userDeltas[u] && user.sendSelf){ // Include self-state if send-self is true
                         user.sendSelf = false;
-                        //userDeltasMod[u] = userDeltas[u];
                         // Filtering
-                        var share = ['x','y','xSpeed','ySpeed','health'];
                         userDeltasMod[u] = {};
                         for(var i in share){
                             if(this.users.get(u).state[share[i]]!=null){ // send all instead of just delta
                                 userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
+                            }
+                        }
+                    }
+                    if(this.step%this.fps!=0){
+                        for(var d in userDeltasMod){ // Restrict to AoI
+                            if(d!=u){
+                                if(!aoi.users[d]){
+                                    delete(userDeltasMod[d]);
+                                }
                             }
                         }
                     }
@@ -107,15 +141,49 @@ p.tick = function(){
                 
                 // Entity deltas
                 if(Object.size(eDeltas)>0){
-                    this.send('/ed '+JSON.stringify(eDeltas));
+                    var eDeltasMod = JSON.parse(JSON.stringify(eDeltas));
+                    if(this.step%this.fps!=0){
+                        for(var e in eDeltasMod){
+                            if(!aoi.entities[e]){
+                                delete(eDeltasMod[e]);
+                            }
+                        }
+                    }
+                    if(Object.size(eDeltasMod)>0){
+                        this.send('/ed '+JSON.stringify(eDeltasMod));
+                    }
                 }
                 
-                if(this.step%32==0){
+                if(this.step%this.fps==0){
                     this.ping();
                 }
             }
         }
     }
+}
+
+p.generateMap = function(){
+    //this.map.load(function(success){// Try loading from database first
+    //    if(!success){
+            this.map.generate();
+            
+            // Surface spawners
+            var tSize = this.map.getTileSize();
+            var fullWidth = this.map.getWorldSize().width * this.map.getRegionSize().width;
+            var fullHeight = this.map.getWorldSize().height * this.map.getRegionSize().height;
+            var numSpawners = 20;
+            for(var i=0;i<numSpawners;i++){
+                var x = Math.floor(fullWidth/numSpawners*i);
+                this.addEntity(new Spawner({
+                    x:x*tSize+1,
+                    y:(fullHeight-Math.floor(this.map.heights[x]))*tSize,
+                    egg:{entityType:'flybot'}
+                }));
+            }
+            
+            this.map.save();
+    //    }
+    //});
 }
 
 p.send = function(str,lobby,ex){
@@ -213,6 +281,7 @@ p.addEntity = function(i){
             state.eid = e.eid;
             this.users.send('/ec ' + JSON.stringify(state));
         }
+        return e;
     }
 }
 
@@ -225,44 +294,121 @@ p.removeEntity = function(i){
     }
 }
 
-p.getNearestItem = function(x,y,maxDistance){
+p.recreateEntity = function(s,eid){
+    if(eid){
+        s.eid = eid;
+    }
+    var e = false;
+    switch(s.entityType){
+        case 'weapon':
+            e = new Weapon(s);
+            break;
+        case 'bullet':
+            e = new Bullet(s);
+            break;
+        case 'spawner':
+            e = new Spawner(s);
+            break;
+        case 'flybot':
+            e = new Flybot(s);
+            break;
+    }
+    if(e){
+        for(var i in s){
+            e.state[i] = s[i];
+        }
+        e.updateRotation();
+    }
+    return e;
+}
+
+p.getDistance = function(x,y,e){
+    var distance = false;
+    if(e instanceof Entity){
+        distance = Math.sqrt(Math.pow(x - e.x,2) + Math.pow(y - e.y,2));
+    }
+    return distance;
+}
+
+p.getNearestEntity = function(Class,x,y,maxDistance){
     maxDistance = !maxDistance ? 0 : maxDistance;
+    var collection = Class === User ? this.users : this.entities;
     var shortestDistance = -1;
-    var nearestItem = false;
-    for(var i in this.entities.get()){
-        var e = this.entities.get(i);
-        if(e instanceof Item){
-            var distance = Math.sqrt(Math.pow(e.state.x - x,2) + Math.pow(e.state.y - y,2));
+    var nearest = false;
+    for(var i in collection.get()){
+        var e = collection.get(i);
+        if(e instanceof Class || !Class){
+            var distance = this.getDistance(x,y,e);
             if(shortestDistance<0 || distance < shortestDistance){
                 if(distance < maxDistance || maxDistance === 0){
-                    nearestItem = e;
+                    nearest = e;
                 }
             }
         }
     }
-    return nearestItem;
+    return nearest;
 }
 
-p.removeNearestItem = function(x,y,maxDistance){
-    var item = this.getNearestItem(x,y,maxDistance);
-    if(item){
-        this.removeEntity(item);
+p.getNearestUser = function(x,y,maxDistance){
+    return this.getNearestEntity(User,x,y,maxDistance);
+}
+
+p.getNearestItem = function(x,y,maxDistance){
+    return this.getNearestEntity(Item,x,y,maxDistance);
+}
+
+p.getAoi = function(x,y,maxDistance){ // Area of interest
+    if(!maxDistance){maxDistance = 500;}
+    var aoi = {
+        users:{},
+        entities:{}
     }
-    return item;
+    for(var u in this.users.get()){
+        var user = this.users.get(u);
+        if(user instanceof User){
+            var distance = this.getDistance(x,y,user);
+            if(distance<maxDistance){
+                aoi.users[u] = user;
+            }
+        }
+    }
+    for(var e in this.entities.get()){
+        var entity = this.entities.get(e);
+        if(entity instanceof Entity){
+            var distance = this.getDistance(x,y,entity);
+            if(distance<maxDistance){
+                aoi.entities[e] = entity;
+            }
+        }
+    }
+    return aoi;
 }
 
 p.bulletCollisions = function(e){
     if(e instanceof Bullet){
+        var aoi = this.getAoi(e.x,e.y,100);
         var ray = e.getRay();
         var collidee = false;
         for(var r in ray){
             if(!collidee){
-                for(var u in this.users.get()){
-                    var user = this.users.get(u);
+                for(var u in aoi.users){
+                    var user = aoi.users[u];
                     var c = user.chkCollision(ray[r][0],ray[r][1]);
                     if(c){
-                        e.onContact(user);
-                        collidee = user;
+                        if(e.onContact(user)){
+                            collidee = user;
+                        }
+                    }
+                }
+                for(var eid in aoi.entities){
+                    var entity = aoi.entities[eid];
+                    if(entity!=e){
+                        var c = entity.chkCollision(ray[r][0],ray[r][1]);
+                        if(c){
+                            if(e.onContact(entity)){
+                                collidee = entity;
+                            }
+                        }
                     }
                 }
             }

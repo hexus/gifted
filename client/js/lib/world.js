@@ -48,15 +48,26 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
     var p = World.prototype = new createjs.Container();
     
     p.tick = function(timeElapsed,paused){
-        for(var u in this.users){
+        var aoi = this.getAoi(Global.player.x,Global.player.y);
+        
+        for(var u in this.users){ // Always tick users
             this.users[u].tick();
         }
+        
         for(var e in this.entities){
             var entity = this.entities[e];
-            entity.tick();
-            this.bulletCollisions(entity);
-            if(entity.isRubbish){
-                this.removeEntity(entity);
+            if(aoi.entities[e] 
+            || entity instanceof Spawner 
+            || entity instanceof Bullet
+            || Global.ticker.getTicks()%Global.ticker.getFPS()==0){
+                entity.visible = true;
+                entity.tick();
+                this.bulletCollisions(entity);
+                if(entity.isRubbish){
+                    this.removeEntity(entity);
+                }
+            }else{
+                entity.visible = false;
             }
         }
         this.iScroll();
@@ -64,12 +75,13 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
     
     p.bulletCollisions = function(e){
         if(e instanceof Bullet){
+            var aoi = this.getAoi(e.x,e.y,100);
             var ray = e.getRay();
             var collidee = false;
             for(var r in ray){
                 if(!collidee){
-                    for(var u in this.users){
-                        var user = this.users[u];
+                    for(var u in aoi.users){
+                        var user = aoi.users[u];
                         var c = user.chkCollision(ray[r][0],ray[r][1]);
                         if(c){
                             if(e.onContact(user)){
@@ -77,9 +89,9 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
                             }
                         }
                     }
-                    for(var eid in this.entities){ // anything that isn't a player
-                        var entity = this.entities[eid];
-                        if(entity!=e){ // if it's not itself
+                    for(var eid in aoi.entities){ // anything that isn't a player
+                        var entity = aoi.entities[eid];
+                        if(entity != e && !(entity instanceof Bullet)){
                             var c = entity.chkCollision(ray[r][0],ray[r][1]);
                             if(c){
                                 if(e.onContact(entity)){
@@ -88,17 +100,38 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
                             }
                         }
                     }
+                }else{
+                    delete(ray);
                 }
             }
+            delete(aoi);
+            
         }
     }
     
     p.generateMap = function(){
         this.map.generate();
+        
+        // at spawn
+        //this.addEntity(new Spawner({egg:{
+        //    entityType:'weapon'
+        //}}));
+        
+        // surface spawners
+        var tSize = this.map.getTileSize();
+        var fullWidth = this.map.getWorldSize().width * this.map.getRegionSize().width;
+        var fullHeight = this.map.getWorldSize().height * this.map.getRegionSize().height;
+        var numSpawners = 20;
+        for(var i=0;i<numSpawners;i++){
+            var x = Math.floor(fullWidth/numSpawners*i);
+            this.addEntity(new Spawner({
+                x:x*tSize+1,
+                y:(fullHeight-Math.floor(this.map.heights[x]))*tSize,
+                egg:{entityType:'flybot'}
+            }));
+        }
+        
         Global.worldUi.updateMap();
-        this.addEntity(new Spawner({egg:{
-            entityType:'flybot'
-        }}));
     }
     
     p.addPlayer = function(id,u){
@@ -107,7 +140,6 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
             u.world = this;
             u.spawn();
         }
-        //var f = this.addEntity(new Flybot());
     }
     
     p.removePlayer = function(id){
@@ -161,22 +193,12 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         return e;
     }
     
-    p.testItem = function(){
-        ps = Global.player.state;
-        Global.wtest = this.addEntity(new Weapon({
-            wid:0,
-            x:this.map.getSpawn().x,
-            y:this.map.getSpawn().y,
-            speed:0
-        }));
-    }
-    
-    p.getNearestPlayer = function(x,y,maxDistance){
-        return this.getNearestEntity(Player,x,y,maxDistance);
-    }
-    
-    p.getNearestItem = function(x,y,maxDistance){
-        return this.getNearestEntity(Item,x,y,maxDistance);
+    p.getDistance = function(x,y,e){
+        var distance = false;
+        if(e instanceof Entity){
+            distance = Math.sqrt(Math.pow(x - e.x,2) + Math.pow(y - e.y,2));
+        }
+        return distance;
     }
     
     p.getNearestEntity = function(Class,x,y,maxDistance){
@@ -188,7 +210,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         for(var i in collection){
             var e = collection[i];
             if(e instanceof Class || !Class){
-                distance = Math.sqrt(Math.pow(e.state.x - x,2) + Math.pow(e.state.y - y,2));
+                var distance = this.getDistance(x,y,e);
                 if(shortestDistance<0 || distance < shortestDistance){
                     if(distance < maxDistance || maxDistance === 0){
                         nearest = e;
@@ -199,20 +221,39 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         return nearest;
     }
     
-    p.getDistance = function(e,f){
-        var distance = false;
-        if(e instanceof Entity && f instanceof Entity){
-            distance = Math.sqrt(Math.pow(e.state.x - f.state.x,2) + Math.pow(e.state.y - f.state.y,2));
-        }
-        return distance;
+    p.getNearestPlayer = function(x,y,maxDistance){
+        return this.getNearestEntity(Player,x,y,maxDistance);
     }
     
-    p.removeNearestItem = function(x,y,maxDistance){
-        var item = this.getNearestItem(x,y,maxDistance);
-        if(item){
-            this.removeEntity(item);
+    p.getNearestItem = function(x,y,maxDistance){
+        return this.getNearestEntity(Item,x,y,maxDistance);
+    }
+    
+    p.getAoi = function(x,y,maxDistance){ // Area of interest
+        if(!maxDistance){maxDistance = 500;}
+        var aoi = {
+            users:{},
+            entities:{}
         }
-        return item;
+        for(var u in this.users){
+            var user = this.users[u];
+            if(user instanceof Player){
+                var distance = this.getDistance(x,y,user);
+                if(distance<maxDistance){
+                    aoi.users[u] = user;
+                }
+            }
+        }
+        for(var e in this.entities){
+            var entity = this.entities[e];
+            if(entity instanceof Entity){
+                var distance = this.getDistance(x,y,entity);
+                if(distance<maxDistance){
+                    aoi.entities[e] = entity;
+                }
+            }
+        }
+        return aoi;
     }
     
     p.focusOn = function(target,lock){
