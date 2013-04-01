@@ -57,10 +57,8 @@ p.tick = function(){
     this.ontick.call(this);
     var share = this.importantStates; 
     var longTick = this.step%(this.fps*15)==0; // every fifteen seconds
-    var fullTick = this.step%(this.fps*2)==0 || longTick; // every second / longTick
+    var fullTick = this.step%(this.fps)==0 || longTick; // every second / longTick
     var deltaTick = this.step%this.streamSpeed==0; // every streamSpeed steps
-    
-    
     
     // User tick and deltas
     var userDeltas = {};
@@ -78,7 +76,7 @@ p.tick = function(){
                         }
                     }else{ // Delta update
                         var userDelta = user.getStateDelta();
-                        userDeltas[u] = {};
+                        //userDeltas[u] = {};
                         if(Object.size(userDelta)>0){
                             userDeltas[u] = userDelta;
                         }
@@ -112,7 +110,6 @@ p.tick = function(){
                         }
                     }else{ // Delta update
                         var eDelta = e.getStateDelta();
-                        eDeltas[i] = {};
                         if(Object.size(eDelta)>0){
                             eDeltas[i] = eDelta;
                         }
@@ -187,7 +184,7 @@ p.generateMap = function(){
             var tSize = this.map.getTileSize();
             var fullWidth = this.map.getWorldSize().width * this.map.getRegionSize().width;
             var fullHeight = this.map.getWorldSize().height * this.map.getRegionSize().height;
-            var numSpawners = 20;
+            var numSpawners = 12;
             for(var i=0;i<numSpawners;i++){
                 var x = Math.floor(fullWidth/numSpawners*i);
                 this.addEntity(new Spawner({
