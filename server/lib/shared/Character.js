@@ -185,84 +185,88 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         }
     }
     
-    p.fly = function(){ with(this.state){flying = !isFlying; ySpeed %= flySpeed; flyDir = ySpeed>=0 ? 1 : -1;} }
-    
-    p.jump = function(){ with(this.state){if(onFloor && !isFlying){this.jump = true;}} }
+    p.jump = function(){
+        var state = this.state;
+        if(state.onFloor && !state.isFlying){
+            this.jump = true;
+        }
+    }
     
     p.tick = function(){
-        if(this.state.health<1){
-            this.state.isFlying = false;
-            this.state.isAimingLeft = false;
-            this.state.isAimingRight = false;
-            this.state.moveLeft = false;
-            this.state.moveRight = false;
-            this.state.moveUp = false;
-            this.state.moveDown = false;
-            this.state.crouch = false;
-            this.state.isUsing['l'] = false;
-            this.state.isUsing['r'] = false;
+        var state = this.state;
+        
+        if(state.health<1){
+            state.isFlying = false;
+            state.isAimingLeft = false;
+            state.isAimingRight = false;
+            state.moveLeft = false;
+            state.moveRight = false;
+            state.moveUp = false;
+            state.moveDown = false;
+            state.crouch = false;
+            state.isUsing['l'] = false;
+            state.isUsing['r'] = false;
         }
         
         this.itemTick();
         
-        with(this){
-            if(state.moveDown && !state.isFlying){
-                if(!state.crouch && state.onFloor){
-                    this.y += Math.floor(this.hitboxFull.height/4);
-                }
-                state.crouch = true;
-            }else{
-                if(state.crouch && state.onFloor){
-                    this.y -= Math.floor(this.hitboxFull.height/4);
-                }
-                state.crouch = false;
+        if(state.moveDown && !state.isFlying){
+            if(!state.crouch && state.onFloor){
+                this.y += Math.floor(this.hitboxFull.height/4);
             }
-            
-            if(state.crouch){
-                this.hitbox.height = Math.floor(this.hitboxFull.height/2);
-            }else{
-                // if no collisions above
-                this.hitbox.height = this.hitboxFull.height;
+            state.crouch = true;
+        }else{
+            // if(no potential collision above)
+            if(state.crouch && state.onFloor){
+                this.y -= Math.floor(this.hitboxFull.height/4);
             }
-            
-            if(state.moveUp && state.onFloor && !upDown && !state.isFlying){
-                jump = true;
-                upDown = true;
+            state.crouch = false;
+        }
+        
+        if(state.crouch){
+            this.hitbox.height = Math.floor(this.hitboxFull.height/2);
+        }else{
+            // if no collisions above
+            this.hitbox.height = this.hitboxFull.height;
+        }
+        
+        if(state.moveUp && state.onFloor && !this.upDown && !state.isFlying){
+            this.jump = true;
+            this.upDown = true;
+        }
+        
+        if(this.upDown && !state.moveUp){
+            this.upDown = false;
+        }
+        
+        // Movement booleans
+        if((state.moveLeft && !state.moveRight) || (state.moveRight && !state.moveLeft)){
+            state.direction = state.moveLeft ? -1 : 1;
+            if(!this.freemove){
+                state.xSpeed += state.direction*state.Accel;
             }
-            
-            if(upDown && !state.moveUp){
-                upDown = false;
+        }else if(Math.abs(state.xSpeed)>state.Accel){
+            state.xSpeed -= state.direction*state.Accel;
+        }else{
+            state.xSpeed = 0;
+        }
+        
+        // Y Booleans
+        if(!state.isFlying){
+            if(this.jump){
+                state.ySpeed = -state.jumpStr;
+                this.jump = false;
             }
-            
-            // Movement booleans
-            if((state.moveLeft && !state.moveRight) || (state.moveRight && !state.moveLeft)){
-                state.direction = state.moveLeft ? -1 : 1;
+        }else{
+            if((state.moveUp && !state.moveDown) || (!state.moveUp && state.moveDown)){
+                state.flyDir = (state.moveUp) ? -1 : 1;
                 if(!this.freemove){
-                    state.xSpeed += state.direction*state.Accel;
+                    state.ySpeed += state.flyDir*state.Accel;
                 }
-            }else if(Math.abs(state.xSpeed)>state.Accel){
-                state.xSpeed -= state.direction*state.Accel;
+            }else if(Math.abs(state.ySpeed)>state.Accel){
+                state.ySpeed -= state.flyDir*state.Accel;
             }else{
-                state.xSpeed = 0;
-            }
-            
-            // Y Booleans
-            if(!state.isFlying){
-                if(jump){
-                    state.ySpeed = -state.jumpStr;
-                    jump = false;
-                }
-            }else{
-                if((state.moveUp && !state.moveDown) || (!state.moveUp && state.moveDown)){
-                    state.flyDir = (state.moveUp) ? -1 : 1;
-                    if(!this.freemove){
-                        state.ySpeed += state.flyDir*state.Accel;
-                    }
-                }else if(Math.abs(state.ySpeed)>state.Accel){
-                    state.ySpeed -= state.flyDir*state.Accel;
-                }else{
-                    state.ySpeed = 0;
-                }
+                state.ySpeed = 0;
             }
         }
         this.super.tick.call(this);

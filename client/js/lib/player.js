@@ -81,12 +81,10 @@ function(createjs,lib,Global,Character){
     }
     
     p.setAnim = function(label){
-        with(this){
-            if(lastAnim!=label){
-                char.gotoAndPlay(label);
-                lastAnim = label;
-                //setOutfit();
-            }
+        if(this.lastAnim!=label){
+            this.char.gotoAndPlay(label);
+            this.lastAnim = label;
+            //setOutfit();
         }
     }
     
@@ -184,166 +182,163 @@ function(createjs,lib,Global,Character){
     
     p.tick = function(){
         this.super2.tick.call(this);
-
-        with(this.state){
-            
+        var state = this.state;
+        
+        // Arm rotation
+        if(this.thisPlayer){
+            state.aimAngle = Math.atan2(this.mouseY,this.mouseX)*180/Math.PI;
+            if(state.aimAngle<0){state.aimAngle+=360;}
+            if(state.health>0){
+                if(this.mouseX>0){
+                    state.aimDir = 1;
+                }else{
+                    state.aimDir = -1;
+                }
+                if(!Global.socket.connected && this.world.step%this.regenSpeed==0 && state.health<state.maxHealth){
+                    state.health++;
+                }
+            }
+        }
+        aimAngle2 = state.aimDir>0 ? (state.aimAngle+90)%180 : (270-state.aimAngle) % 180;
+        
+        this.char.scaleX = state.aimDir>0 ? 1 : -1;
+        
+        var leftArm = state.aimDir>0 ? 'l' : 'r';
+        var rightArm = state.aimDir>0 ? 'r' : 'l';
+        
+        if(state.isAimingRight){
+            this.setDynamicPart('arm',leftArm,true);
+            this.setDynamicPart('arm',rightArm,true);
             // Arm rotation
-            if(this.thisPlayer){
-                aimAngle = Math.atan2(this.mouseY,this.mouseX)*180/Math.PI;
-                if(aimAngle<0){aimAngle+=360;}
-                if(health>0){
-                    if(this.mouseX>0){
-                        aimDir = 1;
+            this.char[rightArm+'arm_d'].arm.rotation = state.aimDir>0 ? state.aimAngle - 65 : state.aimAngle + 65;
+            this.char[leftArm+'arm_d'].arm.rotation = state.aimDir>0 ? (90+40)-aimAngle2*0.1 : (90-40)+aimAngle2*0.1;
+            // Lower arm rotation
+            this.char[leftArm+'arm_d'].arm.l.rotation = -80 + aimAngle2*0.1;
+            this.char[rightArm+'arm_d'].arm.l.rotation = -20;
+            // Y Flip
+            this.char[leftArm+'arm_d'].arm.scaleY = -state.aimDir;
+            this.char[rightArm+'arm_d'].arm.scaleY = state.aimDir;
+        }else{
+            this.setDynamicPart('arm',leftArm,state.isAimingLeft);
+            this.setDynamicPart('arm',rightArm,false);
+        }
+        
+        if(state.isAimingLeft){
+            this.setDynamicPart('arm',leftArm,true);
+            this.setDynamicPart('arm',rightArm,true);
+            this.char[leftArm+'arm_d'].arm.rotation = 180 + (state.aimDir>0 ? -state.aimAngle + 65 : -state.aimAngle - 65);
+            this.char[leftArm+'arm_d'].arm.l.rotation = -20;
+            this.char[leftArm+'arm_d'].arm.scaleY = -state.aimDir;
+            if(!state.isAimingRight){
+                this.char[rightArm+'arm_d'].arm.l.rotation = -40 - aimAngle2*0.1;
+                this.char[rightArm+'arm_d'].arm.rotation = state.aimDir>0 ? (90-40) + aimAngle2*0.1 : (90+40) - aimAngle2*0.1;
+                this.char[rightArm+'arm_d'].arm.scaleY = state.aimDir;
+            }
+        }else{
+            this.setDynamicPart('arm',leftArm,state.isAimingRight);
+            this.setDynamicPart('arm',rightArm,state.isAimingRight);
+        }
+        
+        // Item display
+        var clips = this.itemClips();
+        
+        this.setItemClip(leftArm,this.getItem('l'));
+        this.setItemClip(rightArm,this.getItem('r'));
+        
+        // Muzzle flashes (so fahkin long and hacky)
+        for(var side in [0,1]){
+            side = side>0 ? 'r' : 'l';
+            var side2 = side=='r' ? rightArm : leftArm;
+            if(this.getItem(side)){
+                var itemType = this.getItem(side).clipInfo.type;
+                if(itemType=='weaponsRanged'){
+                    if(this.getItem(side).state.inUse && this.getItem(side).state.coolDown==this.getItem(side).state.coolDownTime){
+                        for(c in clips[side2]){
+                            clips[side2][c][itemType].muzzle.visible = true;
+                        }
                     }else{
-                        aimDir = -1;
-                    }
-                    if(!Global.socket.connected && this.world.step%this.regenSpeed==0 && health<maxHealth){
-                        health++;
-                    }
-                }
-            }
-            aimAngle2 = aimDir>0 ? (aimAngle+90)%180 : (270-aimAngle) % 180;
-            
-            this.char.scaleX = aimDir>0 ? 1 : -1;
-            
-            var leftArm = aimDir>0 ? 'l' : 'r';
-            var rightArm = aimDir>0 ? 'r' : 'l';
-            
-            if(isAimingRight){
-                this.setDynamicPart('arm',leftArm,true);
-                this.setDynamicPart('arm',rightArm,true);
-                // Arm rotation
-                this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? aimAngle - 65 : aimAngle + 65;
-                this.char[leftArm+'arm_d'].arm.rotation = aimDir>0 ? (90+40)-aimAngle2*0.1 : (90-40)+aimAngle2*0.1;
-                // Lower arm rotation
-                this.char[leftArm+'arm_d'].arm.l.rotation = -80 + aimAngle2*0.1;
-                this.char[rightArm+'arm_d'].arm.l.rotation = -20;
-                // Y Flip
-                this.char[leftArm+'arm_d'].arm.scaleY = -aimDir;
-                this.char[rightArm+'arm_d'].arm.scaleY = aimDir;
-            }else{
-                this.setDynamicPart('arm',leftArm,isAimingLeft);
-                this.setDynamicPart('arm',rightArm,false);
-            }
-            
-            if(isAimingLeft){
-                this.setDynamicPart('arm',leftArm,true);
-                this.setDynamicPart('arm',rightArm,true);
-                this.char[leftArm+'arm_d'].arm.rotation = 180 + (aimDir>0 ? -aimAngle + 65 : -aimAngle - 65);
-                this.char[leftArm+'arm_d'].arm.l.rotation = -20;
-                this.char[leftArm+'arm_d'].arm.scaleY = -aimDir;
-                if(!isAimingRight){
-                    this.char[rightArm+'arm_d'].arm.l.rotation = -40 - aimAngle2*0.1;
-                    this.char[rightArm+'arm_d'].arm.rotation = aimDir>0 ? (90-40) + aimAngle2*0.1 : (90+40) - aimAngle2*0.1;
-                    this.char[rightArm+'arm_d'].arm.scaleY = aimDir;
-                }
-            }else{
-                this.setDynamicPart('arm',leftArm,isAimingRight);
-                this.setDynamicPart('arm',rightArm,isAimingRight);
-            }
-            
-            // Item display
-            var clips = this.itemClips();
-            
-            this.setItemClip(leftArm,this.getItem('l'));
-            this.setItemClip(rightArm,this.getItem('r'));
-            
-            // Muzzle flashes
-            for(var side in [0,1]){
-                side = side>0 ? 'r' : 'l';
-                var side2 = side=='r' ? rightArm : leftArm;
-                if(this.getItem(side)){
-                    var itemType = this.getItem(side).clipInfo.type;
-                    if(itemType=='weaponsRanged'){
-                        if(this.getItem(side).state.inUse && this.getItem(side).state.coolDown==this.getItem(side).state.coolDownTime){
-                            for(c in clips[side2]){
-                                clips[side2][c][itemType].muzzle.visible = true;
-                            }
-                        }else{
-                            for(c in clips[side2]){
-                                clips[side2][c][itemType].muzzle.visible = false;
-                            }
+                        for(c in clips[side2]){
+                            clips[side2][c][itemType].muzzle.visible = false;
                         }
                     }
                 }
             }
-            
-            /*
-            this.char.larm_l.wpnUnder.gotoAndStop(this.getItem(leftArm));
-            this.char.larm_d.arm.l.wpnUnder.gotoAndStop(this.getItem(leftArm));
-            
-            this.char.rarm_l.wpnUnder.gotoAndStop(this.getItem(rightArm));
-            this.char.rarm_d.arm.l.wpnOver.gotoAndStop(this.getItem(rightArm));
-            */
-            
-            // Outfit display
-            this.displayOutfit();
-            
-            // Animation
-            if(onFloor){
-                if(xSpeed!=0){
-                    if(!crouch){
-                        if((xSpeed>0 && this.state.aimDir>0) || (xSpeed<0 && this.state.aimDir<0)){
-                            this.setAnim("running");
-                        }else{
-                            this.setAnim("running_back");
-                        }
+        }
+        
+        /*
+        this.char.larm_l.wpnUnder.gotoAndStop(this.getItem(leftArm));
+        this.char.larm_d.arm.l.wpnUnder.gotoAndStop(this.getItem(leftArm));
+        
+        this.char.rarm_l.wpnUnder.gotoAndStop(this.getItem(rightArm));
+        this.char.rarm_d.arm.l.wpnOver.gotoAndStop(this.getItem(rightArm));
+        */
+        
+        // Outfit display
+        this.displayOutfit();
+        
+        // Animation
+        if(state.onFloor){
+            if(state.xSpeed!=0){
+                if(!state.crouch){
+                    if((state.xSpeed>0 && state.aimDir>0) || (state.xSpeed<0 && state.aimDir<0)){
+                        this.setAnim("running");
                     }else{
-                        this.setAnim("crouch_move");
+                        this.setAnim("running_back");
                     }
                 }else{
-                    if(!crouch){
-                        if(this.lastAnim.indexOf("crouch")>-1){
-                            this.setAnim("static_from_crouch");
-                        }else{
-                            if(this.lastAnim!="static_from_crouch"){
-                                this.setAnim("static");
-                            }
-                        }
-                    }else{
-                        if(this.lastAnim.indexOf("crouchjump")==0){
-                            this.setAnim("crouch_from_crouchjump")
-                        }else{
-                            if(this.lastAnim.indexOf("static")>-1){
-                                this.setAnim("crouch_from_static");
-                            }else{
-                                if(this.lastAnim.indexOf("crouch")<0 || this.lastAnim=="crouch_move"){
-                                    this.setAnim("crouch");
-                                }
-                            }
-                        }
-                    }
+                    this.setAnim("crouch_move");
                 }
             }else{
-                if(crouch){
-                    this.setAnim('crouchjump_from_jumping');
-                    if(this.lastAnim!="crouchjump_from_jumping"){
-                        this.setAnim('crouchjump');
-                    }
-                }else{
-                    //if(ySpeed!=0){
-                        if(ySpeed<0){
-                            this.setAnim("jumping");
-                        }else if(ySpeed>(yLimit/5) || (ySpeed>0 && isFlying)){
-                            this.setAnim("falling");
-                        }
-                    //}
-                }
-                if(xSpeed!=0){
-                    if(isFlying && ySpeed<flySpeed/2 && ySpeed>-flySpeed/2){
-                        if((xSpeed>flySpeed/4 && this.state.aimDir>0) || (xSpeed<-flySpeed/4 && this.state.aimDir<0)){
-                            this.setAnim("flying");
-                        }else{
-                            this.setAnim("flying_back");
+                if(!state.crouch){
+                    if(this.lastAnim.indexOf("crouch")>-1){
+                        this.setAnim("static_from_crouch");
+                    }else{
+                        if(this.lastAnim!="static_from_crouch"){
+                            this.setAnim("static");
                         }
                     }
                 }else{
-                    if(isFlying && ySpeed==0){
-                        this.setAnim("floating");
+                    if(this.lastAnim.indexOf("crouchjump")==0){
+                        this.setAnim("crouch_from_crouchjump")
+                    }else{
+                        if(this.lastAnim.indexOf("static")>-1){
+                            this.setAnim("crouch_from_static");
+                        }else{
+                            if(this.lastAnim.indexOf("crouch")<0 || this.lastAnim=="crouch_move"){
+                                this.setAnim("crouch");
+                            }
+                        }
                     }
                 }
             }
-            
+        }else{
+            if(state.crouch){
+                this.setAnim('crouchjump_from_jumping');
+                if(this.lastAnim!="crouchjump_from_jumping"){
+                    this.setAnim('crouchjump');
+                }
+            }else{
+                //if(state.ySpeed!=0){
+                    if(state.ySpeed<0){
+                        this.setAnim("jumping");
+                    }else if(state.ySpeed>(state.yLimit/5) || (state.ySpeed>0 && state.isFlying)){
+                        this.setAnim("falling");
+                    }
+                //}
+            }
+            if(state.xSpeed!=0){
+                if(state.isFlying && state.ySpeed<state.flySpeed/2 && state.ySpeed>-state.flySpeed/2){
+                    if((state.xSpeed>state.flySpeed/4 && state.aimDir>0) || (state.xSpeed<-state.flySpeed/4 && state.aimDir<0)){
+                        this.setAnim("flying");
+                    }else{
+                        this.setAnim("flying_back");
+                    }
+                }
+            }else{
+                if(state.isFlying && state.ySpeed==0){
+                    this.setAnim("floating");
+                }
+            }
         }
     }
     

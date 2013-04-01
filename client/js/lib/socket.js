@@ -164,7 +164,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     }
                     break;
                 case "/ec": // Create entity
-                    //logData = false;
+                    logData = false;
                     var s = JSON.parse(dstr);
                     var e = world.recreateEntity(s);
                     if(e){

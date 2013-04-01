@@ -51,9 +51,8 @@ var init = function(createjs,lib,Global,Enemy,Projectile,Effect,Spawner){
     
     p.updateRotation = function(){
         this.super_Projectile.updateRotation.call(this);
-        with(this.state){
-            this.rotation = direction>0 ? angle : angle-180;
-        }
+        var state = this.state;
+        this.rotation = state.direction>0 ? state.angle : state.angle-180;
     }
     
     p.onContact = function(e){

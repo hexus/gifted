@@ -43,7 +43,7 @@ var init = function(Global,Item,Bullet){
         }
         if(!this.owner && !this.spawnerParent){
             if(this.life<0){
-                this.life = this.world.fps*180;
+                this.life = this.world.fps*120;
             }
         }else{
             if(this.life>-1){

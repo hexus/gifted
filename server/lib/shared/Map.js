@@ -538,7 +538,7 @@ var init = function(){
     		var ry = Math.floor(i / (rSize.width * rSize.height * wSize.width)) % wSize.height;
     		var x = i % rSize.width;
     		var y = Math.floor(i / rSize.width) % rSize.height;
-    		this.setTile(rx,ry,x,y,mapflat[i]);
+    		this.setTile(rx,ry,x,y,parseInt(mapflat[i]));
     	}
     }
     

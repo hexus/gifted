@@ -197,8 +197,10 @@ var init = function(createjs,Global,Effect){
     }
     
     p.chkCollision = function(x,y){
-        var cX = (x > this.state.x - Math.round(this.hitbox.width/2)) && (x < this.state.x + Math.round(this.hitbox.width/2));
-        var cY = (y > this.state.y - Math.round(this.hitbox.height/2)) && (y < this.state.y + Math.round(this.hitbox.height/2));
+        var state = this.state;
+        var hitbox = this.hitbox;
+        var cX = (x > state.x - Math.round(hitbox.width/2)) && (x < state.x + Math.round(hitbox.width/2));
+        var cY = (y > state.y - Math.round(hitbox.height/2)) && (y < state.y + Math.round(hitbox.height/2));
         return (cX && cY);
     }
     
@@ -246,10 +248,13 @@ var init = function(createjs,Global,Effect){
     
     p.tick = function(){
         
+        var state = this.state;
+        var hitbox = this.hitbox;
+        
         if(!node && Global.debug){
             if(Global.debugObj.showHitboxes && !this.hitboxShape){
                 var g = new createjs.Graphics();
-                g.beginStroke("#F0F").beginFill("#F44").drawRect(-this.hitbox.width*0.5,-this.hitbox.height*0.5,this.hitbox.width,this.hitbox.height);
+                g.beginStroke("#F0F").beginFill("#F44").drawRect(-hitbox.width*0.5,-hitbox.height*0.5,hitbox.width,hitbox.height);
                 var s = new createjs.Shape(g);
                 s.alpha = 0.5;
                 s.x = s.y = 0;
@@ -283,8 +288,8 @@ var init = function(createjs,Global,Effect){
             var ef = this.effects[e];
             if(ef){
                 for(var a in ef.state.affects){
-                    if(this.state[a]!=null){
-                        this.state[a] += ef.state.affects[a]; // Apply effect
+                    if(state[a]!=null){
+                        state[a] += ef.state.affects[a]; // Apply effect
                     }
                 }
                 ef.state.life--;
@@ -295,161 +300,159 @@ var init = function(createjs,Global,Effect){
         }
         
         if(!this.isRubbish){
-            with(this.state){
-                var Cx = x; // Center of the object
-                var Cy = y;
-                var Ty = Math.round(y - (this.hitbox.height * 0.5));
-                var By = Math.round(y + (this.hitbox.height * 0.5));
-                var Lx = Math.round(x - (this.hitbox.width  * 0.5));
-                var Rx = Math.floor(x + (this.hitbox.width  * 0.5));
-                /*  These variables predict which tile the character would be in were it to start or
-                    continue moving. They are used for checking ahead with the axis in question. */
-                var pTy=0;
-                var pBy=0;
-                if(ySpeed!=0){
-                    pTy = Ty+ySpeed;
-                    pBy = By+ySpeed;
+            var Cx = state.x; // Center of the object
+            var Cy = state.y;
+            var Ty = Math.round(state.y - (hitbox.height * 0.5));
+            var By = Math.round(state.y + (hitbox.height * 0.5));
+            var Lx = Math.round(state.x - (hitbox.width  * 0.5));
+            var Rx = Math.floor(state.x + (hitbox.width  * 0.5));
+            /*  These variables predict which tile the character would be in were it to start or
+                continue moving. They are used for checking ahead with the axis in question. */
+            var pTy=0;
+            var pBy=0;
+            if(state.ySpeed!=0){
+                pTy = Ty+state.ySpeed;
+                pBy = By+state.ySpeed;
+            }else{
+                if(state.onFloor){
+                    pTy = Ty-state.jumpStr;
                 }else{
-                    if(onFloor){
-                        pTy = Ty-jumpStr;
-                    }else{
-                        pTy = Ty-Accel;
-                    }
-                    pBy = By+Accel; // jumpStr
-                    if(isFlying){
-                        pTy = Ty-Accel; // flyspeed
-                        pBy = By+Accel; // flySpeed
-                    }
+                    pTy = Ty-state.Accel;
                 }
-                var pLx=0;
-                var pRx=0;
-                if(xSpeed!=0){
-                    pLx = Lx+xSpeed;
-                    pRx = Rx+xSpeed;
-                }else{
-                    pLx = Lx+(Accel*direction);
-                    pRx = Rx+(Accel*direction);
+                pBy = By+state.Accel; // jumpStr
+                if(state.isFlying){
+                    pTy = Ty-state.Accel; // flyspeed
+                    pBy = By+state.Accel; // flySpeed
                 }
-                
-                // Switch back to true direction and make extra prediction cords
-                var pDx; // Prediction of X location after movement based on direction           
-                var cLx = Lx, cRx = Rx;
-                if(xSpeed<0){
-                    direction = -1;
-                    cLx = pLx; 
-                    cRx = pLx;// + this.hitbox.width;
-                    pDx = pLx;
-                }else if(xSpeed>0){
-                    direction = 1;
-                    cLx = pRx;// - this.hitbox.width; 
-                    cRx = pRx;
-                    pDx = pRx;
-                }
-                
-                // Fly direction
-                flyDir = ySpeed>0 ? 1 : -1;
-                
-                var hh = Math.floor(this.hitbox.height*0.5); // Half height
-                var hw = Math.floor(this.hitbox.width*0.5); // Half width
-                var qh = Math.floor(this.hitbox.height*0.25); // Quarter height
-                
-                // Y
-                if(!this.chkSolid(Lx,pBy) && !this.chkSolid(Rx,pBy) && !this.chkSolid(Cx,pBy)){ // In mid-air
-                    onFloor = false;
-                    if((ySpeed+this.gravity)<=yLimit && gravCount>=this.gravSpeed){ // Apply gravity
-                        if(!isFlying){
-                            ySpeed += this.gravity;
-                            gravCount=0;
-                        }
-                    }else{
-                        gravCount++;
-                    }
-                    if(ySpeed<=0){ // if travellin upwards and there's shit above, stop dis shit
-                        if( !(this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && !this.chkSolid(Cx,pTy) ){
-                            // nudge character a bit if there ain't that much shit above
-                            if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw - 1); }
-                            if(this.chkSolid(Lx,Ty) && !this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Lx) + this.tileW + hw); }
-                        }else{
-                            ySpeed = 0;
-                            y = Math.floor(this.c2(pTy) + this.tileH + hh);
-                        }
-                    }
-                }else{ // On a surface
-                    onFloor = true;
-                    gravCount = 0;
-                    if(ySpeed>=0 || (isFlying && ySpeed<0)){ // if fallin and there's shit below, land on dat shit
-                        if((this.chkSolid(cLx,pBy) || this.chkSolid(cRx,pBy)) || this.chkSolid(Cx,pBy)){
-                            y = Math.floor(this.c2(pBy) - hh);
-                            ySpeed = 0;
-                        }
-                    }
-                    if((!isFlying && ySpeed!=0) || (isFlying && ySpeed>0)){
-                        //ySpeed = 0;
-                    }
-                    if(ySpeed<0){ // Move up if there's not too much in the way above
-                        if((this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && this.chkSolid(Cx,pTy)){
-                            ySpeed = 0;
-                        }
-                    }
-                }
-                
-                // X
-                if(xSpeed!=0){
-                    var doMove = false;
-                    // Test for collisions and such
-                    if(!this.chkSolid(pDx,pTy) && !this.chkSolid(pDx,pBy) && !this.chkSolid(pDx,Cy)
-                       && !((this.chkSolid(pDx,Cy+qh)) || (this.chkSolid(pDx,Cy-qh)))){
-                        doMove = true;
-                    }else{
-                        if(!this.chkSolid(pDx,Cy)){ // Main X rules
-                            if( !((this.chkSolid(pDx,pBy) && ySpeed>0) ||
-                                  (this.chkSolid(pDx,pTy) && ySpeed<0) ||
-                                  (this.chkSolid(pDx,Ty) && ySpeed==0)||
-                                  (this.chkSolid(pDx,Cy+qh)) ||
-                                  (this.chkSolid(pDx,Cy-qh)) )
-                               ){
-                                doMove = true;
-                            }
-                        }
-                    }
-                    if(!doMove){ // If there is a collision
-                        var c = this.c2(pDx);
-                        if(xSpeed<0){ 
-                            c = c + hw + this.tileW; // Position sums
-                        }else if(xSpeed>0){
-                            c = c - hw - 1; // -1 works because of rounding
-                        } 
-                        x = c; // Move next to collided object
-                        xSpeed = 0;
-                    }
-                }
-                
-                // Apply movement based on above calculations
-                    x += xSpeed;
-                    y += ySpeed;
-                    
-                    if(xSpeed!=0||ySpeed!=0){
-                        this.updateRotation();
-                    }
-                    
-                // Enforce limits
-                    var xLim = isFlying ? flySpeed : xLimit;
-                    var yLim = isFlying ? flySpeed : yLimit;
-                    if(xLim<1){xLim = 1;} // Ensure they aren't
-                    if(yLim<1){yLim = 1;} // negative limits
-                    if(Math.abs(xSpeed)>xLim){ xSpeed = xSpeed > 0 ? xLim : -xLim; }
-                    if(Math.abs(ySpeed)>yLim){ ySpeed = ySpeed > 0 ? yLim : -yLim; }
+            }
+            var pLx=0;
+            var pRx=0;
+            if(state.xSpeed!=0){
+                pLx = Lx+state.xSpeed;
+                pRx = Rx+state.xSpeed;
+            }else{
+                pLx = Lx+(state.Accel*state.direction);
+                pRx = Rx+(state.Accel*state.direction);
             }
             
-            this.x = this.state.x;
-            this.y = this.state.y;
+            // Switch back to true direction and make extra prediction cords
+            var pDx; // Prediction of X location after movement based on direction           
+            var cLx = Lx, cRx = Rx;
+            if(state.xSpeed<0){
+                state.direction = -1;
+                cLx = pLx; 
+                cRx = pLx;// + this.hitbox.width;
+                pDx = pLx;
+            }else if(state.xSpeed>0){
+                state.direction = 1;
+                cLx = pRx;// - this.hitbox.width; 
+                cRx = pRx;
+                pDx = pRx;
+            }
+            
+            // Fly direction
+            state.flyDir = state.ySpeed>0 ? 1 : -1;
+            
+            var hh = Math.floor(hitbox.height*0.5); // Half height
+            var hw = Math.floor(hitbox.width*0.5); // Half width
+            var qh = Math.floor(hitbox.height*0.25); // Quarter height
+            
+            // Y
+            if(!this.chkSolid(Lx,pBy) && !this.chkSolid(Rx,pBy) && !this.chkSolid(Cx,pBy)){ // In mid-air
+                state.onFloor = false;
+                if((state.ySpeed+this.gravity)<=state.yLimit && state.gravCount>=this.gravSpeed){ // Apply gravity
+                    if(!state.isFlying){
+                        state.ySpeed += this.gravity;
+                        state.gravCount=0;
+                    }
+                }else{
+                    state.gravCount++;
+                }
+                if(state.ySpeed<=0){ // if travellin upwards and there's shit above, stop dis shit
+                    if( !(this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && !this.chkSolid(Cx,pTy) ){
+                        // nudge character a bit if there ain't that much shit above
+                        if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw - 1); }
+                        if(this.chkSolid(Lx,Ty) && !this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Lx) + this.tileW + hw); }
+                    }else{
+                        state.ySpeed = 0;
+                        state.y = Math.floor(this.c2(pTy) + this.tileH + hh);
+                    }
+                }
+            }else{ // On a surface
+                state.onFloor = true;
+                state.gravCount = 0;
+                if(state.ySpeed>=0 || (state.isFlying && state.ySpeed<0)){ // if fallin and there's shit below, land on dat shit
+                    if((this.chkSolid(cLx,pBy) || this.chkSolid(cRx,pBy)) || this.chkSolid(Cx,pBy)){
+                        state.y = Math.floor(this.c2(pBy) - hh);
+                        state.ySpeed = 0;
+                    }
+                }
+                if((!state.isFlying && state.ySpeed!=0) || (state.isFlying && state.ySpeed>0)){
+                    //ySpeed = 0;
+                }
+                if(state.ySpeed<0){ // Move up if there's not too much in the way above
+                    if((this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && this.chkSolid(Cx,pTy)){
+                        state.ySpeed = 0;
+                    }
+                }
+            }
+            
+            // X
+            if(state.xSpeed!=0){
+                var doMove = false;
+                // Test for collisions and such
+                if(!this.chkSolid(pDx,pTy) && !this.chkSolid(pDx,pBy) && !this.chkSolid(pDx,Cy)
+                   && !((this.chkSolid(pDx,Cy+qh)) || (this.chkSolid(pDx,Cy-qh)))){
+                    doMove = true;
+                }else{
+                    if(!this.chkSolid(pDx,Cy)){ // Main X rules
+                        if( !((this.chkSolid(pDx,pBy) && state.ySpeed>0) ||
+                              (this.chkSolid(pDx,pTy) && state.ySpeed<0) ||
+                              (this.chkSolid(pDx,Ty) && state.ySpeed==0)||
+                              (this.chkSolid(pDx,Cy+qh)) ||
+                              (this.chkSolid(pDx,Cy-qh)) )
+                           ){
+                            doMove = true;
+                        }
+                    }
+                }
+                if(!doMove){ // If there is a collision
+                    var c = this.c2(pDx);
+                    if(state.xSpeed<0){ 
+                        c = c + hw + this.tileW; // Position sums
+                    }else if(state.xSpeed>0){
+                        c = c - hw - 1; // -1 works because of rounding
+                    } 
+                    state.x = c; // Move next to collided object
+                    state.xSpeed = 0;
+                }
+            }
+            
+            // Apply movement based on above calculations
+                state.x += state.xSpeed;
+                state.y += state.ySpeed;
+                
+                if(state.xSpeed!=0||state.ySpeed!=0){
+                    this.updateRotation();
+                }
+                
+            // Enforce limits
+                var xLim = state.isFlying ? state.flySpeed : state.xLimit;
+                var yLim = state.isFlying ? state.flySpeed : state.yLimit;
+                if(xLim<1){xLim = 1;} // Ensure they aren't
+                if(yLim<1){yLim = 1;} // negative limits
+                if(Math.abs(state.xSpeed)>xLim){ state.xSpeed = state.xSpeed > 0 ? xLim : -xLim; }
+                if(Math.abs(state.ySpeed)>yLim){ state.ySpeed = state.ySpeed > 0 ? yLim : -yLim; }
+            
+            state.x = state.x;
+            state.y = state.y;
         }
         
         if(this.life===0 || (this.hasCollided && this.isRubbishOnCollide)){
             this.isRubbish = true;
-            this.state.xSpeed = 0;
-            this.state.ySpeed = 0;
-            this.state.isFlying = true;
+            state.xSpeed = 0;
+            state.ySpeed = 0;
+            state.isFlying = true;
             if(typeof this.onDeath === 'function'){
                 this.onDeath();
             }
@@ -463,11 +466,10 @@ var init = function(createjs,Global,Effect){
     }
     
     p.updateRotation = function(){
-        with(this.state){
-            if(this.rotateWithSpeed){
-                angle = Math.atan2(ySpeed,xSpeed)*180/Math.PI;
-                this.rotation = direction>0 ? angle : angle-180;
-            }
+        var state = this.state;
+        if(this.rotateWithSpeed){
+            state.angle = Math.atan2(state.ySpeed,state.xSpeed)*180/Math.PI;
+            this.rotation = state.direction>0 ? state.angle : state.angle-180;
         }
     }
     

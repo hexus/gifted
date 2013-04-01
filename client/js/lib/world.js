@@ -47,7 +47,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         this.defaultTarget = new createjs.Container();
         this.scrollTarget = this.addChild(this.defaultTarget);
         this.scrollSensitivity = 0.36;
-        this.update = {rate:8,count:0};
+        this.update = {rate:10,count:0};
         
         this.mapContainer = this.addChild(new createjs.Container());
         this.entityContainer = this.addChild(new createjs.Container());
