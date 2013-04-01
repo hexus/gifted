@@ -2,5 +2,5 @@
 	"httpPort":80,
 	"tcpPort":7000,
 	"websocketPort":7001,
-	"worlds":["Buren","Garen"]
+	"worlds":["Buren"]
 }

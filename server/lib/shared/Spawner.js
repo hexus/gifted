@@ -13,17 +13,20 @@ var init = function(lib,Global,Entity){
         this.super2.constructor.call(this,args);
         this.cooldownTime = 32;
         this.cooldown = this.cooldownTime;
-        this.hitbox.width = 24;
-        this.hitbox.height = 62;
+        this.hitbox.width = 20;
+        this.hitbox.height = 60;
         this.egg = args.egg || [];
         this.babbies = [];
-        this.babbyLimit = 6;
+        this.babbyLimit = args.babbyLimit ||6;
         this.state.entityType = 'spawner';
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 10;
         this.state.health = 300;
+        this.state.spawnerSkin = args.spawnerSkin || 'flybot';
         this.deadTick = false;
         if(!node){
-            this.clip = this.addChild(new lib.mcSpawner()).spawnerClip;
+            this.mcSpawner = this.addChild(new lib.mcSpawner());
+            this.mcSpawner.gotoAndStop(this.state.spawnerSkin);
+            this.clip = this.mcSpawner['spawnerClip_'+this.state.spawnerSkin];
             this.cacheBase();
         }
     }
@@ -33,7 +36,7 @@ var init = function(lib,Global,Entity){
     p.constructor = Spawner;
     
     p.cacheBase = function(){
-        this.clip.base.cache(-this.hitbox.width/2,-this.hitbox.height/2,this.hitbox.width,this.hitbox.height,this.world.scale);
+        this.clip['base_'+this.state.spawnerSkin].cache(-this.hitbox.width/2,-this.hitbox.height/2,this.hitbox.width,this.hitbox.height,this.world.scale);
     }
     
     p.cacheClip = function(){

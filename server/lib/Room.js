@@ -7,6 +7,7 @@ var Weapon = require('./shared/Weapon');
 var Bullet = require('./shared/Bullet');
 var Spawner = require('./shared/Spawner');
 var Flybot = require('./shared/Enemy/Flybot');
+var BulletEnemy = require('./shared/BulletEnemy');
 var Item = require('./shared/Item');
 var Map = require('./shared/Map');
 
@@ -37,10 +38,8 @@ var Room = function(args){
     this.timer = setInterval(function(){that.tick();},this.tickSpeed);
     this.ontick = function(){};
     this.streamSpeed = 3;
-    this.importantStates = [
-        'entityType','x','y','xSpeed','ySpeed','health',
-        'moveLeft','moveRight','moveUp','moveDown',
-        'direction','aimAngle','aimDir'
+    this.importantStates = [ // For user state sending to their self
+        'x','y','xSpeed','ySpeed','health','direction'
     ];
     this.lastStates = {
         users:{},
@@ -93,12 +92,14 @@ p.tick = function(){
     
     // Entity tick and deltas
     var eDeltas = {};
+    var eRemove = [];
     for(var i in this.entities.get()){
     	var e = this.entities.get(i);
     	if(e instanceof Entity){
         	e.tick();
         	this.bulletCollisions(e);
             if(e.isRubbish){
+                eRemove.push(i);
                 this.removeEntity(e);
             }else if(!(e instanceof Bullet)){
             	if(deltaTick || fullTick){
@@ -130,11 +131,13 @@ p.tick = function(){
                 if(Object.size(userDeltas)>0){
                     var userDeltasMod = JSON.parse(JSON.stringify(userDeltas));
                     delete(userDeltasMod[u]); // Don't send to self by default
-                    if(userDeltas[u] && user.sendSelf){ // Include self-state if send-self is true
+                    if(userDeltas[u].health!=null && !fullTick){ // Always let them know their health if it changes (hacky soz)
+                        userDeltasMod[u] = {health:userDeltas[u].health};
+                    }
+                    if(userDeltas[u] && user.sendSelf){ // Include self-delta if send-self is true
                         user.sendSelf = false;
-                        // Filtering
                         userDeltasMod[u] = {};
-                        for(var i in share){ // send all instead of just delta
+                        for(var i in share){ // == this.importantStates
                             userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
                         }
                     }
@@ -167,6 +170,11 @@ p.tick = function(){
                     }
                 }
                 
+                // Entity removal
+                if(Object.size(eRemove)>0){
+                    
+                }
+                
                 if(this.step%this.fps==0){ // Ping every second
                     this.ping();
                 }
@@ -180,15 +188,23 @@ p.generateMap = function(){
     //    if(!success){
             this.map.generate();
             
+            this.addEntity(new Spawner({
+                spawnerSkin:'weapon',
+                babbyLimit:1,
+                egg:{
+                    entityType:'weapon'
+                }
+            }));
+            
             // Surface spawners
             var tSize = this.map.getTileSize();
             var fullWidth = this.map.getWorldSize().width * this.map.getRegionSize().width;
             var fullHeight = this.map.getWorldSize().height * this.map.getRegionSize().height;
             var numSpawners = 12;
             for(var i=0;i<numSpawners;i++){
-                var x = Math.floor(fullWidth/numSpawners*i);
+                var x = Math.floor((fullWidth/numSpawners*i) + (fullWidth/numSpawners)/2);
                 this.addEntity(new Spawner({
-                    x:x*tSize+1,
+                    x:x*tSize,
                     y:(fullHeight-Math.floor(this.map.heights[x]))*tSize,
                     egg:{entityType:'flybot'}
                 }));
@@ -289,6 +305,7 @@ p.addEntity = function(i){
     if(i instanceof Entity){
         var e = this.entities.add(i);
         e.room = e.world = this;
+        e.spawn();
         if(!(e instanceof Item && e.owner)){
             var state = JSON.parse(JSON.stringify(e.state));
             state.eid = e.eid;
@@ -302,7 +319,7 @@ p.removeEntity = function(i){
     if(i instanceof Entity){
         this.entities.remove(i);
         if(!(i instanceof Item && i.owner) && !(i instanceof Bullet)){
-            this.users.send('/ed ' + i.eid);
+            this.users.send('/er ' + i.eid);
         }
     }
 }
@@ -324,6 +341,9 @@ p.recreateEntity = function(s,eid){
             break;
         case 'flybot':
             e = new Flybot(s);
+            break;
+        case 'bulletenemy':
+            e = new BulletEnemy(s);
             break;
     }
     if(e){
@@ -375,7 +395,7 @@ p.getNearestPlayer = function(x,y,maxDistance){
 }
 
 p.getAoi = function(x,y,maxDistance){ // Area of interest
-    if(!maxDistance){maxDistance = 500;}
+    if(!maxDistance){maxDistance = 800;}
     var aoi = {
         users:{},
         entities:{}

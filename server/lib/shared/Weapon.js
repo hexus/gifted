@@ -37,6 +37,20 @@ var init = function(Global,Item,Bullet){
         if(!node){
             this.clip.gotoAndStop(this.clipInfo.frame);
         }
+        if(this.owner && this.spawnerParent){
+            this.spawnerParent.leave(this);
+            this.spawnerParent = false;
+        }
+        if(!this.owner && !this.spawnerParent){
+            if(this.life<0){
+                this.life = this.world.fps*180;
+            }
+        }else{
+            if(this.life>-1){
+                this.life = -1;
+            }
+        }
+        
     }
     
     p.sprayModifier = function(){ // two decimal places

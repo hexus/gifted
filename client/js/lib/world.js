@@ -1,5 +1,7 @@
-define(['createjs','assets','lib/global','lib/tile','lib/player','shared/Map','shared/Entity','shared/Bullet','shared/Item','shared/Weapon','shared/Spawner','shared/Enemy/Flybot'],
-function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,Flybot){
+define(['createjs','assets','lib/global','lib/tile','lib/player',
+        'shared/Map','shared/Entity','shared/Bullet','shared/Item','shared/Weapon',
+        'shared/Spawner','shared/Enemy/Flybot','shared/BulletEnemy'],
+function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,Flybot,BulletEnemy){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -33,6 +35,12 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         this.get('scrH',function(){
             return Global.stage.canvas.height / this.scale;
         });
+        this.get('step',function(){
+            return Global.ticker.getTicks();
+        });
+        this.get('fps',function(){
+            return Global.ticker.getFPS();
+        })
         
         this.view = {x:0,y:0,scale:1};
         this.lastUpdated = {x:0,y:0,scale:1};
@@ -59,11 +67,11 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
             if(aoi.entities[e] 
             || entity instanceof Spawner 
             || entity instanceof Bullet
-            || Global.ticker.getTicks()%Global.ticker.getFPS()==0){
+            || (this.step%Math.round(this.fps/2))==0){
                 entity.visible = true;
                 entity.tick();
                 this.bulletCollisions(entity);
-                if(entity.isRubbish){
+                if(entity.isRubbish && (!Global.socket.connected || entity instanceof Bullet)){
                     this.removeEntity(entity);
                 }
             }else{
@@ -113,19 +121,23 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         this.map.generate();
         
         // at spawn
-        //this.addEntity(new Spawner({egg:{
-        //    entityType:'weapon'
-        //}}));
+        this.addEntity(new Spawner({
+            spawnerSkin:'weapon',
+            babbyLimit:1,
+            egg:{
+                entityType:'weapon'
+            }
+        }));
         
         // surface spawners
         var tSize = this.map.getTileSize();
         var fullWidth = this.map.getWorldSize().width * this.map.getRegionSize().width;
         var fullHeight = this.map.getWorldSize().height * this.map.getRegionSize().height;
-        var numSpawners = 20;
+        var numSpawners = 12;
         for(var i=0;i<numSpawners;i++){
-            var x = Math.floor(fullWidth/numSpawners*i);
+            var x = Math.floor((fullWidth/numSpawners*i) + (fullWidth/numSpawners)/2);
             this.addEntity(new Spawner({
-                x:x*tSize+1,
+                x:x*tSize,
                 y:(fullHeight-Math.floor(this.map.heights[x]))*tSize,
                 egg:{entityType:'flybot'}
             }));
@@ -183,6 +195,9 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
             case 'flybot':
                 e = new Flybot(s);
                 break;
+            case 'bulletenemy':
+                e = new BulletEnemy(s);
+                break;
         }
         if(e){
             for(var i in s){
@@ -230,7 +245,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
     }
     
     p.getAoi = function(x,y,maxDistance){ // Area of interest
-        if(!maxDistance){maxDistance = 500;}
+        if(!maxDistance){maxDistance = 800;}
         var aoi = {
             users:{},
             entities:{}

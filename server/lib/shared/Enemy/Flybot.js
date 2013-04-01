@@ -1,18 +1,24 @@
 (function(){
 var node = typeof window === 'undefined';
-var deps = ['assets','lib/global','shared/Enemy'];
+var deps = ['assets','lib/global','shared/Enemy','shared/BulletEnemy'];
 
-var init = function(lib,Global,Enemy){
+var init = function(lib,Global,Enemy,BulletEnemy){
     
     if(node){
         Enemy = require('../Enemy');
+        BulletEnemy = require('../BulletEnemy');
     }
     
     var Flybot = function(args){ // Abstract
         if(!args){args={};}
         this.super3.constructor.call(this,args);
         this.state.entityType = 'flybot';
+        this.state.health = 50;
+        this.state.maxHealth = 50;
         this.wander = false;
+        this.searchFrequency = 5;
+        this.shootFrequency = 16;
+        this.spray = 26;
         if(!node){
             this.char = this.addChild(new lib.mcFlybot()).flybotChar;
             this.turret = this.char.turret;
@@ -32,12 +38,17 @@ var init = function(lib,Global,Enemy){
         this.char.cache(-this.hitbox.width/2,-this.hitbox.height/2,this.hitbox.width,this.hitbox.height,this.world.scale);
     }
     
+    p.sprayModifier = function(){ // two decimal places
+        return Math.round((-this.spray/2+Math.random()*this.spray)*100)/100;
+    }
+    
     p.tick = function(){
         this.super3.tick.call(this);
+        var state = this.state;
         if(!node){
-            if(this.state.health>0){
-                this.char.scaleX = this.state.aimDir;
-                this.turret.rotation = this.char.scaleX>0 ? this.state.aimAngle : 180-this.state.aimAngle;
+            if(state.health>0){
+                this.char.scaleX = state.aimDir;
+                this.turret.rotation = this.char.scaleX>0 ? state.aimAngle : 180-state.aimAngle;
             }else{
                 if(this.char.currentFrame<1){
                     this.char.gotoAndStop('dead');
@@ -48,54 +59,71 @@ var init = function(lib,Global,Enemy){
     }
     
     p.stopMoving = function(){
-        this.state.moveUp = false;
-        this.state.moveDown = false;
-        this.state.moveLeft = false;
-        this.state.moveRight = false;
+        var state = this.state;
+        state.moveUp = false;
+        state.moveDown = false;
+        state.moveLeft = false;
+        state.moveRight = false;
     }
     
     p.aiTick = function(){
         this.super3.aiTick.call(this);
-        this.search();
+        var state = this.state;
+        var step = this.world.step;
+        if(step%this.searchFrequency==0){
+            this.targetDistance = this.world.getDistance(state.x,state.y,this.target);
+            this.search();
+        }
         this.wanderStep();
         if(this.target){
-            this.state.isFlying = true;
-            this.state.isAimingLeft = true;
-            this.state.aimAngle = Math.atan2(this.target.y-this.y,this.target.x-this.x)*180/Math.PI;
-            this.state.aimDir = this.x < this.target.x ? 1 : -1; 
+            state.isFlying = true;
+            state.isAimingLeft = true;
+            state.aimAngle = Math.atan2(this.target.y-state.y,this.target.x-state.x)*180/Math.PI;
+            state.aimDir = state.x < this.target.x ? 1 : -1;
             if(!this.wander){
-                var rads = this.state.aimAngle * Math.PI/180;
-                var xRad = Math.cos(rads)*this.state.flySpeed;
-                var yRad = Math.sin(rads)*this.state.flySpeed;
-                if(this.world.getDistance(this.x,this.y,this.target)>this.state.ai.keepDistance+this.state.flySpeed*2){
-                    this.state.moveUp = this.y > this.target.y + this.state.flySpeed;
-                    this.state.moveDown = this.y < this.target.y - this.state.flySpeed;
-                    this.state.moveLeft = this.x > this.target.x + this.state.flySpeed;
-                    this.state.moveRight = this.x < this.target.x - this.state.flySpeed;
-                    this.state.xSpeed = Math.cos(rads) > 0 ? Math.ceil(xRad) : Math.floor(xRad);
-                    this.state.ySpeed = Math.sin(rads) > 0 ? Math.ceil(yRad) : Math.floor(yRad);
-                }else if(this.world.getDistance(this.x,this.y,this.target)<this.state.ai.keepDistance-this.state.flySpeed*2){
+                var rads = state.aimAngle * Math.PI/180;
+                var xRad = Math.cos(rads)*state.flySpeed;
+                var yRad = Math.sin(rads)*state.flySpeed;
+                if(this.targetDistance>state.ai.keepDistance+state.flySpeed*2){
+                    state.moveUp = state.y > this.target.y + state.flySpeed;
+                    state.moveDown = state.y < this.target.y - state.flySpeed;
+                    state.moveLeft = state.x > this.target.x + state.flySpeed;
+                    state.moveRight = state.x < this.target.x - state.flySpeed;
+                    state.xSpeed = Math.cos(rads) > 0 ? Math.ceil(xRad) : Math.floor(xRad);
+                    state.ySpeed = Math.sin(rads) > 0 ? Math.ceil(yRad) : Math.floor(yRad);
+                }else if(this.targetDistance<state.ai.keepDistance-this.state.flySpeed*2){
                     // not sure if the next four lines are accurate
-                    this.state.moveUp = this.y < this.target.y - this.state.flySpeed;
-                    this.state.moveDown = this.y > this.target.y + this.state.flySpeed;
-                    this.state.moveLeft = this.x < this.target.x - this.state.flySpeed;
-                    this.state.moveRight = this.x > this.target.x + this.state.flySpeed;
-                    this.state.xSpeed = Math.cos(rads) > 0 ? -Math.ceil(xRad) : -Math.floor(xRad);
-                    this.state.ySpeed = Math.sin(rads) > 0 ? -Math.ceil(yRad) : -Math.floor(yRad);
+                    state.moveUp = state.y < this.target.y - state.flySpeed;
+                    state.moveDown = state.y > this.target.y + state.flySpeed;
+                    state.moveLeft = state.x < this.target.x - state.flySpeed;
+                    state.moveRight = state.x > this.target.x + state.flySpeed;
+                    state.xSpeed = Math.cos(rads) > 0 ? -Math.ceil(xRad) : -Math.floor(xRad);
+                    state.ySpeed = Math.sin(rads) > 0 ? -Math.ceil(yRad) : -Math.floor(yRad);
                 }else{
                     this.stopMoving();
                 }
             }
+            if(step%this.shootFrequency==0){
+                var bullet = new BulletEnemy({
+                    owner:this,
+                    x:state.x,
+                    y:state.y,
+                    direction:state.aimDir,
+                    angle:state.aimAngle+this.sprayModifier(),
+                    speed:30
+                });
+                this.world.addEntity(bullet);
+            }
         }else{
-            this.state.isFlying = false;
-            this.state.isAimingLeft = false;
-            this.state.aimAngle = this.state.direction>0 ? 0 : 180;
-            this.state.aimDir = this.state.direction;
+            state.isFlying = false;
+            state.isAimingLeft = false;
+            state.aimAngle = state.direction>0 ? 0 : 180;
+            state.aimDir = state.direction;
             if(!this.wander){
                 this.stopMoving();
             }else{
                 if(this.wander.jump){
-                    this.state.moveUp = true;
+                    state.moveUp = true;
                 }
             }
         }
@@ -104,9 +132,13 @@ var init = function(lib,Global,Enemy){
     p.search = function(){
         var nearestPlayer = this.world.getNearestPlayer(this.x,this.y,this.state.ai.sightRange);
         if(!this.target){
-            this.target = nearestPlayer;
+            if(nearestPlayer){
+                if(nearestPlayer.state.health>0){
+                    this.target = nearestPlayer;
+                }
+            }
         }else{
-            if(this.world.getDistance(this.x,this.y,this.target)>this.state.ai.loseInterest){
+            if(this.targetDistance>this.state.ai.loseInterest || this.target.state.health<1){
                 this.target = false;
             }
             if(node){

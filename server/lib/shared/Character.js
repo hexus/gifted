@@ -12,6 +12,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         this.super.constructor.call(this,args); // Superclass constructor
         var that = this;
         this.state.health = 100;
+        this.state.maxHealth = 100;
         this.state.xLimit = 10;
         this.state.Accel = 1;
         this.state.yLimit = 20;

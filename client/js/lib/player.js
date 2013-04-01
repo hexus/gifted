@@ -8,6 +8,8 @@ function(createjs,lib,Global,Character){
     	
     	this.uid = args.id || 0; // Game ID (this.id is used by createjs)
     	this.name = args.name || 'guest';
+        this.regen = true;
+        this.regenSpeed = 10;
     	
         this.clip = this.addChild(new lib.giftedclientplayer()); // previously lib.mcPlayer_char()
         
@@ -68,10 +70,14 @@ function(createjs,lib,Global,Character){
     p.super2 = Character.prototype;
     p.constructor = Player;
     
-    p.currentLabel = function(){
-        var cl = this.lastAnim;
-        var cf = this.char.currentFrame;
-        return cl;
+    p.getStateDelta = function(readonly){ 
+        var delta = this.super2.getStateDelta.call(this,readonly);
+        for(var i in delta){
+            if(i=='health'){
+                delete(delta[i]);
+            }
+        }
+        return delta;
     }
     
     p.setAnim = function(label){
@@ -190,6 +196,9 @@ function(createjs,lib,Global,Character){
                         aimDir = 1;
                     }else{
                         aimDir = -1;
+                    }
+                    if(!Global.socket.connected && this.world.step%this.regenSpeed==0 && health<maxHealth){
+                        health++;
                     }
                 }
             }

@@ -6,6 +6,8 @@ var User = function(args){
     var that = this
     this.id = args.id; // Local ID
     this.name = args.name; // Selected character name
+    this.regen = true;
+    this.regenSpeed = 10;
     this.hitbox = {width:25,height:60};
     this.hitboxFull = JSON.parse(JSON.stringify(this.hitbox));
     this.room = null;
@@ -31,10 +33,12 @@ var p = User.prototype = new Character();
 p.super_Character = Character.prototype;
 
 p.tick = function(){
-    for(var e in this.effects){ // inform user about changes to self on next delta update
-        if(this.effects[e]!=null){
-            this.sendSelf = true;
-        }
+    if(this.effects.length>0){ // inform user about changes to self on next delta update
+        this.sendSelf = true;
+    }
+    if(this.state.health>0 && this.state.health<this.state.maxHealth && this.world.step%this.regenSpeed==0){
+        this.state.health++;
+        this.sendSelf = true;
     }
     this.super_Character.tick.call(this);
 }

@@ -34,10 +34,8 @@ var init = function(lib,Global,Character){
         this.super2.tick.call(this);
         doAiTick = true;
         if(!node){
-            if(Global.socket){
-                if(Global.socket.connected){
-                    doAiTick = false;
-                }
+            if(Global.socket.connected){
+                doAiTick = false;
             }
         }
         if(this.state.health>0){

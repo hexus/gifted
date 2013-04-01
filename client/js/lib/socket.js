@@ -146,6 +146,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     Ui.print(users[d[1]].name+": "+data.substr(d[0].length+d[1].length+2));
                     break;
                 case "/m": // Update player state (move)
+                    logData = false;
                     var deltas = JSON.parse(dstr);
                     for(var d in deltas){
                         var s = deltas[d];
@@ -163,6 +164,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     }
                     break;
                 case "/ec": // Create entity
+                    //logData = false;
                     var s = JSON.parse(dstr);
                     var e = world.recreateEntity(s);
                     if(e){
@@ -176,6 +178,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     }
                     break;
                 case "/ed": // Update entity state
+                    logData = false;
                     var deltas = JSON.parse(dstr);
                     for(var eid in deltas){
                         var e = world.entities[eid];
