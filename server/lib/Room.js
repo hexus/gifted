@@ -92,14 +92,12 @@ p.tick = function(){
     
     // Entity tick and deltas
     var eDeltas = {};
-    var eRemove = [];
     for(var i in this.entities.get()){
     	var e = this.entities.get(i);
     	if(e instanceof Entity){
         	e.tick();
         	this.bulletCollisions(e);
             if(e.isRubbish){
-                eRemove.push(i);
                 this.removeEntity(e);
             }else if(!(e instanceof Bullet)){
             	if(deltaTick || fullTick){
@@ -131,14 +129,16 @@ p.tick = function(){
                 if(Object.size(userDeltas)>0){
                     var userDeltasMod = JSON.parse(JSON.stringify(userDeltas));
                     delete(userDeltasMod[u]); // Don't send to self by default
-                    if(userDeltas[u].health!=null && !fullTick){ // Always let them know their health if it changes (hacky soz)
-                        userDeltasMod[u] = {health:userDeltas[u].health};
-                    }
-                    if(userDeltas[u] && user.sendSelf){ // Include self-delta if send-self is true
-                        user.sendSelf = false;
-                        userDeltasMod[u] = {};
-                        for(var i in share){ // == this.importantStates
-                            userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
+                    if(userDeltas[u]){
+                        if(userDeltas[u].health!=null && !fullTick){ // Always let them know their health if it changes (hacky soz)
+                            userDeltasMod[u] = {health:userDeltas[u].health};
+                        }
+                        if(user.sendSelf){ // Include self-delta if send-self is true
+                            user.sendSelf = false;
+                            userDeltasMod[u] = {};
+                            for(var i in share){ // == this.importantStates
+                                userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
+                            }
                         }
                     }
                     if(!longTick){
@@ -168,11 +168,6 @@ p.tick = function(){
                     if(Object.size(eDeltasMod)>0){
                         this.send('/ed '+JSON.stringify(eDeltasMod));
                     }
-                }
-                
-                // Entity removal
-                if(Object.size(eRemove)>0){
-                    
                 }
                 
                 if(this.step%this.fps==0){ // Ping every second
