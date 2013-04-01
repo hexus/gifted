@@ -49,9 +49,10 @@ var init = function(createjs,lib,Global,Entity,Character,Projectile,Effect,Spawn
     }
     
     p.onContact = function(e){
-        var doApply = false;
+        var doApply = false, doRemove = false;
         if((e instanceof Character || e instanceof Spawner) && e!=this.owner){
             doApply = true;
+            doRemove = true;
             if(!node && Global.socket){ // Authoritative server
                 if(Global.socket.connected){
                     doApply = false;
@@ -59,6 +60,7 @@ var init = function(createjs,lib,Global,Entity,Character,Projectile,Effect,Spawn
             }
             if(e.state.health<1){
                 doApply = false;
+                doRemove = false;
             }
             if(doApply){
                 var effect = {health:-this.state.damage};
@@ -68,10 +70,12 @@ var init = function(createjs,lib,Global,Entity,Character,Projectile,Effect,Spawn
                     effect.ySpeed = Math.round(Math.sin(rads) * this.state.knockback);
                 }
                 e.applyEffect(new Effect(effect));
+            }
+            if(doRemove){
                 this.isRubbish = true;
             }
         }
-        return doApply;
+        return doApply || doRemove;
     }
    
     return Bullet; 

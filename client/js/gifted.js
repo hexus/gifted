@@ -40,7 +40,7 @@ requirejs.config({
 
 require(['jquery','lib/global'],
 function($,Global){
-    $.get('/socket','',function(d){ // Don't require anything else until socket.io address is loaded
+    $.get('/socket','',function(d){ // Don't require anything else until socket.io port is known
         socketUrl = Global.sUrl = '//'+window.location.hostname+':'+d;
         $('#worldList, #mp').removeAttr('disabled');
         requirejs.config({ // Update config

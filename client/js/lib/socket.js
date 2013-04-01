@@ -74,7 +74,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     }
                     break;
                 case "/youare":
-                    Global.player.gid = d[1] || 0;
+                    Global.player.uid = d[1] || 0;
                     Global.player.name = d[2] || 'guest';
                     users[d[1]] = Global.player;
                     break;
@@ -132,7 +132,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                 case "/wd": // World data (map)
                     world.map.expand(dstr);
                     Global.worldUi.updateMap();
-                    world.addPlayer(player.gid,player);
+                    world.addPlayer(player.uid,player);
                     world.focusOn(player);
                     Ui.showWorld(); // Implement a loading overlay!
                     logData = false;

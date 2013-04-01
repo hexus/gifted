@@ -21,7 +21,7 @@ var init = function(lib,Global,Entity){
         this.state.entityType = 'spawner';
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 10;
         this.state.health = 300;
-        this.deadcache = false;
+        this.deadTick = false;
         if(!node){
             this.clip = this.addChild(new lib.mcSpawner()).spawnerClip;
             this.cacheBase();
@@ -59,10 +59,10 @@ var init = function(lib,Global,Entity){
                 }
             }
         }else{
-            if(!node && !this.deadcache){
+            if(!node && !this.deadTick){
                 this.clip.gotoAndStop('dead');
                 this.cacheClip();
-                this.deadcache = true;
+                this.deadTick = true;
             }
         }
     }

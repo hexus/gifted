@@ -6,7 +6,7 @@ function(createjs,lib,Global,Character){
         var that = this;
     	this.super2.constructor.call(this,args);
     	
-    	this.gid = args.id || 0; // Game ID (this.id is used by createjs)
+    	this.uid = args.id || 0; // Game ID (this.id is used by createjs)
     	this.name = args.name || 'guest';
     	
         this.clip = this.addChild(new lib.giftedclientplayer()); // previously lib.mcPlayer_char()
@@ -185,11 +185,12 @@ function(createjs,lib,Global,Character){
             if(this.thisPlayer){
                 aimAngle = Math.atan2(this.mouseY,this.mouseX)*180/Math.PI;
                 if(aimAngle<0){aimAngle+=360;}
-                //Global.debugObj.out.aimAngle = aimAngle;
-                if(this.mouseX>0){
-                    aimDir = 1;
-                }else{
-                    aimDir = -1;
+                if(health>0){
+                    if(this.mouseX>0){
+                        aimDir = 1;
+                    }else{
+                        aimDir = -1;
+                    }
                 }
             }
             aimAngle2 = aimDir>0 ? (aimAngle+90)%180 : (270-aimAngle) % 180;

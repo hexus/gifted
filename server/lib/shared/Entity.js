@@ -186,7 +186,7 @@ var init = function(createjs,Global,Effect){
             }
         }
         
-        // Delete half of the line
+        // Ignore half of the line (hacky performance improvement for bullets)
         for(var i in ray){
             if(i%2==0){
                 delete(ray[i]);

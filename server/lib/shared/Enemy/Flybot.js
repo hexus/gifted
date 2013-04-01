@@ -1,8 +1,8 @@
 (function(){
 var node = typeof window === 'undefined';
-var deps = ['assets','shared/Enemy'];
+var deps = ['assets','lib/global','shared/Enemy'];
 
-var init = function(lib,Enemy){
+var init = function(lib,Global,Enemy){
     
     if(node){
         Enemy = require('../Enemy');
@@ -11,6 +11,7 @@ var init = function(lib,Enemy){
     var Flybot = function(args){ // Abstract
         if(!args){args={};}
         this.super3.constructor.call(this,args);
+        this.state.entityType = 'flybot';
         this.wander = false;
         if(!node){
             this.char = this.addChild(new lib.mcFlybot()).flybotChar;
@@ -35,12 +36,8 @@ var init = function(lib,Enemy){
         this.super3.tick.call(this);
         if(!node){
             if(this.state.health>0){
-                if(this.target){
-                    this.scaleX = this.x < this.target.x ? 1 : -1;
-                }else{
-                    this.scaleX = this.state.direction;
-                }
-                this.turret.rotation = this.scaleX>0 ? this.state.aimAngle : 180-this.state.aimAngle;
+                this.char.scaleX = this.state.aimDir;
+                this.turret.rotation = this.char.scaleX>0 ? this.state.aimAngle : 180-this.state.aimAngle;
             }else{
                 if(this.char.currentFrame<1){
                     this.char.gotoAndStop('dead');
@@ -59,11 +56,13 @@ var init = function(lib,Enemy){
     
     p.aiTick = function(){
         this.super3.aiTick.call(this);
-        //this.search();
+        this.search();
         this.wanderStep();
         if(this.target){
             this.state.isFlying = true;
+            this.state.isAimingLeft = true;
             this.state.aimAngle = Math.atan2(this.target.y-this.y,this.target.x-this.x)*180/Math.PI;
+            this.state.aimDir = this.x < this.target.x ? 1 : -1; 
             if(!this.wander){
                 var rads = this.state.aimAngle * Math.PI/180;
                 var xRad = Math.cos(rads)*this.state.flySpeed;
@@ -89,6 +88,9 @@ var init = function(lib,Enemy){
             }
         }else{
             this.state.isFlying = false;
+            this.state.isAimingLeft = false;
+            this.state.aimAngle = this.state.direction>0 ? 0 : 180;
+            this.state.aimDir = this.state.direction;
             if(!this.wander){
                 this.stopMoving();
             }else{
@@ -97,10 +99,6 @@ var init = function(lib,Enemy){
                 }
             }
         }
-        // Random
-        //this.state.aimAngle = (this.state.aimAngle + 1) % 360;
-        //this.state.xSpeed += -this.state.flySpeed+Math.round(Math.random()*(this.state.flySpeed*2));
-        //this.state.ySpeed += -this.state.flySpeed+Math.round(Math.random()*(this.state.flySpeed*2));
     }
     
     p.search = function(){
@@ -110,6 +108,15 @@ var init = function(lib,Enemy){
         }else{
             if(this.world.getDistance(this.x,this.y,this.target)>this.state.ai.loseInterest){
                 this.target = false;
+            }
+            if(node){
+                if(!this.world.users.get(this.target.id)){
+                    this.target = false;
+                }
+            }else{
+                if(!this.world.users[this.target.uid]){
+                    this.target = false;
+                }
             }
             if(nearestPlayer){
                 var distance = this.world.getDistance(this.x,this.y,nearestPlayer);

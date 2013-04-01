@@ -5,7 +5,6 @@ var User = function(args){
     this.super_Character.constructor.call(this,args);
     var that = this
     this.id = args.id; // Local ID
-    this.aid = args.aid; // Account ID
     this.name = args.name; // Selected character name
     this.hitbox = {width:25,height:60};
     this.hitboxFull = JSON.parse(JSON.stringify(this.hitbox));

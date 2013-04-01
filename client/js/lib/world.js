@@ -75,7 +75,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
     
     p.bulletCollisions = function(e){
         if(e instanceof Bullet){
-            var aoi = this.getAoi(e.x,e.y,100);
+            var aoi = this.getBulletAoi(e.x,e.y,100);
             var ray = e.getRay();
             var collidee = false;
             for(var r in ray){
@@ -251,6 +251,17 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
                 if(distance<maxDistance){
                     aoi.entities[e] = entity;
                 }
+            }
+        }
+        return aoi;
+    }
+    
+    p.getBulletAoi = function(x,y,maxDistance){
+        var aoi = this.getAoi(x,y,maxDistance);
+        for(var e in aoi.entities){
+            var entity = aoi.entities[e];
+            if(entity instanceof Bullet){
+                delete[aoi.entities[e]];
             }
         }
         return aoi;

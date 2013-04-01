@@ -35,7 +35,7 @@ function($,createjs,Global,Socket,Bullet,Weapon){
                 var cb = function(){
                     world.generateMap();
                     var p = world.map.getProperties();
-                    world.addPlayer(Global.player.gid,Global.player);
+                    world.addPlayer(Global.player.uid,Global.player);
                     world.focusOn(Global.player);
                     Ui.showWorld();
                     $('#client').show();

@@ -37,7 +37,15 @@ var Room = function(args){
     this.timer = setInterval(function(){that.tick();},this.tickSpeed);
     this.ontick = function(){};
     this.streamSpeed = 3;
-    this.importantStates = ['entityType','x','y','xSpeed','ySpeed','health'];
+    this.importantStates = [
+        'entityType','x','y','xSpeed','ySpeed','health',
+        'moveLeft','moveRight','moveUp','moveDown',
+        'direction','aimAngle','aimDir'
+    ];
+    this.lastStates = {
+        users:{},
+        entities:{}
+    }
 }
 
 var p = Room.prototype;
@@ -48,8 +56,11 @@ p.tick = function(){
     this.step++;
     this.ontick.call(this);
     var share = this.importantStates; 
-    var streamTick = this.step%this.streamSpeed==0;
-    var fpsTick = this.step%(this.fps*2)==0; // every two seconds
+    var longTick = this.step%(this.fps*15)==0; // every fifteen seconds
+    var fullTick = this.step%(this.fps*2)==0 || longTick; // every second / longTick
+    var deltaTick = this.step%this.streamSpeed==0; // every streamSpeed steps
+    
+    
     
     // User tick and deltas
     var userDeltas = {};
@@ -58,18 +69,24 @@ p.tick = function(){
         if(user instanceof User){
             user.tick();
             if(!user.inLobby){
-                if(streamTick || fpsTick){
-                    var userDelta = user.getStateDelta();
-                    if(Object.size(userDelta)>0){
-                        userDeltas[u] = userDelta;
-                        if(fpsTick){
-                            if(!userDeltas[u]){
-                                userDeltas[u] = {};
-                            }
-                            for(var s in share){
+                if(deltaTick || fullTick){
+                    if(fullTick){ // Full update
+                        var userState = JSON.stringify(user.state);
+                        if(this.lastStates.users[u]!=userState){
+                            userDeltas[u] = user.state;
+                            this.lastStates.users[u] = userState;
+                        }
+                    }else{ // Delta update
+                        var userDelta = user.getStateDelta();
+                        userDeltas[u] = {};
+                        if(Object.size(userDelta)>0){
+                            userDeltas[u] = userDelta;
+                        }
+                        /*for(var s in share){
+                            if(user.state[share[s]]!=null){
                                 userDeltas[u][share[s]] = user.state[share[s]];
                             }
-                        }
+                        }*/
                     }
                 }
             }
@@ -85,21 +102,22 @@ p.tick = function(){
         	this.bulletCollisions(e);
             if(e.isRubbish){
                 this.removeEntity(e);
-            }else{
-            	if((streamTick && !(e instanceof Bullet)) || fpsTick){
-            		var eDelta = e.getStateDelta();
-            		if(Object.size(eDelta)>0){
-            			eDeltas[i] = eDelta;
-                        if(fpsTick){
-                            if(!eDeltas[i]){
-                                eDeltas[i] = {};
-                            }
-                            for(var s in share){
-                                eDeltas[i][share[s]] = e.state[share[s]];
-                            }
+            }else if(!(e instanceof Bullet)){
+            	if(deltaTick || fullTick){
+            	    if(fullTick){ // Full update
+                	    var eState = JSON.stringify(e.state);
+                	    if(this.lastStates.entities[i]!=eState){
+                	        eDeltas[i] = e.state;
+                            this.lastStates.entities[i] = eState; 
                         }
-            		}
-                }
+                    }else{ // Delta update
+                        var eDelta = e.getStateDelta();
+                        eDeltas[i] = {};
+                        if(Object.size(eDelta)>0){
+                            eDeltas[i] = eDelta;
+                        }
+                    }
+            	}
             }
         }
     }
@@ -119,13 +137,11 @@ p.tick = function(){
                         user.sendSelf = false;
                         // Filtering
                         userDeltasMod[u] = {};
-                        for(var i in share){
-                            if(this.users.get(u).state[share[i]]!=null){ // send all instead of just delta
-                                userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
-                            }
+                        for(var i in share){ // send all instead of just delta
+                            userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
                         }
                     }
-                    if(this.step%this.fps!=0){
+                    if(!longTick){
                         for(var d in userDeltasMod){ // Restrict to AoI
                             if(d!=u){
                                 if(!aoi.users[d]){
@@ -142,7 +158,7 @@ p.tick = function(){
                 // Entity deltas
                 if(Object.size(eDeltas)>0){
                     var eDeltasMod = JSON.parse(JSON.stringify(eDeltas));
-                    if(this.step%this.fps!=0){
+                    if(!longTick){
                         for(var e in eDeltasMod){
                             if(!aoi.entities[e]){
                                 delete(eDeltasMod[e]);
@@ -154,7 +170,7 @@ p.tick = function(){
                     }
                 }
                 
-                if(this.step%this.fps==0){
+                if(this.step%this.fps==0){ // Ping every second
                     this.ping();
                 }
             }
@@ -357,6 +373,10 @@ p.getNearestItem = function(x,y,maxDistance){
     return this.getNearestEntity(Item,x,y,maxDistance);
 }
 
+p.getNearestPlayer = function(x,y,maxDistance){
+    return this.getNearestUser(x,y,maxDistance);
+}
+
 p.getAoi = function(x,y,maxDistance){ // Area of interest
     if(!maxDistance){maxDistance = 500;}
     var aoi = {
@@ -384,9 +404,20 @@ p.getAoi = function(x,y,maxDistance){ // Area of interest
     return aoi;
 }
 
+p.getBulletAoi = function(x,y,maxDistance){
+    var aoi = this.getAoi(x,y,maxDistance);
+    for(var e in aoi.entities){
+        var entity = aoi.entities[e];
+        if(entity instanceof Bullet){
+            delete[aoi.entities[e]];
+        }
+    }
+    return aoi;
+}
+
 p.bulletCollisions = function(e){
     if(e instanceof Bullet){
-        var aoi = this.getAoi(e.x,e.y,100);
+        var aoi = this.getBulletAoi(e.x,e.y,100);
         var ray = e.getRay();
         var collidee = false;
         for(var r in ray){
@@ -402,7 +433,7 @@ p.bulletCollisions = function(e){
                 }
                 for(var eid in aoi.entities){
                     var entity = aoi.entities[eid];
-                    if(entity!=e){
+                    if(entity!=e && !(entity instanceof Bullet)){
                         var c = entity.chkCollision(ray[r][0],ray[r][1]);
                         if(c){
                             if(e.onContact(entity)){
@@ -411,7 +442,10 @@ p.bulletCollisions = function(e){
                         }
                     }
                 }
+            }else{
+                delete(ray);
             }
         }
+        delete(aoi);
     }
 }

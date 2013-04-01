@@ -13,17 +13,16 @@ var init = function(lib,Global,Character){
         this.super2.constructor.call(this,args);
         this.target = false;
         this.freemove = true;
+        this.afterlife = 500;
         this.hitbox.width = this.hitbox.height = 30;
-        this.state.entityType = 'flybot';
         this.state.isFlying = true;
         this.state.xLimit = this.state.flySpeed = 4;
         this.state.yLimit = 14;
         this.state.jumpStr = 8;
         this.state.ai = {
-            sightRange:300,
+            sightRange:250,
             loseInterest:500,
-            keepDistance:150
-            
+            keepDistance:125
         }
     }
     
@@ -41,10 +40,14 @@ var init = function(lib,Global,Character){
                 }
             }
         }
-        if(doAiTick && this.state.health>0){
-            this.aiTick();
-        }
-        if(this.state.health<1){
+        if(this.state.health>0){
+            if(doAiTick){
+                this.aiTick();
+            }
+        }else{
+            if(this.life<0){
+                this.life = this.afterlife;
+            }
             if(this.spawnerParent){
                 this.spawnerParent.leave(this);
             }
