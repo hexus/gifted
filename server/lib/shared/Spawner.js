@@ -17,7 +17,7 @@ var init = function(lib,Global,Entity){
         this.hitbox.height = 60;
         this.egg = args.egg || [];
         this.babbies = [];
-        this.babbyLimit = args.babbyLimit ||6;
+        this.babbyLimit = args.babbyLimit || 10;
         this.state.entityType = 'spawner';
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 10;
         this.state.health = 300;

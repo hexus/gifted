@@ -450,6 +450,7 @@ p.getBulletAoi = function(bullet){
             }
         }
     }
+    
     return aoi;
 }
 
@@ -483,7 +484,7 @@ p.bulletCollisions = function(e){
     for(var eid in entities){
         var entity = entities[eid];
         for(r=0;r<rayLen && !collidee;r++){
-            var ray = rayPoints[r];
+            ray = rayPoints[r];
             if(entity.chkCollision(ray[0],ray[1])){
                 if(e.onContact(entity)){
                     collidee = entity;

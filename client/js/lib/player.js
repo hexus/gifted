@@ -1,5 +1,5 @@
-define(['createjs','assets','lib/global','shared/Character'],
-function(createjs,lib,Global,Character){
+define(['createjs','assets','lib/global','shared/Character','shared/Effect'],
+function(createjs,lib,Global,Character,Effect){
     var Player = function(args){
         this.initialize();
         if(!args){args={};}
@@ -69,6 +69,30 @@ function(createjs,lib,Global,Character){
     var p = Player.prototype = new Character();
     p.super2 = Character.prototype;
     p.constructor = Player;
+    
+    p.useItem = function(side){
+        this.super2.useItem.call(this,side);
+        
+        // Experimental telekinesis on click
+        /*
+        var wScale = this.world.scale;
+        var mX = this.x + this.mouseX;
+        var mY = this.y + this.mouseY;
+        var aoi = this.world.getAoi(mX,mY,200);
+        var entities = aoi.entities;
+        for(var e in entities){
+            var entity = entities[e];
+            var angle = Math.atan2(entity.y-mY,entity.x-mX)*180/Math.PI;
+            console.log(angle);
+            var rads = angle * Math.PI/180;
+            entity.applyEffect(new Effect({
+                duration:8,
+                xSpeed:Math.round(Math.cos(rads)*10),
+                ySpeed:Math.round(Math.sin(rads)*10)
+            }));
+        }
+        */
+    }
     
     p.getStateDelta = function(readonly){ 
         var delta = this.super2.getStateDelta.call(this,readonly);
