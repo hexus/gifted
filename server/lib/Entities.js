@@ -24,7 +24,7 @@ p.add = function(i){
 
 p.remove = function(i){
 	if(i instanceof Entity){
-	    this.collection[i.eid] = false;
+	    delete(this.collection[i.eid]);// = false;
 	}
 }
 

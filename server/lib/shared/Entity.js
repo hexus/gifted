@@ -186,10 +186,11 @@ var init = function(createjs,Global,Effect){
             }
         }
         
-        // Ignore half of the line (hacky performance improvement for bullets)
-        for(var i in ray){
+        // Ignore half of the line (minor performance improvement for bullets)
+        var rayLen = ray.length;
+        for(var i=0;i<rayLen;i++){
             if(i%2==0){
-                delete(ray[i]);
+                ray.splice(i,1);
             }
         }
         

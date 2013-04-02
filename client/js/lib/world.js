@@ -48,6 +48,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         this.scrollTarget = this.addChild(this.defaultTarget);
         this.scrollSensitivity = 0.36;
         this.update = {rate:10,count:0};
+        this.bulletAoiSpeed = Math.round(this.fps/2);
         
         this.mapContainer = this.addChild(new createjs.Container());
         this.entityContainer = this.addChild(new createjs.Container());
@@ -64,16 +65,19 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         
         for(var e in this.entities){
             var entity = this.entities[e];
-            if(aoi.entities[e] 
-            || entity instanceof Spawner 
-            || entity instanceof Bullet
-            || (this.step%Math.round(this.fps/2))==0){
-                entity.visible = true;
+            var inAoi = aoi.entities[e]!=null;
+            var isBullet = entity instanceof Bullet;
+            if(inAoi || entity instanceof Spawner || isBullet || (this.step%Math.round(this.fps/2))==0){
                 entity.tick();
-                this.bulletCollisions(entity);
-                if(entity.isRubbish && (!Global.socket.connected || entity instanceof Bullet)){
+                if(isBullet){
+                    this.bulletCollisions(entity);
+                }
+                if(entity.isRubbish && (!Global.socket.connected || isBullet)){
                     this.removeEntity(entity);
                 }
+            }
+            if(inAoi){
+                entity.visible = true;
             }else{
                 entity.visible = false;
             }
@@ -82,38 +86,42 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
     }
     
     p.bulletCollisions = function(e){
-        if(e instanceof Bullet){
-            var aoi = this.getBulletAoi(e.x,e.y,100);
-            var ray = e.getRay();
-            var collidee = false;
-            for(var r in ray){
-                if(!collidee){
-                    for(var u in aoi.users){
-                        var user = aoi.users[u];
-                        var c = user.chkCollision(ray[r][0],ray[r][1]);
-                        if(c){
-                            if(e.onContact(user)){
-                                collidee = user;
-                            }
-                        }
+        var aoi = e.bulletAoi;
+        if(!aoi){
+            aoi = e.bulletAoi = this.getBulletAoi(e);
+        }
+        if(aoi.life>0){
+            aoi.life--;
+        }else{
+            aoi = e.bulletAoi = this.getBulletAoi(e);
+        }
+        var users = aoi.users;
+        var entities = aoi.entities;
+        var rayPoints = e.getRay();
+        var rayLen = rayPoints.length;
+        var collidee = false;
+        for(var u in users){
+            var user = users[u];
+            for(var r=0;r<rayLen && !collidee;r++){
+                var ray = rayPoints[r];
+                if(user.chkCollision(ray[0],ray[1])){
+                    if(e.onContact(user)){
+                        collidee = user;
                     }
-                    for(var eid in aoi.entities){ // anything that isn't a player
-                        var entity = aoi.entities[eid];
-                        if(entity != e && !(entity instanceof Bullet)){
-                            var c = entity.chkCollision(ray[r][0],ray[r][1]);
-                            if(c){
-                                if(e.onContact(entity)){
-                                    collidee = entity;
-                                }
-                            }
-                        }
-                    }
-                }else{
-                    delete(ray);
                 }
             }
-            delete(aoi);
-            
+        }
+        collidee = false;
+        for(var eid in entities){
+            var entity = entities[eid];
+            for(r=0;r<rayLen && !collidee;r++){
+                ray = rayPoints[r];
+                if(entity.chkCollision(ray[0],ray[1])){
+                    if(e.onContact(entity)){
+                        collidee = entity;
+                    }
+                }
+            }
         }
     }
     
@@ -271,14 +279,39 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         return aoi;
     }
     
-    p.getBulletAoi = function(x,y,maxDistance){
-        var aoi = this.getAoi(x,y,maxDistance);
-        for(var e in aoi.entities){
-            var entity = aoi.entities[e];
-            if(entity instanceof Bullet){
-                delete[aoi.entities[e]];
+    p.getBulletAoi = function(bullet){
+        var maxDistance = bullet.state.flySpeed * this.bulletAoiSpeed;
+        var aoi = {
+            users:{},
+            entities:{},
+            life:this.bulletAoiSpeed
+        }
+        
+        if(bullet instanceof BulletEnemy){
+            var users = this.users;
+            for(var u in users){
+                var user = users[u];
+                if(user instanceof Player){
+                    if(this.getDistance(bullet.x,bullet.y,user)<maxDistance){
+                        aoi.users[u] = user;
+                    }
+                }
+            }
+        }else{
+            var entities = this.entities;
+            for(var e in entities){
+                var entity = entities[e];
+                if(entity instanceof Entity){
+                    if(bullet!=entity && !(entity instanceof Bullet)
+                    && entity.state.health>0 && entity.state.spawnerSkin!='weapon'){
+                        if(this.getDistance(bullet.x,bullet.y,entity)<maxDistance){
+                            aoi.entities[e] = entity;
+                        }
+                    }
+                }
             }
         }
+        
         return aoi;
     }
     

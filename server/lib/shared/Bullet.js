@@ -65,7 +65,7 @@ var init = function(createjs,lib,Global,Enemy,Projectile,Effect,Spawner){
                     doApply = false;
                 }
             }
-            if(e.state.health<1 || e.state.spawnerSkin=='weapon'){
+            if(e.state.health<1){
                 doApply = false;
                 doRemove = false;
             }

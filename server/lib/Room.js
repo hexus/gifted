@@ -38,6 +38,7 @@ var Room = function(args){
     this.timer = setInterval(function(){that.tick();},this.tickSpeed);
     this.ontick = function(){};
     this.streamSpeed = 3;
+    this.bulletAoiSpeed = Math.round(this.fps/2);
     this.importantStates = [ // For user state sending to their self
         'x','y','xSpeed','ySpeed','health','direction'
     ];
@@ -96,10 +97,11 @@ p.tick = function(){
     	var e = this.entities.get(i);
     	if(e instanceof Entity){
         	e.tick();
-        	this.bulletCollisions(e);
             if(e.isRubbish){
                 this.removeEntity(e);
-            }else if(!(e instanceof Bullet)){
+            }else if(e instanceof Bullet){
+                this.bulletCollisions(e);
+            }else{
             	if(deltaTick || fullTick){
             	    if(fullTick){ // Full update
                 	    var eState = JSON.stringify(e.state);
@@ -352,7 +354,7 @@ p.recreateEntity = function(s,eid){
 
 p.getDistance = function(x,y,e){
     var distance = false;
-    if(e instanceof Entity){
+    if(e.x && e.y){
         distance = Math.sqrt(Math.pow(x - e.x,2) + Math.pow(y - e.y,2));
     }
     return distance;
@@ -395,8 +397,9 @@ p.getAoi = function(x,y,maxDistance){ // Area of interest
         users:{},
         entities:{}
     }
-    for(var u in this.users.get()){
-        var user = this.users.get(u);
+    var users = this.users.get();
+    for(var u in users){
+        var user = users[u];
         if(user instanceof User){
             var distance = this.getDistance(x,y,user);
             if(distance<maxDistance){
@@ -404,60 +407,89 @@ p.getAoi = function(x,y,maxDistance){ // Area of interest
             }
         }
     }
-    for(var e in this.entities.get()){
-        var entity = this.entities.get(e);
-        if(entity instanceof Entity){
-            var distance = this.getDistance(x,y,entity);
-            if(distance<maxDistance){
-                aoi.entities[e] = entity;
-            }
+    var entities = this.entities.get();
+    for(var e in entities){
+        var entity = entities[e];
+        var distance = this.getDistance(x,y,entity);
+        if(distance<maxDistance){
+            aoi.entities[e] = entity;
         }
     }
     return aoi;
 }
 
-p.getBulletAoi = function(x,y,maxDistance){
-    var aoi = this.getAoi(x,y,maxDistance);
-    for(var e in aoi.entities){
-        var entity = aoi.entities[e];
-        if(entity instanceof Bullet){
-            delete[aoi.entities[e]];
+p.getBulletAoi = function(bullet){
+    var maxDistance = bullet.state.flySpeed * this.bulletAoiSpeed;
+    var aoi ={
+        users:{},
+        entities:{},
+        life:this.bulletAoiSpeed // update every half second
+    }
+    
+    if(bullet instanceof BulletEnemy){
+        var users = this.users.get();
+        for(var u in users){
+            var user = users[u];
+            if(user instanceof User){
+                if(this.getDistance(bullet.x,bullet.y,user)<maxDistance){
+                    aoi.users[u] = user;
+                }
+            }
+        }
+    }else{
+        var entities = this.entities.get();
+        for(var e in entities){
+            var entity = entities[e];
+            if(entity instanceof Entity){
+                if(bullet!=entity && !(entity instanceof Bullet)
+                && entity.state.health>0 && entity.state.spawnerSkin!='weapon'){
+                    if(this.getDistance(bullet.x,bullet.y,entity)<maxDistance){
+                        aoi.entities[e] = entity;
+                    }
+                }
+            }
         }
     }
     return aoi;
 }
 
 p.bulletCollisions = function(e){
-    if(e instanceof Bullet){
-        var aoi = this.getBulletAoi(e.x,e.y,100);
-        var ray = e.getRay();
-        var collidee = false;
-        for(var r in ray){
-            if(!collidee){
-                for(var u in aoi.users){
-                    var user = aoi.users[u];
-                    var c = user.chkCollision(ray[r][0],ray[r][1]);
-                    if(c){
-                        if(e.onContact(user)){
-                            collidee = user;
-                        }
-                    }
+    var aoi = e.bulletAoi;
+    if(!aoi){
+        aoi = e.bulletAoi = this.getBulletAoi(e);
+    }
+    if(aoi.life>0){
+        aoi.life--;
+    }else{
+        aoi = e.bulletAoi = this.getBulletAoi(e);
+    }
+    var users = aoi.users;
+    var entities = aoi.entities;
+    var rayPoints = e.getRay();
+    var rayLen = rayPoints.length;
+    var collidee = false;
+    for(var u in users){
+        var user = users[u];
+        for(var r=0;r<rayLen && !collidee;r++){
+            var ray = rayPoints[r];
+            if(user.chkCollision(ray[0],ray[1])){
+                if(e.onContact(user)){
+                    collidee = user;
                 }
-                for(var eid in aoi.entities){
-                    var entity = aoi.entities[eid];
-                    if(entity!=e && !(entity instanceof Bullet)){
-                        var c = entity.chkCollision(ray[r][0],ray[r][1]);
-                        if(c){
-                            if(e.onContact(entity)){
-                                collidee = entity;
-                            }
-                        }
-                    }
-                }
-            }else{
-                delete(ray);
             }
         }
-        delete(aoi);
     }
+    collidee = false;
+    for(var eid in entities){
+        var entity = entities[eid];
+        for(r=0;r<rayLen && !collidee;r++){
+            var ray = rayPoints[r];
+            if(entity.chkCollision(ray[0],ray[1])){
+                if(e.onContact(entity)){
+                    collidee = entity;
+                }
+            }
+        }
+    }
+    delete(rayPoints);
 }

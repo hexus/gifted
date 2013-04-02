@@ -38,7 +38,7 @@ p.tick = function(){
     }
     if(this.state.health>0 && this.state.health<this.state.maxHealth && this.world.step%this.regenSpeed==0){
         this.state.health++;
-        this.sendSelf = true;
+        //this.sendSelf = true;
     }
     this.super_Character.tick.call(this);
 }
