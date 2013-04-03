@@ -45,6 +45,12 @@ var init = function(lib,Global,Entity){
     
     p.tick = function(){
         this.super2.tick.call(this);
+        if(this.state.xSpeed>0){
+            this.state.xSpeed--;
+        }
+        if(this.state.xSpeed<0){
+            this.state.xSpeed++;
+        }
         if(this.state.health>0){
             doSpawn = true;
             if(!node && Global.socket){

@@ -62,8 +62,9 @@ p.tick = function(){
     
     // User tick and deltas
     var userDeltas = {};
-    for(var u in this.users.get()){
-        var user = this.users.get(u);
+    var users = this.users.get();
+    for(var u in users){
+        var user = users[u];
         if(user instanceof User){
             user.tick();
             if(!user.inLobby){
@@ -90,11 +91,12 @@ p.tick = function(){
             }
         }
     }
-    
+
     // Entity tick and deltas
     var eDeltas = {};
-    for(var i in this.entities.get()){
-    	var e = this.entities.get(i);
+    var entities = this.entities.get();
+    for(var i in entities){
+    	var e = entities[i];
     	if(e instanceof Entity){
         	e.tick();
             if(e.isRubbish){
@@ -120,8 +122,8 @@ p.tick = function(){
         }
     }
     
-    for(var u in this.users.get()){
-        var user = this.users.get(u);
+    for(var u in users){
+        var user = users[u];
         if(user instanceof User){
             if(!user.inLobby){
                 // Aoi time
@@ -143,8 +145,8 @@ p.tick = function(){
                             }
                         }
                     }
-                    if(!longTick){
-                        for(var d in userDeltasMod){ // Restrict to AoI
+                    if(!longTick){ // Restrict to AoI
+                        for(var d in userDeltasMod){
                             if(d!=u){
                                 if(!aoi.users[d]){
                                     delete(userDeltasMod[d]);

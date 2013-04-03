@@ -152,14 +152,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                         var s = deltas[d];
                         if(world.users[d]){
                             var user = world.users[d];
-                            for(i in s){
-                                if(user.state[i]!=null && typeof user.state[i] === typeof s[i]){
-                                    user.state[i] = s[i];
-                                }
-                            }
-                            if(!user.thisPlayer){
-                                user.tick(); // Keep physics in check immediately
-                            }
+                            user.bufferState(s);
                         }
                     }
                     break;

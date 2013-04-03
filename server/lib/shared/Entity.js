@@ -66,16 +66,24 @@ var init = function(createjs,Global,Effect){
         this.effects = [];
         this.affected = false;
         
+        // Latency compensation
+        this.interpolate = true;
+        this.interpBuffer = []; // format: {time:0,states:{x:0,y:0}};
+        this.interpSpeed = 3; // Expect a new state every n ticks
+        this.interpStep = this.interpSpeed+1; // How far we are through the current interpolation
+        this.interpFrom = {}; // The state to interpolate from
+        this.interpExclude = ['aimDir','direction']; // Number states to exclude from interpolation
+        
         if(!node && Global.debug){
             this.hitboxShape = false;
             this.rayPoints = this.addChild(new createjs.Container());
         }
         
-        if(this.life===0){
+        /*if(this.life===0){
             if(typeof this.onDeath === 'function'){
                 this.onDeath();
             }
-        }
+        }*/
     }
     
     var p = Entity.prototype;
@@ -449,6 +457,12 @@ var init = function(createjs,Global,Effect){
             state.y = state.y;
         }
         
+        if(Global.socket){
+            if(Global.socket.connected){
+                this.streamTick();
+            }
+        }
+        
         if(this.life===0 || (this.hasCollided && this.isRubbishOnCollide)){
             this.isRubbish = true;
             state.xSpeed = 0;
@@ -463,7 +477,9 @@ var init = function(createjs,Global,Effect){
                 }
             }
         }
-        //this.streamTick();
+        
+            
+        
     }
     
     p.updateRotation = function(){
@@ -475,7 +491,80 @@ var init = function(createjs,Global,Effect){
     }
     
     p.streamTick = function(){
-
+        if(this.interpolate){
+            var state = this.state;
+            var step = this.world.step;
+            var buf = this.interpBuffer;
+            var bufLen = buf.length;
+            
+            // Variable interpolation speed based on the buffer size
+            var interpSpeed = bufLen>1 ? this.interpSpeed-1 : this.interpSpeed;
+            //interpSpeed = bufLen<1 ? this.interpSpeed+1 : this.interpSpeed;
+            
+            // Check whether to start interpolating
+            if(bufLen>1){
+                if(this.interpStep>=interpSpeed){
+                    if(bufLen>0){
+                        this.interpBuffer.shift();
+                        this.interpFrom = JSON.parse(JSON.stringify(state));
+                        this.interpStep = 0;
+                    }
+                }
+            }
+            
+            // Interpolation
+            if(this.interpStep<=interpSpeed){
+                var from = this.interpFrom;
+                var to = buf[0].state;
+                var t = 1/(interpSpeed/this.interpStep);
+                for(var i in to){
+                    if(typeof to[i] == 'number' && this.interpExclude.indexOf(i)<0){
+                        this.state[i] = Math.round(this.lerp(from[i],to[i],t));
+                    }else{
+                        this.state[i] = to[i];
+                    }
+                }
+                this.interpStep++;
+                if(t==1){
+                    
+                }
+            }
+        }
+    }
+    
+    p.lerp = function(x,y,t){ // Linear interpolation
+        return x+(y-x)*t;
+    }
+    
+    p.updateState = function(state){
+        for(var i in state){
+            if(user.state[i]!=null && typeof user.state[i] === typeof state[i]){
+                user.state[i] = state[i];
+            }
+        }
+        //if(!user.thisPlayer){
+            user.tick(); // Keep physics in check immediately
+        //}
+    }
+    
+    p.bufferState = function(state){
+        var time = new Date();
+        var late = false;
+        var lastState = this.interpBuffer[this.interpBuffer.length-1];        
+        if(lastState){
+            late = (time - lastState.time) > 1/this.fps * this.interpSpeed + this.world.ping/1000;
+        }
+        
+        if(this.interpolate && !late){ // Buffer state update
+            this.interpBuffer.push({time:time,state:state});
+            this.interpLastTime = time;
+        }else{ // Apply immediately, clear buffer
+            while(this.interpBuffer.length>0){
+                this.interpBuffer.splice(0,1);
+            }
+            this.interpStep = 0;
+            this.updateState(state);
+        }
     }
 
     return Entity;

@@ -82,23 +82,29 @@ var init = function(lib,Global,Enemy,BulletEnemy){
             state.aimDir = state.x < this.target.x ? 1 : -1;
             if(!this.wander){
                 var rads = state.aimAngle * Math.PI/180;
-                var xRad = Math.cos(rads)*state.flySpeed;
-                var yRad = Math.sin(rads)*state.flySpeed;
+                var cos = Math.cos(rads);
+                var sin = Math.sin(rads);
+                var xRad = cos*state.flySpeed;
+                var yRad = sin*state.flySpeed;
+                var xRadC = Math.ceil(xRad);
+                var xRadF = Math.floor(xRad);
+                var yRadC = Math.ceil(yRad);
+                var yRadF = Math.floor(yRad);
                 if(this.targetDistance>state.ai.keepDistance+state.flySpeed*2){
                     state.moveUp = state.y > this.target.y + state.flySpeed;
                     state.moveDown = state.y < this.target.y - state.flySpeed;
                     state.moveLeft = state.x > this.target.x + state.flySpeed;
                     state.moveRight = state.x < this.target.x - state.flySpeed;
-                    state.xSpeed = Math.cos(rads) > 0 ? Math.ceil(xRad) : Math.floor(xRad);
-                    state.ySpeed = Math.sin(rads) > 0 ? Math.ceil(yRad) : Math.floor(yRad);
+                    state.xSpeed = cos > 0 ? xRadC : xRadF;
+                    state.ySpeed = sin > 0 ? yRadC : yRadF;
                 }else if(this.targetDistance<state.ai.keepDistance-this.state.flySpeed*2){
                     // not sure if the next four lines are accurate
                     state.moveUp = state.y < this.target.y - state.flySpeed;
                     state.moveDown = state.y > this.target.y + state.flySpeed;
                     state.moveLeft = state.x < this.target.x - state.flySpeed;
                     state.moveRight = state.x > this.target.x + state.flySpeed;
-                    state.xSpeed = Math.cos(rads) > 0 ? -Math.ceil(xRad) : -Math.floor(xRad);
-                    state.ySpeed = Math.sin(rads) > 0 ? -Math.ceil(yRad) : -Math.floor(yRad);
+                    state.xSpeed = cos > 0 ? -xRadC : -xRadF;
+                    state.ySpeed = sin > 0 ? -yRadC : -yRadF;
                 }else{
                     this.stopMoving();
                 }

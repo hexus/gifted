@@ -41,6 +41,9 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         this.get('fps',function(){
             return Global.ticker.getFPS();
         })
+        this.get('ping',function(){
+            return Global.debugObj.out.ping;
+        });
         
         this.view = {x:0,y:0,scale:1};
         this.lastUpdated = {x:0,y:0,scale:1};
