@@ -67,12 +67,14 @@ var init = function(createjs,Global,Effect){
         this.affected = false;
         
         // Latency compensation
-        this.interpolate = true;
+        this.interpolate = false;
         this.interpBuffer = []; // format: {time:0,states:{x:0,y:0}};
-        this.interpSpeed = 3; // Expect a new state every n ticks
+        this.interpSpeed = 3; // Expect a new state after this many ticks / interpolate over this many ticks
+        this.interpWait = this.interpSpeed; // How many steps to wait before starting interpolation
         this.interpStep = this.interpSpeed+1; // How far we are through the current interpolation
         this.interpFrom = {}; // The state to interpolate from
         this.interpExclude = ['aimDir','direction','health']; // States to exclude from interpolation
+        
         
         if(!node && Global.debug){
             this.hitboxShape = false;
@@ -493,42 +495,43 @@ var init = function(createjs,Global,Effect){
     p.streamTick = function(){
         if(this.interpolate){
             var state = this.state;
-            var step = this.world.step;
             var buf = this.interpBuffer;
-            var bufLen = buf.length;
+            var interpSpeed = this.interpSpeed-1;
             
             // Variable interpolation speed based on the buffer size
-            var interpSpeed = bufLen>1 ? this.interpSpeed-1 : this.interpSpeed;
+            interpSpeed = buf.length>2 ? interpSpeed-1 : interpSpeed;
             //interpSpeed = bufLen<1 ? this.interpSpeed+1 : this.interpSpeed;
             
-            // Check whether to start interpolating
-            if(bufLen>1){
-                if(this.interpStep>=interpSpeed){
-                    if(bufLen>0){
-                        this.interpBuffer.shift();
-                        this.interpFrom = JSON.parse(JSON.stringify(state));
-                        this.interpStep = 0;
-                    }
-                }
+            if(this.interpStep>interpSpeed && buf.length>0){
+                this.interpFrom = JSON.parse(JSON.stringify(state));
+                this.interpStep = 0-this.interpWait;
+                if(this.interpWait>0){this.interpWait=0;}
             }
-            
+
             // Perform interpolation
             if(this.interpStep<=interpSpeed){
-                var from = this.interpFrom;
-                var to = buf[0].state;
-                var t = 1/(interpSpeed/this.interpStep);
-                for(var i in to){
-                    if(typeof to[i] == 'number' && this.interpExclude.indexOf(i)<0){
-                        this.state[i] = Math.round(this.lerp(from[i],to[i],t));
-                    }else{
-                        this.state[i] = to[i];
+                if(this.interpStep>=0){
+                    var from = this.interpFrom;
+                    var to = buf[0].state;
+                    var t = 1/(interpSpeed/this.interpStep);
+                    for(var i in to){
+                        if(typeof to[i] == 'number' && this.interpExclude.indexOf(i)<0){
+                            state[i] = Math.round(this.lerp(from[i],to[i],t));
+                        }else{
+                            state[i] = to[i];
+                        }
+                    }
+                    if(t==1){
+                        buf.shift();
+                        if(buf.length<1){
+                            this.interpWait = this.interpSpeed;
+                        }
                     }
                 }
                 this.interpStep++;
-                if(t==1){
-                    
-                }
             }
+            
+            
         }
     }
     
@@ -538,31 +541,25 @@ var init = function(createjs,Global,Effect){
     
     p.updateState = function(state){
         for(var i in state){
-            if(user.state[i]!=null && typeof user.state[i] === typeof state[i]){
-                user.state[i] = state[i];
+            if(this.state[i]!=null && typeof this.state[i] === typeof state[i]){
+                this.state[i] = state[i];
             }
         }
-        //if(!user.thisPlayer){
-            user.tick(); // Keep physics in check immediately
-        //}
+        //this.tick(); // Keep physics in check immediately
     }
     
     p.bufferState = function(state){
         var time = new Date();
         var late = false;
-        var lastState = this.interpBuffer[this.interpBuffer.length-1];        
-        if(lastState){
-            late = (time - lastState.time) > 1/this.fps * this.interpSpeed + this.world.ping/1000;
-        }
+        var lastState = this.interpBuffer[this.interpBuffer.length-1];
         
-        if(this.interpolate && !late){ // Buffer state update
+        if(this.interpolate){ // Buffer state update
             this.interpBuffer.push({time:time,state:state});
-            this.interpLastTime = time;
         }else{ // Apply immediately, clear buffer
             while(this.interpBuffer.length>0){
                 this.interpBuffer.splice(0,1);
             }
-            this.interpStep = 0;
+            this.interpStep = this.interpSpeed+1;
             this.updateState(state);
         }
     }

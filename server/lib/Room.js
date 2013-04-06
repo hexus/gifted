@@ -170,7 +170,7 @@ p.tick = function(){
                         }
                     }
                     if(Object.size(eDeltasMod)>0){
-                        this.send('/ed '+JSON.stringify(eDeltasMod));
+                        user.send('/ed '+JSON.stringify(eDeltasMod));
                     }
                 }
                 

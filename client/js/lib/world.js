@@ -61,16 +61,24 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
     
     p.tick = function(timeElapsed,paused){
         var aoi = this.getAoi(Global.player.x,Global.player.y);
+        var tickAll = (this.step%Math.round(this.fps/2))==0;
         
-        for(var u in this.users){ // Always tick users
-            this.users[u].tick();
+        for(var u in this.users){
+            var user = this.users[u];
+            var inAoi = aoi.users[u]!=null;
+            user.visible = inAoi;
+            user.interpolate = inAoi && !user.thisPlayer;
+            if(inAoi || tickAll){
+                user.tick();
+            }
         }
         
         for(var e in this.entities){
             var entity = this.entities[e];
             var inAoi = aoi.entities[e]!=null;
             var isBullet = entity instanceof Bullet;
-            if(inAoi || entity instanceof Spawner || isBullet || (this.step%Math.round(this.fps/2))==0){
+            entity.visible = entity.interpolate = inAoi;
+            if(inAoi || entity instanceof Spawner || isBullet || tickAll){
                 entity.tick();
                 if(isBullet){
                     this.bulletCollisions(entity);
@@ -78,11 +86,6 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
                 if(entity.isRubbish && (!Global.socket.connected || isBullet)){
                     this.removeEntity(entity);
                 }
-            }
-            if(inAoi){
-                entity.visible = true;
-            }else{
-                entity.visible = false;
             }
         }
         this.iScroll();
