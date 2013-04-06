@@ -125,10 +125,13 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     p.useItem = function(side){
         side = !side ? 'r' : side;
-        i = this.getItem(side);
+        switch(side){
+            case 'l': this.state.isAimingLeft = true; break;
+            case 'r': this.state.isAimingRight = true; break;
+        }
+        var i = this.getItem(side);
         if(i){
-            if((side=='l' && this.state.isAimingLeft) || (side=='r' && this.state.isAimingRight)){
-                //i.state.inUse = true;
+            if(side=='l' || side=='r'){
                 this.state.isUsing[side] = true;
             }
         }
@@ -136,10 +139,15 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     p.stopUsingItem = function(side){
         side = !side ? 'r' : side;
-        i = this.getItem(side);
+        switch(side){
+            case 'l': this.state.isAimingLeft = false; break;
+            case 'r': this.state.isAimingRight = false; break;
+        }
+        var i = this.getItem(side);
         if(i){
-            //i.state.inUse = false;
-            this.state.isUsing[side] = false;
+            if(side=='l' || side=='r'){
+                this.state.isUsing[side] = false;
+            }
         }
     }
     
@@ -161,18 +169,23 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     }
     
     p.dropItem = function(side){
-        side = !side ? 'r' : side;
-        var item = this.getItem(side);
-        if(item){
-            item.state.inUse = false;
-            item.state.x = this.state.x;
-            item.state.y = this.state.y;
-            item.state.xSpeed = Math.round(this.state.xSpeed * 0.5);
-            item.state.ySpeed = Math.round(this.state.ySpeed * 0.5);
-            this.world.addEntity(item);
-            item.owner = false;
+        if(side=='b'){
+            this.dropItem('l');
+            this.dropItem('r');
+        }else{
+            side = !side ? 'r' : side;
+            var item = this.getItem(side);
+            if(item){
+                item.state.inUse = false;
+                item.state.x = this.state.x;
+                item.state.y = this.state.y;
+                item.state.xSpeed = Math.round(this.state.xSpeed * 0.5);
+                item.state.ySpeed = Math.round(this.state.ySpeed * 0.5);
+                this.world.addEntity(item);
+                item.owner = false;
+            }
+            this.setItem(side); // unset
         }
-        this.setItem(side); // unset
     }
     
     p.pickUpOrDropItem = function(side){

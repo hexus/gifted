@@ -523,7 +523,7 @@ var init = function(createjs,Global,Effect){
                     }
                     if(t==1){
                         buf.shift();
-                        if(buf.length<1){
+                        if(buf.length<1){ // && wait<speed, wait++
                             this.interpWait = this.interpSpeed;
                         }
                     }

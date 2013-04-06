@@ -21,7 +21,17 @@ function($,Global,Ui,Weapon,Bullet){
         down : {
             key:83,
             down:function(){
+                // Move down
                 Global.player.state.moveDown = true;
+                // Pick up item
+                var side = Global.player.getItem('l') ? 'r' : 'l';
+                if(!Global.player.getItem(side)){
+                    if(connected()){
+                        Global.socket.send('/itemTake ' + side);
+                    }else{
+                        Global.player.pickUpItem(side);
+                    }
+                }
             },
             up:function(){
                 Global.player.state.moveDown = false;
@@ -46,7 +56,7 @@ function($,Global,Ui,Weapon,Bullet){
             }
         },
         armLeft : {
-            key:81,
+            key:-1,//81, // Q 
             down:function(){
                 Global.player.state.isAimingLeft = !Global.player.state.isAimingLeft;
             },
@@ -55,7 +65,7 @@ function($,Global,Ui,Weapon,Bullet){
             }
         },
         armRight : {
-            key:69,
+            key:-1,//69, // E
             down:function(){
                 Global.player.state.isAimingRight = !Global.player.state.isAimingRight;
             },
@@ -64,7 +74,7 @@ function($,Global,Ui,Weapon,Bullet){
             }
         },
         pickUpDropLeft : {
-            key:90,
+            key:-1,//90, // Z
             down:function(){
                 if(Global.player.getItem('l')){
                     if(connected()){
@@ -85,7 +95,7 @@ function($,Global,Ui,Weapon,Bullet){
             }
         },
         pickUpDropRight : {
-            key:67,
+            key:-1,//67, // C
             down:function(){
                 if(Global.player.getItem('r')){
                     if(connected()){
@@ -146,28 +156,34 @@ function($,Global,Ui,Weapon,Bullet){
                 Global.worldUi.minimap.visible = true;
             }
         },
-        createGun : {
+        dropItems : {
             key:71,
             down:function(){
-                if(connected()){
-                    Global.socket.send('/guntest');
-                }else{
-                    ps = Global.player.state;
-                    Global.wtest = Global.world.addEntity(new Weapon({
-                        weaponId:'pistol',
-                        x:ps.x,
-                        y:ps.y,
-                        //speed:10,
-                        //angle:ps.aimAngle
-                    }));
+                var side = Global.player.getItem('r') ? 'r' : 'l';
+                if(Global.player.getItem(side)){
+                    if(connected()){
+                        Global.socket.send('/itemDrop ' + side);
+                    }else{
+                        Global.player.dropItem(side);
+                    }
                 }
+                /* // Old gun test code
+                ps = Global.player.state;
+                Global.wtest = Global.world.addEntity(new Weapon({
+                    weaponId:'pistol',
+                    x:ps.x,
+                    y:ps.y,
+                    speed:10,
+                    angle:ps.aimAngle
+                }));
+                */
             },
             up:function(){
                 
             }
         },
         fly : {
-            key:70,
+            key:-1,//70, // F
             down:function(){
                 Global.player.state.isFlying = !Global.player.state.isFlying;
             },
@@ -195,7 +211,7 @@ function($,Global,Ui,Weapon,Bullet){
             var k = e.keyCode || e.which;
             keysLast[k] = keysDown[k];
             keysDown[k] = true;
-            //console.log(k);
+            console.log(k);
         });
         
         $(window).keyup(function(e){
@@ -222,7 +238,7 @@ function($,Global,Ui,Weapon,Bullet){
     
     Controls.tick = function(){
         if(Ui.selected()==='world'){
-            for(c in controlMap){
+            for(var c in controlMap){
                 o = controlMap[c];
                 if(keysDown[o.key]){
                     if(typeof o.down === 'function'){
