@@ -178,13 +178,15 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                         if(!e){ // create entity if it doesn't exist
                             e = world.addEntity(world.recreateEntity(deltas[eid],eid));
                         }else{
+                            e.bufferState(deltas[eid]);
+                            /*
                             for(var i in deltas[eid]){
                                 if(e){
                                     if(e.state[i]!=null && typeof e.state[i] === typeof deltas[eid][i]){
                                         e.state[i] = deltas[eid][i];
                                     }
                                 }
-                            }
+                            }*/
                             //e.tick();
                         }
                     }

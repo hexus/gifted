@@ -72,7 +72,7 @@ var init = function(createjs,Global,Effect){
         this.interpSpeed = 3; // Expect a new state every n ticks
         this.interpStep = this.interpSpeed+1; // How far we are through the current interpolation
         this.interpFrom = {}; // The state to interpolate from
-        this.interpExclude = ['aimDir','direction']; // Number states to exclude from interpolation
+        this.interpExclude = ['aimDir','direction','health']; // States to exclude from interpolation
         
         if(!node && Global.debug){
             this.hitboxShape = false;
@@ -512,7 +512,7 @@ var init = function(createjs,Global,Effect){
                 }
             }
             
-            // Interpolation
+            // Perform interpolation
             if(this.interpStep<=interpSpeed){
                 var from = this.interpFrom;
                 var to = buf[0].state;
