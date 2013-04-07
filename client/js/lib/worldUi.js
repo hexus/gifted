@@ -10,6 +10,16 @@ function(createjs,lib,Global){
         this.mapCanvas = null;
         this.createMapCanvas();
         
+        this.healthbar = this.addChild(new createjs.Container());
+        this.healthbar.x = this.healthbar.y = 10;
+        this.healthbar.maxHealth = this.healthbar.addChild(new createjs.Shape(
+            new createjs.Graphics().beginStroke('#A44').beginFill('#933').rect(0,0,200,10)
+        ));
+        this.healthbar.currentHealth = this.healthbar.addChild(new createjs.Shape(
+            new createjs.Graphics().beginFill('#D33').rect(0,0,198,8)
+        ));
+        this.healthbar.currentHealth.x = this.healthbar.currentHealth.y = 1;
+        
         this.fullmap = this.addChild(new createjs.Container());
         this.fullmap.x = this.world.scrW/2;
         this.fullmap.y = this.world.scrH/2;
@@ -63,6 +73,8 @@ function(createjs,lib,Global){
         this.fullmap.map.y = -this.mapCanvas.height/2; // align
         this.fullmap.player.x = (tX/tSize) - (fullWidth/2); // Player
         this.fullmap.player.y = (tY/tSize) - (fullHeight/2); // pos
+        
+        this.healthbar.currentHealth.scaleX = Global.player.state.health/Global.player.state.maxHealth;
     }
     
     p.createMapCanvas = function(){

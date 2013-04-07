@@ -380,10 +380,10 @@ var init = function(createjs,Global,Effect){
                     state.gravCount++;
                 }
                 if(state.ySpeed<=0){ // if travellin upwards and there's shit above, stop dis shit
-                    if( !(this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy)) && !this.chkSolid(Cx,pTy) ){
+                    if( !(this.chkSolid(Lx,pTy) && this.chkSolid(Rx,pTy) && this.chkSolid(Cx,pTy))){
                         // nudge character a bit if there ain't that much shit above
-                        if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Rx) - hw - 1); }
-                        if(this.chkSolid(Lx,Ty) && !this.chkSolid(Rx,Ty)){ x = Math.floor(this.c2(Lx) + this.tileW + hw); }
+                        if(!this.chkSolid(Lx,Ty) && this.chkSolid(Rx,Ty)){ state.x = Math.floor(this.c2(Rx) - hw - 1); }
+                        if(this.chkSolid(Lx,Ty) && !this.chkSolid(Rx,Ty)){ state.x = Math.floor(this.c2(Lx) + this.tileW + hw); }
                     }else{
                         state.ySpeed = 0;
                         state.y = Math.floor(this.c2(pTy) + this.tileH + hh);

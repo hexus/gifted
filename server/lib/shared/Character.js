@@ -224,37 +224,43 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         
         this.itemTick();
         
-        var Lx = Math.round(state.x - (hitbox.width * 0.5));
-        var Rx = Math.floor(state.x + (hitbox.width * 0.5));
-        var fh = this.hitboxFull.height;
-        var hfh = Math.floor(this.hitboxFull.height*0.5);
+        var halfWidth = Math.floor(this.hitbox.width*0.5);
+        var xLeft = state.x - halfWidth;
+        var xRight = state.x + halfWidth;
+        var fh = this.hitboxFull.height; // full height
+        var hfh = Math.floor(fh*0.5); // half full height
         var hTy = state.y-hfh;
-        var collisionAbove = this.chkSolid(Lx,hTy) || this.chkSolid(Rx,hTy) || this.chkSolid(state.x,hTy);
+        var collisionAbove = this.chkSolid(xLeft,hTy) || this.chkSolid(xRight,hTy) || this.chkSolid(state.x,hTy);
+        
+        var sideCollision = this.chkSolid(state.x+(halfWidth*state.direction)+(state.xSpeed||state.Accel*state.direction),state.y);
         
         if(state.moveDown && !state.isFlying){
             if(!state.crouch && state.onFloor){
-                this.y += Math.floor(this.hitboxFull.height/4);
+                this.y += Math.floor(fh/4);
             }
             state.crouch = true;
         }else{
             if(!collisionAbove){
                 if(state.crouch && state.onFloor){
-                    this.y -= Math.floor(this.hitboxFull.height/4);
+                    this.y -= Math.floor(fh/4);
                 }
                 state.crouch = false;
             }
         }
         
         if(state.crouch){
-            hitbox.height = Math.floor(this.hitboxFull.height/2);
+            hitbox.height = hfh;
         }else{
             // if no collisions above
-            hitbox.height = this.hitboxFull.height;
+            hitbox.height = fh;
         }
         
-        if(state.moveUp && state.onFloor && !this.upDown && !state.isFlying){
+        if(state.moveUp && (state.onFloor || sideCollision) && !this.upDown && !state.isFlying){
             this.jump = true;
             this.upDown = true;
+            if(sideCollision && !state.onFloor){
+                state.xSpeed = -Math.floor(state.direction*state.jumpStr/2);
+            }
         }
         
         if(this.upDown && !state.moveUp){

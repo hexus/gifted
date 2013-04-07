@@ -216,6 +216,10 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         }
     }
     
+    Ui.toggleDebug = function(){
+        $('#debug').toggle();
+    }
+    
     Ui.updateDebug = function(str){
         $('#debug').html(str);
     }

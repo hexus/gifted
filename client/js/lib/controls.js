@@ -190,6 +190,12 @@ function($,Global,Ui,Weapon,Bullet){
             up:function(){
                 
             }
+        },
+        toggleDebug : {
+            key:186,
+            down:function(){
+                Global.ui.toggleDebug();
+            }
         }
     }
     
