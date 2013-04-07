@@ -363,7 +363,8 @@ var init = function(){
             height: 4
         }
         
-        this.setSpawn(topSpawn.x,topSpawn.y);
+        //this.setSpawn(topSpawn.x,topSpawn.y);
+        this.setSpawn(lowSpawn.x,lowSpawn.y);
     	
         this.eachTile(function(x,y){
             this.setTile(x,y,9);

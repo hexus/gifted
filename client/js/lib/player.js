@@ -225,6 +225,9 @@ function(createjs,lib,Global,Character,Effect){
         }
         aimAngle2 = state.aimDir>0 ? (state.aimAngle+90)%180 : (270-state.aimAngle) % 180;
         
+        if(!this.state.isAiming){ 
+            state.aimDir = state.direction;
+        }
         this.char.scaleX = state.aimDir>0 ? 1 : -1;
         
         var leftArm = state.aimDir>0 ? 'l' : 'r';

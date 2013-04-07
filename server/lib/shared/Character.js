@@ -207,6 +207,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     
     p.tick = function(){
         var state = this.state;
+        var hitbox = this.hitbox;
         
         if(state.health<1){
             state.isFlying = false;
@@ -223,24 +224,32 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
         
         this.itemTick();
         
+        var Lx = Math.round(state.x - (hitbox.width * 0.5));
+        var Rx = Math.floor(state.x + (hitbox.width * 0.5));
+        var fh = this.hitboxFull.height;
+        var hfh = Math.floor(this.hitboxFull.height*0.5);
+        var hTy = state.y-hfh;
+        var collisionAbove = this.chkSolid(Lx,hTy) || this.chkSolid(Rx,hTy) || this.chkSolid(state.x,hTy);
+        
         if(state.moveDown && !state.isFlying){
             if(!state.crouch && state.onFloor){
                 this.y += Math.floor(this.hitboxFull.height/4);
             }
             state.crouch = true;
         }else{
-            // if(no potential collision above)
-            if(state.crouch && state.onFloor){
-                this.y -= Math.floor(this.hitboxFull.height/4);
+            if(!collisionAbove){
+                if(state.crouch && state.onFloor){
+                    this.y -= Math.floor(this.hitboxFull.height/4);
+                }
+                state.crouch = false;
             }
-            state.crouch = false;
         }
         
         if(state.crouch){
-            this.hitbox.height = Math.floor(this.hitboxFull.height/2);
+            hitbox.height = Math.floor(this.hitboxFull.height/2);
         }else{
             // if no collisions above
-            this.hitbox.height = this.hitboxFull.height;
+            hitbox.height = this.hitboxFull.height;
         }
         
         if(state.moveUp && state.onFloor && !this.upDown && !state.isFlying){
