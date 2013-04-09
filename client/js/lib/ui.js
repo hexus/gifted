@@ -1,11 +1,11 @@
 define(['jquery','createjs','lib/global','lib/socket','shared/Bullet','shared/Weapon'],
 function($,createjs,Global,Socket,Bullet,Weapon){
     
-    var Ui = {}, dom,stage,socket,player,world,worldUi,selected;
+    var Ui = {}, dom,stage,socket,player,world,worldUi,selected,original;
     
     Ui.init = function(){
         
-        var original = {
+        original = {
             width: parseInt($('#client').css('width')),
             height:parseInt($('#client').css('height'))
         };
@@ -29,7 +29,6 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         Ui.reset();
         
         $("#sp").click(function(){
-            
             if(world){
                 $('#client').hide();
                 var cb = function(){
@@ -86,15 +85,46 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         });
         
         $('#leave').click(function(){
-           Ui.selectWorld(); 
+           //Ui.selectWorld();
+           Global.reset();
         });
         
         $('#play').click(function(){
             socket.send('/r 1');
         });
         
+        $('#respawn').click(function(){
+            var respawn = true;
+            if(Global.socket){
+                if(Global.socket.connected){
+                    respawn = false;
+                }
+            }
+            Global.player.hasRespawned = true;
+            if(respawn){
+                Global.player.respawn();
+            }else{
+                socket.send('/respawn');
+            }
+            
+            $('#respawnMenu').hide();
+        });
+        
+        $('#resume').click(function(){
+            $('#worldMenu').hide();
+        });
+        
+        $('#quit').click(function(){
+            $('#worldMenu').hide();
+            Global.reset();
+        });
+        
         $('#client').fadeTo('slow',1);
         Ui.showMain();
+    }
+    
+    Ui.original = function(){
+        return original;
     }
     
     Ui.reset = function(){ // So very very lazy
@@ -123,8 +153,11 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         $('#loading').hide();
         $('#client').show();
         $('#mainMenu').hide();
+        $('#world').hide();
         $('#worldList').hide();
         $('#lobby').hide();
+        $('#worldMenu').hide();
+        $('#respawnMenu').hide();
         player.visible = false;
         world.visible = false;
         worldUi.visible = false;
@@ -170,10 +203,23 @@ function($,createjs,Global,Socket,Bullet,Weapon){
     Ui.showWorld = function(){
         selected = 'world';
         Ui.hideAll();
+        $('#world').show();
         player.scaleX = player.scaleY = 1;
         player.visible = true;
         world.visible = true;
         worldUi.visible = true;
+    }
+    
+    Ui.toggleWorldMenu = function(){
+        $('#worldMenu').toggle();
+    }
+    
+    Ui.showRespawnMenu = function(){
+        $('#respawnMenu').show();
+    }
+    
+    Ui.hideRespawnMenu = function(){
+        $('#respawnMenu').hide();
     }
     
     Ui.selected = function(){

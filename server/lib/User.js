@@ -43,6 +43,12 @@ p.tick = function(){
     this.super_Character.tick.call(this);
 }
 
+p.respawn = function(){
+    this.x = 0;
+    this.super_Character.spawn.call(this);
+    this.state.health = Math.floor(this.state.maxHealth / 10);
+}
+
 p.getState = function(){
     var state = JSON.parse(JSON.stringify(this.state));
     state.id = this.id;

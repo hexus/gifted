@@ -79,13 +79,11 @@ h.handleData = function(data){ // Called in context of a User
                 }
             }
             break;
-        case "/guntest":
-            var gun = new Weapon({
-                weaponId:'pistol',
-                x:this.x,
-                y:this.y
-            });
-            this.room.addEntity(gun);
+        case "/respawn":
+            if(this.state.health<1){
+                this.respawn();
+            }
+            this.sendSelf = true;
             break;
         default:
           log = false;

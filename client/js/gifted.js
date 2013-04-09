@@ -50,7 +50,7 @@ function($,Global){
         });
         $('#loading').show({easing:'linear'});
         require(['createjs','assets','lib/ui','lib/controls','lib/player','lib/world','lib/worldUi'],
-        function(createjs,lib,Ui,Controls,Player,World,worldUi){
+        function(createjs,lib,Ui,Controls,Player,World,WorldUi){
             function init(){
                 var canvas, stage, socket, player, id, users, world, aspect=2.35, debugStr;
                 
@@ -61,7 +61,7 @@ function($,Global){
                 ticker = Global.ticker = createjs.Ticker;
                 stage = Global.stage = new createjs.Stage(canvas);
                 world = Global.world = new World();
-                worldUi = Global.worldUi = new worldUi(world);
+                worldUi = Global.worldUi = new WorldUi(world);
                 player = Global.player = new Player();
                 users = Global.users = {};
                 
@@ -111,17 +111,22 @@ function($,Global){
                 Global.reset = function(){
                     with(Global){
                         stage.removeAllChildren();
-                        users = {};
-                        
                         world = new World();
+                        world.scale = stage.canvas.width/ui.original().width;
+                        worldUi = new WorldUi(world);
                         player = new Player();
+                        users = {};
                         stage.addChild(world);
+                        stage.addChild(worldUi);
                         stage.addChild(player);
-                        
+
                         ui.reset();
                         ui.showMain();
-                        socket.disconnect();
-                        socket.reset();
+                        
+                        if(socket){
+                            socket.disconnect();
+                            socket.reset();
+                        }
                     }
                 }
             }

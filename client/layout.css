@@ -38,7 +38,7 @@ input[type=text]{padding:0 2px;}
     padding:0 4px;
 }
 #canvas{}
-#mainMenu,#worldList{z-index:1337;height:50%;top:25%;text-align:center;font-size:200%;}
+#mainMenu,#worldList{z-index:1337;height:50%;top:25%;text-align:center;font-size:150%;}
 #lobby{height:100%;}
     #chat{position:relative;width:63%;height:95%;left:35%;}
     #chat #msg{width:80%;}
@@ -48,4 +48,17 @@ input[type=text]{padding:0 2px;}
     #headwear_prev{left:20px;top:80px;}
     #headwear_next{left:140px;top:80px;}
     #chat_top{padding:6px;}
-#world{width:0%;}
+#world{width:100%;height:100%;}
+.menu{
+    position:relative;
+    top:50%;
+    left:50%;
+    width:200px;
+    height:126px;
+    margin-left:-100px;
+    margin-top:-63px;
+    text-align:center;
+}
+.menu input{
+    
+}

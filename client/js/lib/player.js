@@ -63,12 +63,20 @@ function(createjs,lib,Global,Character,Effect){
             return Global.stage.mouseY/that.world.scale - (that.world.y/that.world.scale + that.y) + 10;
         });
         
+        this.hasRespawned = false;
+        
         //this.char.shadow = new createjs.Shadow('#FFF',0,0,20);
     }
     
     var p = Player.prototype = new Character();
     p.super2 = Character.prototype;
     p.constructor = Player;
+    
+    p.respawn = function(){
+        this.x = 0; // force spawn at spawn point
+        this.super.spawn.call(this);
+        this.state.health = Math.floor(this.state.maxHealth / 10);
+    }
     
     p.useItem = function(side){
         this.super2.useItem.call(this,side);
@@ -220,6 +228,10 @@ function(createjs,lib,Global,Character,Effect){
                 }
                 if(!Global.socket.connected && this.world.step%this.regenSpeed==0 && state.health<state.maxHealth){
                     state.health++;
+                }
+            }else{
+                if(state.health<1 && !this.hasRespawned){
+                    Global.ui.showRespawnMenu();
                 }
             }
         }

@@ -29,7 +29,9 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
         
         socket.reset();
         
-        socket.connect(function(){
+        socket.connect();
+        
+        socket.on('connect',function(){
             console.log("Socket.io connected!");
             console.log(socket);
             socket.send('/worlds-pls');
@@ -52,6 +54,10 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
             if(typeof onDisconnect === 'function'){
                 onDisconnect();
             }
+        });
+        
+        socket.on('error',function(e){
+            onDisconnect();
         });
         
         socket.on('message',function(data){
@@ -152,6 +158,9 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                         var s = deltas[d];
                         if(world.users[d]){
                             var user = world.users[d];
+                            if(user.thisPlayer && user.state.health<1){
+                                user.hasRespawned = false;
+                            }
                             user.bufferState(s);
                         }
                     }

@@ -10,6 +10,11 @@ function(createjs,lib,Global){
         this.mapCanvas = null;
         this.createMapCanvas();
         
+        var stageWidth = this.world.scrW;
+        var stageHeight = this.world.scrH;
+        
+        console.log(stageWidth,stageHeight);
+        
         this.healthbar = this.addChild(new createjs.Container());
         this.healthbar.x = this.healthbar.y = 10;
         this.healthbar.maxHealth = this.healthbar.addChild(new createjs.Shape(
@@ -21,14 +26,14 @@ function(createjs,lib,Global){
         this.healthbar.currentHealth.x = this.healthbar.currentHealth.y = 1;
         
         this.fullmap = this.addChild(new createjs.Container());
-        this.fullmap.x = this.world.scrW/2;
-        this.fullmap.y = this.world.scrH/2;
+        this.fullmap.x = stageWidth/2;
+        this.fullmap.y = stageHeight/2;
         this.fullmap.visible = false;
         
         this.minimapSize = 100;
-        this.minimapScale = 1/this.world.scale;
+        this.minimapScale = 1;//1/this.world.scale;
         this.minimap = this.addChild(new createjs.Container());
-        this.minimap.x = this.world.scrW - this.minimapSize;
+        this.minimap.x = stageWidth - this.minimapSize;
 
         this.minimap.map = this.minimap.addChild(new createjs.Bitmap(this.mapCanvas));
         this.minimap.player = this.minimap.addChild(new createjs.Shape(

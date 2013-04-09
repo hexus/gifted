@@ -500,7 +500,13 @@ var init = function(createjs,Global,Effect){
             
             // Variable interpolation speed based on the buffer size
             interpSpeed = buf.length>2 ? interpSpeed-1 : interpSpeed;
-            //interpSpeed = bufLen<1 ? this.interpSpeed+1 : this.interpSpeed;
+            
+            // If we're too far behind, skip to the last state in the buffer
+            if(buf.length>4){
+                while(buf.length>1){
+                    buf.splice(0,1);
+                }
+            }
             
             if(this.interpStep>interpSpeed && buf.length>0){
                 this.interpFrom = JSON.parse(JSON.stringify(state));

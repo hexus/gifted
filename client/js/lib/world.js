@@ -66,8 +66,9 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         for(var u in this.users){
             var user = this.users[u];
             var inAoi = aoi.users[u]!=null;
+            var thisPlayer = user.thisPlayer;
             user.visible = inAoi;
-            user.interpolate = inAoi && !user.thisPlayer;
+            user.interpolate = inAoi && !thisPlayer;
             if(inAoi || tickAll){
                 user.tick();
             }

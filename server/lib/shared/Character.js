@@ -71,27 +71,7 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
     var p = Character.prototype = new Entity(); // Inheritance
     p.super = Entity.prototype; // Superclass reference
     p.constructor = Character;
-    
-    p.getStateDelta = function(readonly){ 
-        var delta = this.super.getStateDelta.call(this,readonly);
-        var care;
-        for(i in delta){
-            care = true;
-            switch(i){
-                case "aimAngle":
-                    care = this.state.isAiming;
-                    if(care){
-                        delta.aimAngle = this.state.aimAngle;
-                    }
-                    break;
-            }
-            if(!care){
-                delete(delta[i]);
-            }
-        }
-        return delta;
-    }
-    
+
     p.getItem = function(side){
         side = !side ? 'r' : side;
         switch(side){

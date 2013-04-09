@@ -34,5 +34,6 @@ var boot = function(){
 }
 
 // Database (boots on success, terminates on failure)
-console.log("Connecting to database server");
-db.init(boot);
+//console.log("Connecting to database server");
+//db.init(boot);
+boot();

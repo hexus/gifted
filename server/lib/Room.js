@@ -209,7 +209,7 @@ p.generateMap = function(){
                 }));
             }
             
-            this.map.save();
+            //this.map.save();
     //    }
     //});
 }
