@@ -84,7 +84,7 @@ p.dropItem = function(side){
 }
 
 p.getPing = function(){
-    return Math.round((this.pongTime - this.pingTime) / 2);
+    return Math.round((this.pongTime - this.pingTime));
 }
 
 p.ping = function(){

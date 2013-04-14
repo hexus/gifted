@@ -522,7 +522,6 @@ var init = function(createjs,Global,Effect){
                             state[i] = to[i];
                         }
                     }
-                    console.log(t==1 && this.interpStep>=interpSpeed, t);
                     if(t==1){
                         buf.shift();
                         if(buf.length<1){ // && wait<speed, wait++
