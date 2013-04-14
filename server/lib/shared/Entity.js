@@ -496,27 +496,22 @@ var init = function(createjs,Global,Effect){
         if(this.interpolate){
             var state = this.state;
             var buf = this.interpBuffer;
-            var interpSpeed = this.interpSpeed-1;
+            var interpSpeed = this.interpSpeed;
             
             // Variable interpolation speed based on the buffer size
-            interpSpeed = buf.length>2 ? interpSpeed-1 : interpSpeed;
+            //interpSpeed = buf.length>2 ? interpSpeed-1 : interpSpeed;
             
-            // If we're too far behind, skip to the last state in the buffer
-            if(buf.length>4){
-                while(buf.length>1){
+            // If we're too far behind, skip to the last two states in the buffer
+            if(buf.length>2){
+                while(buf.length>2){
                     buf.splice(0,1);
                 }
             }
-            
-            if(this.interpStep>interpSpeed && buf.length>0){
-                this.interpFrom = JSON.parse(JSON.stringify(state));
-                this.interpStep = 0-this.interpWait;
-                if(this.interpWait>0){this.interpWait=0;}
-            }
 
             // Perform interpolation
-            if(this.interpStep<=interpSpeed){
-                if(this.interpStep>=0){
+            if(this.interpStep<interpSpeed){
+                this.interpStep++;
+                if(this.interpStep>0){
                     var from = this.interpFrom;
                     var to = buf[0].state;
                     var t = 1/(interpSpeed/this.interpStep);
@@ -527,6 +522,7 @@ var init = function(createjs,Global,Effect){
                             state[i] = to[i];
                         }
                     }
+                    console.log(t==1 && this.interpStep>=interpSpeed, t);
                     if(t==1){
                         buf.shift();
                         if(buf.length<1){ // && wait<speed, wait++
@@ -534,10 +530,14 @@ var init = function(createjs,Global,Effect){
                         }
                     }
                 }
-                this.interpStep++;
+                
             }
             
-            
+            if(this.interpStep>=interpSpeed && buf.length>0){
+                this.interpFrom = JSON.parse(JSON.stringify(state)); // Current state
+                this.interpStep = 0-this.interpWait;
+                if(this.interpWait>0){this.interpWait=0;}
+            }
         }
     }
     

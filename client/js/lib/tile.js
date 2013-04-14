@@ -25,7 +25,7 @@ function(createjs,lib,Global){
         });
         this.set('frame',function(f){
             _f = parseInt(f) || 0;
-            var getFrame = Global.tiles.getFrame(_f);
+            var getFrame = /*_f>0 && f!=12 ? new createjs.Bitmap('img/cow.png') :*/ Global.tiles.getFrame(_f);
             if(getFrame){
                 that.image = getFrame.image;
                 that.sourceRect = getFrame.rect;
