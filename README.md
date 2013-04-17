@@ -1,12 +1,12 @@
 Gifted
 ======
 
-A cross-platform multiplayer web-based game.
+A multiplayer web-based 2D platform game.
 
 About the project
 -----
 
-A small project I started a few years ago, the prospects of which have grown considerably since. My intention is to build a real-time multiplayer game that can perform well on multiple platforms, with servers hosting a multitude of players.
+A small multiplayer game experiment project started in 2012. My intention is to build a real-time multiplayer game that can perform well on multiple platforms, with servers hosting a multitude of players.
 
 The initial project focused on a VB.Net based server and an Adobe Flash client, attempting to make the most of the object-oriented ActionScript 3. I have since decided to rebuild my progress so far with a server and client code-base that only runs JavaScript.
 

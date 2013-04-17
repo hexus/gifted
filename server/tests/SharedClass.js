@@ -14,7 +14,7 @@ var init = function(foo,bar){ // Class definition (RequireJS dependencies as arg
         this.super.constructor.call(this,args); // Superclass constructor
         this.get = this.__defineGetter__; // Getter shortcut
         this.set = this.__defineSetter__; // Setter shortcut
-        var that = this;
+        var that = this; // Access to context for privileged methods
         
         var privateProperty = 0;
         this.publicProperty = 0;
