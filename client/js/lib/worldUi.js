@@ -13,7 +13,7 @@ function(createjs,lib,Global){
         var stageWidth = this.world.scrW;
         var stageHeight = this.world.scrH;
         
-        console.log(stageWidth,stageHeight);
+        //console.log(stageWidth,stageHeight);
         
         this.healthbar = this.addChild(new createjs.Container());
         this.healthbar.x = this.healthbar.y = 10;

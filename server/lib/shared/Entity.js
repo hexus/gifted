@@ -499,13 +499,19 @@ var init = function(createjs,Global,Effect){
             var interpSpeed = this.interpSpeed;
             
             // Variable interpolation speed based on the buffer size
-            //interpSpeed = buf.length>2 ? interpSpeed-1 : interpSpeed;
+            interpSpeed = buf.length>2 ? interpSpeed-1 : interpSpeed;
             
             // If we're too far behind, skip to the last two states in the buffer
-            if(buf.length>2){
+            /*if(buf.length>2){
                 while(buf.length>2){
-                    buf.splice(0,1);
+                    buf.shift();
                 }
+            }*/
+            
+            if(this.interpStep>=interpSpeed && buf.length>0){
+                this.interpFrom = JSON.parse(JSON.stringify(state)); // Current state
+                this.interpStep = 0-this.interpWait;
+                if(this.interpWait>0){this.interpWait=0;}
             }
 
             // Perform interpolation
@@ -530,12 +536,6 @@ var init = function(createjs,Global,Effect){
                     }
                 }
                 
-            }
-            
-            if(this.interpStep>=interpSpeed && buf.length>0){
-                this.interpFrom = JSON.parse(JSON.stringify(state)); // Current state
-                this.interpStep = 0-this.interpWait;
-                if(this.interpWait>0){this.interpWait=0;}
             }
         }
     }

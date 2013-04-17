@@ -1,5 +1,5 @@
-define(['jquery','lib/global','lib/ui','shared/Weapon','shared/Bullet'],
-function($,Global,Ui,Weapon,Bullet){
+define(['jquery','lib/global','lib/ui'],
+function($,Global,Ui){
     
     var connected = function(){
         return Global.socket ? Global.socket.connected : false;
