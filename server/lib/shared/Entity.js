@@ -23,7 +23,7 @@ var init = function(createjs,Global,Effect){
             height  : args.height || 32
         };
         this.world = Global.world || args.world || null;
-        this.get('room',function(){return that.world;})
+        this.get('room',function(){return that.world;});
         this.get('map',function(){return that.world.map;});
         this.get('tileH',function(){return that.map.getTileSize();});
         this.get('tileW',function(){return that.map.getTileSize();});
@@ -263,7 +263,10 @@ var init = function(createjs,Global,Effect){
         var hitbox = this.hitbox;
         
         if(!node && Global.debug){
-            if(Global.debugObj.showHitboxes && !this.hitboxShape){
+            if(this.hitboxShape){
+                this.removeChild(this.hitboxShape);
+            }
+            if(Global.debugObj.showHitboxes){
                 var g = new createjs.Graphics();
                 g.beginStroke("#F0F").beginFill("#F44").drawRect(-hitbox.width*0.5,-hitbox.height*0.5,hitbox.width,hitbox.height);
                 var s = new createjs.Shape(g);
@@ -499,14 +502,15 @@ var init = function(createjs,Global,Effect){
             var interpSpeed = this.interpSpeed;
             
             // Variable interpolation speed based on the buffer size
-            interpSpeed = buf.length>2 ? interpSpeed-1 : interpSpeed;
+            //interpSpeed = buf.length>2 ? interpSpeed-1 : interpSpeed;
             
             // If we're too far behind, skip to the last two states in the buffer
-            /*if(buf.length>2){
+            if(buf.length>2){
+                //console.log('Excessive buffer',buf.length);
                 while(buf.length>2){
                     buf.shift();
                 }
-            }*/
+            }
             
             if(this.interpStep>=interpSpeed && buf.length>0){
                 this.interpFrom = JSON.parse(JSON.stringify(state)); // Current state

@@ -15,13 +15,13 @@ var init = function(lib,Global,Entity){
         this.cooldown = this.cooldownTime;
         this.hitbox.width = 20;
         this.hitbox.height = 60;
-        this.egg = args.egg || [];
-        this.babbies = [];
-        this.babbyLimit = args.babbyLimit || 4;
         this.state.entityType = 'spawner';
         this.state.xLimit = this.state.yLimit = this.state.flySpeed = 10;
         this.state.health = 300;
         this.state.spawnerSkin = args.spawnerSkin || 'flybot';
+        this.egg = args.egg || [];
+        this.babbies = [];
+        this.babbyLimit = args.babbyLimit || 4;
         this.deadTick = false;
         if(!node){
             this.mcSpawner = this.addChild(new lib.mcSpawner());

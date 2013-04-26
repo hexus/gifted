@@ -66,8 +66,8 @@ p.tick = function(){
     for(var u in users){
         var user = users[u];
         if(user instanceof User){
-            user.tick();
             if(!user.inLobby){
+                user.tick();
                 if(deltaTick || fullTick){
                     if(fullTick){ // Full update
                         var userState = JSON.stringify(user.state);

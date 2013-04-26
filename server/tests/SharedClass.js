@@ -1,12 +1,13 @@
 (function(){
 var node = typeof window === 'undefined'; // Node.js test
-var deps = ['lib/foo','lib/bar']; // RequireJS dependencies
+var deps = ['shared/SuperClass','lib/foo','lib/bar']; // RequireJS dependencies
 
-var init = function(foo,bar){ // Class definition (RequireJS dependencies as arguments)
+var init = function(SuperClass,foo,bar){ // Class definition (RequireJS dependencies as arguments)
 
     if(node){ // Node dependencies
-        var foo = require('./foo');
-        var bar = require('./bar');
+        var SuperClass = require('./SuperClass');
+        var foo = require('../foo');
+        var bar = require('../bar');
     }
     
     var Class = function(args){ // Constructor
