@@ -93,7 +93,7 @@ function($,Global){
                                 }
                             }
                         }
-                        if(Global.debug && ticker.getTicks()%16==0){ // every half second
+                        if(Global.debug && ticker.getTicks()%6==0){ // every half second
                             debugStr = '';
                             debugObj.out.fps = Math.round(ticker.getMeasuredFPS());
                             debugObj.out.x = Global.player.x;

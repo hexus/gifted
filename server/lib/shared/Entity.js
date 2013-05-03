@@ -69,10 +69,8 @@ var init = function(createjs,Global,Effect){
         // Latency compensation
         this.interpolate = false;
         this.interpBuffer = []; // format: {time:0,states:{x:0,y:0}};
-        this.interpSpeed = 3; // Expect a new state after this many ticks / interpolate over this many ticks
-        this.interpWait = this.interpSpeed; // How many steps to wait before starting interpolation
-        this.interpStep = this.interpSpeed+1; // How far we are through the current interpolation
-        this.interpFrom = {}; // The state to interpolate from
+        this.interpWait = 500; // How many milliseconds to wait before starting interpolation
+        this.interpFrom = false; // The state to interpolate from
         this.interpExclude = ['aimDir','direction','health']; // States to exclude from interpolation
         
         
@@ -499,47 +497,52 @@ var init = function(createjs,Global,Effect){
         if(this.interpolate){
             var state = this.state;
             var buf = this.interpBuffer;
-            var interpSpeed = this.interpSpeed;
+            var tickRate = Math.round(1/this.world.fps)*1000;
+            var curTime = new Date().getTime()-this.interpWait;
             
-            // Variable interpolation speed based on the buffer size
-            //interpSpeed = buf.length>2 ? interpSpeed-1 : interpSpeed;
-            
-            // If we're too far behind, skip to the last two states in the buffer
-            if(buf.length>2){
-                //console.log('Excessive buffer',buf.length);
-                while(buf.length>2){
-                    buf.shift();
-                }
-            }
-            
-            if(this.interpStep>=interpSpeed && buf.length>0){
-                this.interpFrom = JSON.parse(JSON.stringify(state)); // Current state
-                this.interpStep = 0-this.interpWait;
-                if(this.interpWait>0){this.interpWait=0;}
-            }
-
-            // Perform interpolation
-            if(this.interpStep<interpSpeed){
-                this.interpStep++;
-                if(this.interpStep>0){
-                    var from = this.interpFrom;
-                    var to = buf[0].state;
-                    var t = 1/(interpSpeed/this.interpStep);
-                    for(var i in to){
-                        if(typeof to[i] == 'number' && this.interpExclude.indexOf(i)<0){
-                            state[i] = Math.round(this.lerp(from[i],to[i],t));
-                        }else{
-                            state[i] = to[i];
-                        }
+            if(buf.length>0){
+                
+                if(this.interpFrom){
+                    Global.debugObj.out.interpDif = buf[0].time-this.interpFrom.time;
+                    if(buf[0].time-this.interpFrom.time>tickRate*4){
+                        //this.interpFrom.time = buf[0].time-tickRate*3;
                     }
-                    if(t==1){
-                        buf.shift();
-                        if(buf.length<1){ // && wait<speed, wait++
-                            this.interpWait = this.interpSpeed;
-                        }
+                }
+                if(!this.interpFrom){
+                    this.interpFrom = {
+                        time:buf[0].time-tickRate*3,
+                        state:JSON.parse(JSON.stringify(state))
                     }
                 }
                 
+                if(curTime>=this.interpFrom.time){
+                    var from = this.interpFrom;
+                    var to = buf[0];
+                    var t = (curTime-from.time)/(to.time-from.time);
+
+                    if(t>=1){
+                        var last = buf.shift();
+                        this.interpFrom = {
+                            time:last.time,
+                            state:JSON.parse(JSON.stringify(state))
+                        }
+                        for(var i in last.state){
+                            this.interpFrom.state[i] = last.state[i];
+                        }
+                        from = this.interpFrom;
+                        to = buf.length>0 ? buf[0] : from;
+                        t -= 1;
+                    }
+                    
+                    // Apply
+                    for(var i in to.state){
+                        if(typeof to.state[i] == 'number' && this.interpExclude.indexOf(i)<0){
+                            state[i] = Math.round(this.lerp(from.state[i],to.state[i],t));
+                        }else{
+                            state[i] = to.state[i];
+                        }
+                    }
+                }
             }
         }
     }
@@ -558,7 +561,7 @@ var init = function(createjs,Global,Effect){
     }
     
     p.bufferState = function(state){
-        var time = new Date();
+        var time = new Date().getTime();
         var late = false;
         var lastState = this.interpBuffer[this.interpBuffer.length-1];
         
