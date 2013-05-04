@@ -496,32 +496,30 @@ var init = function(createjs,Global,Effect){
     p.streamTick = function(){
         var buf = this.interpBuffer;
         if(this.interpolate && buf.length>0){
-            var state = this.state;            
-            var tickRate = Math.round(1/this.world.fps)*1000;
+            var state = this.state;
             var curTime = new Date().getTime()-this.interpWait;
             
             if(!this.interpFrom){ // If no start state, make one based on current state
                 this.interpFrom = {
-                    time:buf[0].time-tickRate*3,
+                    time:buf[0].time-100,
                     state:JSON.parse(JSON.stringify(state))
                 }
             }else{
                 if(buf[0].time-this.interpFrom.time>200){ // If start state is more than 200ms old
-                    this.interpFrom.time = buf[0].time-100; // Snap back
+                    this.interpFrom.time = buf[0].time-100; // Snap it forward
                 }
             }
             
             if(curTime>=this.interpFrom.time){
-                var from = this.interpFrom;
-                var to = buf[0];
+                var from = this.interpFrom; // Start state
+                var to = buf[0]; // End state
                 var t = (curTime-from.time)/(to.time-from.time);
-
+                
+                // Shift to next state update
                 if(t>=1){
                     var last = buf.shift();
-                    this.interpFrom = {
-                        time:last.time,
-                        state:JSON.parse(JSON.stringify(state))
-                    }
+                    this.interpFrom.time = last.time;
+                    this.interpFrom.state = JSON.parse(JSON.stringify(state));
                     for(var i in last.state){
                         this.interpFrom.state[i] = last.state[i];
                     }
