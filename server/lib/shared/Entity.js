@@ -69,7 +69,7 @@ var init = function(createjs,Global,Effect){
         // Latency compensation
         this.interpolate = false;
         this.interpBuffer = []; // format: {time:0,states:{x:0,y:0}};
-        this.interpWait = 500; // How many milliseconds to wait before starting interpolation
+        this.interpWait = 100; // How many milliseconds to wait before starting interpolation
         this.interpFrom = false; // The state to interpolate from
         this.interpExclude = ['aimDir','direction','health']; // States to exclude from interpolation
         
@@ -494,53 +494,48 @@ var init = function(createjs,Global,Effect){
     }
     
     p.streamTick = function(){
-        if(this.interpolate){
-            var state = this.state;
-            var buf = this.interpBuffer;
+        var buf = this.interpBuffer;
+        if(this.interpolate && buf.length>0){
+            var state = this.state;            
             var tickRate = Math.round(1/this.world.fps)*1000;
             var curTime = new Date().getTime()-this.interpWait;
             
-            if(buf.length>0){
-                
-                if(this.interpFrom){
-                    Global.debugObj.out.interpDif = buf[0].time-this.interpFrom.time;
-                    if(buf[0].time-this.interpFrom.time>tickRate*4){
-                        //this.interpFrom.time = buf[0].time-tickRate*3;
-                    }
+            if(!this.interpFrom){ // If no start state, make one based on current state
+                this.interpFrom = {
+                    time:buf[0].time-tickRate*3,
+                    state:JSON.parse(JSON.stringify(state))
                 }
-                if(!this.interpFrom){
+            }else{
+                if(buf[0].time-this.interpFrom.time>200){ // If start state is more than 200ms old
+                    this.interpFrom.time = buf[0].time-100; // Snap back
+                }
+            }
+            
+            if(curTime>=this.interpFrom.time){
+                var from = this.interpFrom;
+                var to = buf[0];
+                var t = (curTime-from.time)/(to.time-from.time);
+
+                if(t>=1){
+                    var last = buf.shift();
                     this.interpFrom = {
-                        time:buf[0].time-tickRate*3,
+                        time:last.time,
                         state:JSON.parse(JSON.stringify(state))
                     }
+                    for(var i in last.state){
+                        this.interpFrom.state[i] = last.state[i];
+                    }
+                    from = this.interpFrom;
+                    to = buf.length>0 ? buf[0] : from;
+                    t -= 1;
                 }
                 
-                if(curTime>=this.interpFrom.time){
-                    var from = this.interpFrom;
-                    var to = buf[0];
-                    var t = (curTime-from.time)/(to.time-from.time);
-
-                    if(t>=1){
-                        var last = buf.shift();
-                        this.interpFrom = {
-                            time:last.time,
-                            state:JSON.parse(JSON.stringify(state))
-                        }
-                        for(var i in last.state){
-                            this.interpFrom.state[i] = last.state[i];
-                        }
-                        from = this.interpFrom;
-                        to = buf.length>0 ? buf[0] : from;
-                        t -= 1;
-                    }
-                    
-                    // Apply
-                    for(var i in to.state){
-                        if(typeof to.state[i] == 'number' && this.interpExclude.indexOf(i)<0){
-                            state[i] = Math.round(this.lerp(from.state[i],to.state[i],t));
-                        }else{
-                            state[i] = to.state[i];
-                        }
+                // Apply
+                for(var i in to.state){
+                    if(typeof to.state[i] == 'number' && this.interpExclude.indexOf(i)<0){
+                        state[i] = Math.round(this.lerp(from.state[i],to.state[i],t));
+                    }else{
+                        state[i] = to.state[i];
                     }
                 }
             }
