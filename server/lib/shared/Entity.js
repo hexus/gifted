@@ -69,7 +69,7 @@ var init = function(createjs,Global,Effect){
         // Latency compensation
         this.interpolate = false;
         this.interpBuffer = []; // format: {time:0,states:{x:0,y:0}};
-        this.interpWait = 100; // How many milliseconds to wait before starting interpolation
+        this.interpWait = 200; // How many milliseconds to wait before starting interpolation
         this.interpFrom = false; // The state to interpolate from
         this.interpExclude = ['aimDir','direction','health']; // States to exclude from interpolation
         
@@ -251,6 +251,7 @@ var init = function(createjs,Global,Effect){
             }
         }else{
             console.log("Out of bounds collision: " + rx + " " + ry + " " + cx + " " + cy,this.state.x,this.state.y,this.state.direction);
+            console.trace();
             return true;
         }
     }
@@ -505,7 +506,7 @@ var init = function(createjs,Global,Effect){
                     state:JSON.parse(JSON.stringify(state))
                 }
             }else{
-                if(buf[0].time-this.interpFrom.time>200){ // If start state is more than 200ms old
+                if(buf[0].time-this.interpFrom.time>this.interpWait*2){ // If start state is too old
                     this.interpFrom.time = buf[0].time-100; // Snap it forward
                 }
             }
@@ -513,7 +514,7 @@ var init = function(createjs,Global,Effect){
             if(curTime>=this.interpFrom.time){
                 var from = this.interpFrom; // Start state
                 var to = buf[0]; // End state
-                var t = (curTime-from.time)/(to.time-from.time);
+                var t = to.time - from.time > 0 ? (curTime-from.time)/(to.time-from.time) : 1;
                 
                 // Shift to next state update
                 if(t>=1){
