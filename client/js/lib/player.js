@@ -66,6 +66,13 @@ function(createjs,lib,Global,Character,Effect){
         this.hasRespawned = false;
         
         //this.char.shadow = new createjs.Shadow('#FFF',0,0,20);
+        
+        this.isGhost = args.isGhost;
+        if(!this.isGhost){
+            this.ghost = this.world.addChild(new Player({isGhost:true}));
+            this.ghost.alpha = 0.5;
+            this.ghost.state = JSON.parse(JSON.stringify(this.state));
+        }
     }
     
     var p = Player.prototype = new Character();
@@ -74,8 +81,15 @@ function(createjs,lib,Global,Character,Effect){
     
     p.respawn = function(){
         this.x = 0; // force spawn at spawn point
-        this.super.spawn.call(this);
+        this.super2.spawn.call(this);
         this.state.health = Math.floor(this.state.maxHealth / 10);
+    }
+    
+    p.unspawn = function(){
+        this.super2.unspawn.call(this);
+        if(this.ghost){
+            this.world.removeChild(this.ghost);
+        }
     }
     
     p.useItem = function(side){
@@ -216,6 +230,10 @@ function(createjs,lib,Global,Character,Effect){
         this.super2.tick.call(this);
         var state = this.state;
         
+        if(this.ghost){
+            this.ghost.alpha = Global.debugObj.showGhosts ? 0.5 : 0;
+        }
+        
         // Arm rotation
         if(this.thisPlayer){
             state.aimAngle = Math.atan2(this.mouseY,this.mouseX)*180/Math.PI;
@@ -231,7 +249,7 @@ function(createjs,lib,Global,Character,Effect){
                 }
             }else{
                 if(state.health<1 && !this.hasRespawned){
-                    Global.ui.showRespawnMenu();
+                    //Global.ui.showRespawnMenu();
                 }
             }
         }
@@ -383,6 +401,16 @@ function(createjs,lib,Global,Character,Effect){
     
     p.itemTick = function(){
         this.super2.itemTick.call(this);
+    }
+    
+    p.bufferState = function(state){
+        if(!this.thisPlayer || state.important){
+            this.super2.bufferState.call(this,state);
+        }
+        for(var i in state){
+            this.ghost.state[i] = state[i];
+        }
+        this.ghost.tick();
     }
     
     return Player;

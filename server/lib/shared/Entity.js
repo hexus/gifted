@@ -77,6 +77,8 @@ var init = function(createjs,Global,Effect){
         if(!node && Global.debug){
             this.hitboxShape = false;
             this.rayPoints = this.addChild(new createjs.Container());
+            this.interpTracePoints = [];
+            this.interpTraceLines = [];
         }
         
         /*if(this.life===0){
@@ -163,6 +165,11 @@ var init = function(createjs,Global,Effect){
         if(!node){
             if(this.world.entityContainer.contains(this)){
                 this.world.entityContainer.removeChild(this);
+            }
+            if(Global.debugObj.interpTrace){
+                for(var i in this.interpTracePoints){
+                    this.world.removeChild(this.interpTracePoints[i]);
+                }
             }
         }
     }
@@ -288,6 +295,23 @@ var init = function(createjs,Global,Effect){
                     s.x = this.x-ray[i][0];
                     s.y = this.y-ray[i][1];
                     this.rayPoints.addChild(s);
+                }
+            }
+            
+            // interp trace
+            if(Global.debugObj.interpTrace){
+                for(var i in this.interpTracePoints){
+                    var point = this.interpTracePoints[i];
+                    if(point.alpha>0){
+                        point.alpha -= 0.02; 
+                    }else{
+                        this.interpTracePoints.splice(i,1);
+                        this.world.removeChild(point);
+                    }
+                }
+            }else{
+                for(var i in this.interpTracePoints){
+                    this.world.removeChild(this.interpTracePoints[i]);
                 }
             }
         }
@@ -567,6 +591,20 @@ var init = function(createjs,Global,Effect){
             }
             this.interpStep = this.interpSpeed+1;
             this.updateState(state);
+        }
+        
+        // interp trace point
+        if(Global.debugObj.interpTrace){
+            var g = new createjs.Graphics();
+            g.f("#95c").dc(0,0,4);
+            var lastPoint = this.interpTracePoints[this.interpTracePoints.length-1] || {x:this.x,y:this.y};
+            if(lastPoint){
+                g.ss(1).s("#95c").mt(0,0).lt(lastPoint.x-(state.x||lastPoint.x),lastPoint.y-(state.y||lastPoint.y));
+            }
+            var s = new createjs.Shape(g);
+            s.x = state.x || lastPoint.x;
+            s.y = state.y || lastPoint.y;
+            this.interpTracePoints.push(this.world.addChild(s));
         }
     }
 

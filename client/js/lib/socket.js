@@ -158,8 +158,10 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                         var s = deltas[d];
                         if(world.users[d]){
                             var user = world.users[d];
-                            if(user.thisPlayer && user.state.health<1){
-                                user.hasRespawned = false;
+                            if(user.thisPlayer){
+                                if(user.state.health<1){
+                                    Global.ui.showRespawnMenu();
+                                }
                             }
                             user.bufferState(s);
                         }

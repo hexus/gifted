@@ -132,17 +132,17 @@ p.tick = function(){
                 // User Deltas
                 if(Object.size(userDeltas)>0){
                     var userDeltasMod = JSON.parse(JSON.stringify(userDeltas));
-                    delete(userDeltasMod[u]); // Don't send to self by default
+                    //delete(userDeltasMod[u]); // Don't send to self by default
                     if(userDeltas[u]){
                         if(userDeltas[u].health!=null && !fullTick){ // Always let them know their health if it changes (hacky soz)
                             userDeltasMod[u] = {health:userDeltas[u].health};
                         }
-                        if(user.sendSelf){ // Include self-delta if send-self is true
+                        for(var i in share){ // include this.importantStates
+                            userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
+                        }
+                        if(user.sendSelf){ // Include self-delta importance flag if send-self is true
+                            userDeltasMod[u].important = true;
                             user.sendSelf = false;
-                            userDeltasMod[u] = {};
-                            for(var i in share){ // == this.importantStates
-                                userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
-                            }
                         }
                     }
                     if(!longTick){ // Restrict to AoI

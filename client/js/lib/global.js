@@ -5,7 +5,9 @@ function(){
         debugObj:{  // Debug output object
             out:{},
             showHitboxes:false,
-            showRays:false
+            showRays:false,
+            showGhosts:true,
+            interpTrace:true
         }, 
         ticker:null, // CreateJS Ticker
         stage:null,  // CreateJS Stage

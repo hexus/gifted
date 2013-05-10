@@ -100,7 +100,7 @@ function($,createjs,Global,Socket,Bullet,Weapon){
                     respawn = false;
                 }
             }
-            Global.player.hasRespawned = true;
+            //Global.player.hasRespawned = true;
             if(respawn){
                 Global.player.respawn();
             }else{
