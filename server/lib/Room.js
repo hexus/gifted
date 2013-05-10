@@ -112,6 +112,11 @@ p.tick = function(){
                 	    if(this.lastStates.entities[i]!=eState){
                 	        eDeltas[i] = e.state;
                             this.lastStates.entities[i] = eState; 
+                        }else{ // if nothing has changed, send only important updates per second
+                            eDeltas[i] = {};
+                            for(var j in share){
+                                eDeltas[i][share[j]] = e.state[share[j]];
+                            }
                         }
                     }else{ // Delta update
                         var eDelta = e.getStateDelta();

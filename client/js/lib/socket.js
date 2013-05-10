@@ -183,7 +183,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     }
                     break;
                 case "/ed": // Update entity state
-                    logData = false;
+                    //logData = false;
                     var deltas = JSON.parse(dstr);
                     for(var eid in deltas){
                         var e = world.entities[eid];
@@ -191,15 +191,6 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                             e = world.addEntity(world.recreateEntity(deltas[eid],eid));
                         }else{
                             e.bufferState(deltas[eid]);
-                            /*
-                            for(var i in deltas[eid]){
-                                if(e){
-                                    if(e.state[i]!=null && typeof e.state[i] === typeof deltas[eid][i]){
-                                        e.state[i] = deltas[eid][i];
-                                    }
-                                }
-                            }*/
-                            //e.tick();
                         }
                     }
                     break;

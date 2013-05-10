@@ -51,6 +51,7 @@ var init = function(lib,Global,Enemy,BulletEnemy){
                 this.turret.rotation = this.char.scaleX>0 ? state.aimAngle : 180-state.aimAngle;
             }else{
                 if(this.char.currentFrame<1){
+                    this.stopMoving();
                     this.char.gotoAndStop('dead');
                     this.cacheChar();
                 }

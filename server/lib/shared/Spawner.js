@@ -67,6 +67,11 @@ var init = function(lib,Global,Entity){
                     }
                 }
             }
+            if(!node && this.clip.cacheCanvas){
+                this.deadTick = false;
+                this.clip.gotoAndStop(0);
+                this.clip.uncache();
+            }
         }else{
             if(!node && !this.deadTick){
                 this.clip.gotoAndStop('dead');

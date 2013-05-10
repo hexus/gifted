@@ -589,10 +589,10 @@ var init = function(createjs,Global,Effect){
         if(this.interpolate){ // Buffer state update
             this.interpBuffer.push({time:time,state:state});
         }else{ // Apply immediately, clear buffer
+            this.interpFrom = false;
             while(this.interpBuffer.length>0){
                 this.interpBuffer.splice(0,1);
             }
-            this.interpStep = this.interpSpeed+1;
             this.updateState(state);
         }
         
