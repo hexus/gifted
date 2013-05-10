@@ -1,5 +1,5 @@
-define(['jquery','lib/global','lib/ui'],
-function($,Global,Ui){
+define(['jquery','lib/global','lib/ui','shared/Enemy/Flybot'],
+function($,Global,Ui,Flybot){
     
     var connected = function(){
         return Global.socket ? Global.socket.connected : false;
@@ -202,6 +202,45 @@ function($,Global,Ui){
             down:function(){
                 Global.ui.toggleWorldMenu();
             }
+        },
+        toggleInterpTrace : {
+            key:192,
+            down:function(){
+                Global.debugObj.interpTrace = !Global.debugObj.interpTrace;
+            }
+        },
+        toggleGhosts : {
+            key:222,
+            down:function(){
+                Global.debugObj.showGhosts = !Global.debugObj.showGhosts;
+            }
+        },
+        killAll : {
+            key:75,
+            down:function(){
+                if(connected()){
+                    Global.socket.send('/killall');
+                }else{
+                    var entities = Global.world.entities; 
+                    for(var e in entities){
+                        if(entities[e] instanceof Flybot){
+                            entities[e].state.health = 0;
+                        }
+                    }
+                }
+            }
+        },
+        spawnFlybots : {
+            key:76,
+            down:function(){
+                if(connected()){
+                    Global.socket.send('/spawnflybots');
+                }else{
+                    for(var i=0;i<10;i++){
+                        Global.world.addEntity(new Flybot({x:Global.player.x,y:Global.player.y}));
+                    }
+                }
+            }
         }
     }
     
@@ -223,7 +262,7 @@ function($,Global,Ui){
             var k = e.keyCode || e.which;
             keysLast[k] = keysDown[k];
             keysDown[k] = true;
-            //console.log(k);
+            console.log(k);
         });
         
         $(window).keyup(function(e){

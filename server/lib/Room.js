@@ -6,6 +6,7 @@ var Entities = require('./Entities');
 var Weapon = require('./shared/Weapon');
 var Bullet = require('./shared/Bullet');
 var Spawner = require('./shared/Spawner');
+var Enemy = require('./shared/Enemy');
 var Flybot = require('./shared/Enemy/Flybot');
 var BulletEnemy = require('./shared/BulletEnemy');
 var Item = require('./shared/Item');
@@ -30,6 +31,7 @@ var Room = function(args){
     this.lobbyUsers = new Users(); // Users in room lobby
     this.users = new Users(); // Users in room world
     this.entities = new Entities();
+    this.enemyCount = 0;
     this.generateMap();
     
     this.fps = args.fps || 32;
@@ -120,6 +122,10 @@ p.tick = function(){
             	}
             }
         }
+        this.enemyCount = 0;
+        if(e instanceof Enemy){
+            this.enemyCount++;
+        }
     }
     
     for(var u in users){
@@ -135,13 +141,13 @@ p.tick = function(){
                     //delete(userDeltasMod[u]); // Don't send to self by default
                     if(userDeltas[u]){
                         if(userDeltas[u].health!=null && !fullTick){ // Always let them know their health if it changes (hacky soz)
-                            userDeltasMod[u] = {health:userDeltas[u].health};
+                            userDeltasMod[u] = {health:userDeltas[u].health,important:true};
                         }
-                        for(var i in share){ // include this.importantStates
-                            userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
-                        }
-                        if(user.sendSelf){ // Include self-delta importance flag if send-self is true
-                            userDeltasMod[u].important = true;
+                        if(user.sendSelf){ 
+                            for(var i in share){ // Include this.importantStates
+                                userDeltasMod[u][share[i]] = this.users.get(u).state[share[i]];
+                            }
+                            userDeltasMod[u].important = true; // Include self-delta importance flag
                             user.sendSelf = false;
                         }
                     }

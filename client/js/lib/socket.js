@@ -159,7 +159,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                         if(world.users[d]){
                             var user = world.users[d];
                             if(user.thisPlayer){
-                                if(user.state.health<1){
+                                if(s.health<1){
                                     Global.ui.showRespawnMenu();
                                 }
                             }
@@ -177,6 +177,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     }
                     break;
                 case "/er":
+                    logData = false;
                     if(d[1]){
                         world.removeEntity(world.entities[d[1]]);
                     }
@@ -203,11 +204,13 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     }
                     break;
                 case "/itemGive":
+                    logData = false;
                     var json = JSON.parse(dstr);
                     var item = world.recreateEntity(json.state,json.eid);
                     users[json.id].setItem(json.side,item);
                     break;
                 case "/itemTake":
+                    logData = false;
                     var json = JSON.parse(dstr);
                     var item = world.entities[json.eid];
                     if(item){

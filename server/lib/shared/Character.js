@@ -163,6 +163,10 @@ var init = function(Entity){ // Character definition (add RequireJS dependencies
                 item.state.ySpeed = Math.round(this.state.ySpeed * 0.5);
                 this.world.addEntity(item);
                 item.owner = false;
+                if(!node){
+                    item.interpBuffer = [];
+                    item.interpFrom = false;
+                }
             }
             this.setItem(side); // unset
         }

@@ -1,6 +1,7 @@
 var config = require('./Config');
 var global = require('./Global');
 var Room = require('./Room');
+var Flybot = require('./shared/Enemy/Flybot')
 var rooms = global.rooms;
 
 var Weapon = require('./shared/Weapon');
@@ -14,7 +15,7 @@ h.handleData = function(data){ // Called in context of a User
     	// Lobby handlers
         case "<policy-file-request/>": // Flash policy
             this.send('<cross-domain-policy><allow-access-from domain="*" to-ports="*"/></cross-domain-policy>');
-            break;
+            break;aw
         case "/worlds-pls": // Client is ready to log in and wants a list of worlds
             this.send('/login-request ' + rooms.list());
             break;
@@ -51,7 +52,7 @@ h.handleData = function(data){ // Called in context of a User
             this.room.send("/c " + this.id + " " + data.substr(3),true);
             break;
         case "/m": // Move (state update)
-            //log = false;
+            log = false;
             var stateDelta = JSON.parse(data.substr(3));
             for(i in stateDelta){
                 if(typeof stateDelta[i] === typeof this.state[i]){
@@ -61,16 +62,19 @@ h.handleData = function(data){ // Called in context of a User
             //this.tick();
             break;
         case "/itemTake":
+            log = false;
             if(d[1]=='l' || d[1]=='r'){
                 this.pickUpItem(d[1]);
             }
             break;
         case "/itemDrop":
+            log = false;
             if(d[1]=='l' || d[1]=='r'){
                 this.dropItem(d[1]);
             }
             break;
         case "/itemUse":
+            log = false;
             if(d[1]=='l' || d[1]=='r'){
                 if(d[2]==1){
                     this.useItem(d[1]);
@@ -80,10 +84,26 @@ h.handleData = function(data){ // Called in context of a User
             }
             break;
         case "/respawn":
+            log = false;
             if(this.state.health<1){
                 this.respawn();
             }
             this.sendSelf = true;
+            break;
+        case "/killall": // debug, kill all flybots
+            log = false;
+            var entities = this.world.entities;
+            for(var e in entities.get()){
+                if(entities.get(e) instanceof Flybot){
+                    entities.get(e).state.health = 0;
+                }
+            }
+            break;
+        case "/spawnflybots": // debug, spawn flybots on player
+            log = false;
+            for(var i=0;i<10;i++){
+                this.world.addEntity(new Flybot({x:this.x,y:this.y}));
+            }
             break;
         default:
           log = false;

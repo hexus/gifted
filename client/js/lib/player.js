@@ -231,7 +231,7 @@ function(createjs,lib,Global,Character,Effect){
         var state = this.state;
         
         if(this.ghost){
-            this.ghost.alpha = Global.debugObj.showGhosts ? 0.5 : 0;
+            this.ghost.alpha = Global.debugObj.showGhosts && !this.thisPlayer ? 0.5 : 0;
         }
         
         // Arm rotation
@@ -248,8 +248,8 @@ function(createjs,lib,Global,Character,Effect){
                     state.health++;
                 }
             }else{
-                if(state.health<1 && !this.hasRespawned){
-                    //Global.ui.showRespawnMenu();
+                if(!Global.socket.connected){
+                    Global.ui.showRespawnMenu();
                 }
             }
         }
@@ -411,6 +411,12 @@ function(createjs,lib,Global,Character,Effect){
             this.ghost.state[i] = state[i];
         }
         this.ghost.tick();
+    }
+    
+    p.interpTrace = function(state){
+        if(!this.thisPlayer){
+            this.super2.interpTrace.call(this,state);
+        }
     }
     
     return Player;

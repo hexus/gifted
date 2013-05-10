@@ -6,8 +6,8 @@ function(){
             out:{},
             showHitboxes:false,
             showRays:false,
-            showGhosts:true,
-            interpTrace:true
+            showGhosts:false,
+            interpTrace:false
         }, 
         ticker:null, // CreateJS Ticker
         stage:null,  // CreateJS Stage

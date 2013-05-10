@@ -313,6 +313,9 @@ var init = function(createjs,Global,Effect){
                 for(var i in this.interpTracePoints){
                     this.world.removeChild(this.interpTracePoints[i]);
                 }
+                while(this.interpTracePoints.length>0){
+                    this.interpTracePoints.shift();
+                }
             }
         }
         
@@ -593,7 +596,11 @@ var init = function(createjs,Global,Effect){
             this.updateState(state);
         }
         
-        // interp trace point
+        this.interpTrace(state);
+    }
+    
+    // Draw interpolation trace
+    p.interpTrace = function(state){
         if(Global.debugObj.interpTrace){
             var g = new createjs.Graphics();
             g.f("#95c").dc(0,0,4);
