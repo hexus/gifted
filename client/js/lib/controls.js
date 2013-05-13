@@ -241,6 +241,18 @@ function($,Global,Ui,Flybot){
                     }
                 }
             }
+        },
+        telekinesisTest : {
+            key:84,
+            down:function(){
+                Global.debugObj.tk = !Global.debugObj.tk;
+            }
+        },
+        flight : {
+            key:70,
+            down:function(){
+                Global.player.state.isFlying = !Global.player.state.isFlying;
+            }
         }
     }
     

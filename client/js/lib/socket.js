@@ -183,7 +183,7 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                     }
                     break;
                 case "/ed": // Update entity state
-                    //logData = false;
+                    logData = false;
                     var deltas = JSON.parse(dstr);
                     for(var eid in deltas){
                         var e = world.entities[eid];

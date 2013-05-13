@@ -156,6 +156,8 @@ var init = function(){
     	    regions = [];
     	}
     	
+    	this.stages = [];
+    	
     };
     
     var m = Map.prototype;
@@ -318,9 +320,11 @@ var init = function(){
         }
     }
     
-    m.generate = function(){
+    m.generate = function(canvasStages){
         if(node){
     	   console.log('Generating world \'' + this.name + '\'');
+    	}else{
+    	    this.stages = [];
     	}
     	
     	var wSize = this.getWorldSize(),
@@ -369,6 +373,11 @@ var init = function(){
         this.eachTile(function(x,y){
             this.setTile(x,y,9);
         },true);
+        
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
+        }
     	
     	// Let's dig!
     	var miners = {};
@@ -409,6 +418,11 @@ var init = function(){
         
         iterateMiners();
         
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
+        }
+        
         // Fill caves randomly
         this.eachTile(function(x,y,v){
             if(v==0){
@@ -417,6 +431,11 @@ var init = function(){
                 }
             }
         },true);
+        
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
+        }
         
         // Cellular automataaaaa
         for(var i=0;i<2;i++){
@@ -427,6 +446,11 @@ var init = function(){
                     this.setTile(x,y,0);
                 }
             },true);
+        }
+        
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
         }
         
         for(var i=0;i<2;i++){
@@ -448,12 +472,17 @@ var init = function(){
             },true);
         }
         
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
+        }
+        
         // Carve spawn
         for(var i=lowSpawn.x-Math.round(lowSpawn.width/2);i<lowSpawn.x+Math.round(lowSpawn.width/2);i++){
             for(var j=lowSpawn.y-Math.round(lowSpawn.height/2);j<lowSpawn.y+Math.round(lowSpawn.height/2);j++){
                 var c = this.convertCords(i,j,true);
                 this.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
-            }           
+            }
         }
         
         // Tunnels from spawn
@@ -470,12 +499,16 @@ var init = function(){
     	
     	iterateMiners();
     	
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
+        }
+    	
     	// Flood fill
     	var q = [];
     	q[0] = [0,0];
     	while(q.length>0){
-    	    var n = q[q.length-1];
-    	    q.splice(q.length-1,1);
+    	    var n = q.pop();
     	    if(this.getTile(n[0],n[1])==0){
     	        this.setTile(n[0],n[1],7);
     	        q.push([n[0]+1,n[1]]);
@@ -485,6 +518,11 @@ var init = function(){
     	    }
     	}
     	
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
+        }
+    	
     	// Fill in disconnected caves
     	this.eachTile(function(x,y,v){
     	    if(v==0){
@@ -492,12 +530,22 @@ var init = function(){
     	    }
     	});
     	
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
+        }
+    	
     	// Undo flood fill
     	this.eachTile(function(x,y,v){
     	    if(v==7){
     	        this.setTile(x,y);
     	    }
     	});
+    	
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
+        }
     	
     	// Painting
         this.eachTile(function(x,y,v){
@@ -526,6 +574,11 @@ var init = function(){
                 }
             }
         },true);
+
+        if(!node && canvasStages){
+            this.stages.push(this.createCanvasData());
+            console.log('Map gen stage ' + this.stages.length);
+        }
 
     	// Done.
     }

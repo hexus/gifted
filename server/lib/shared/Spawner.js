@@ -67,7 +67,7 @@ var init = function(lib,Global,Entity){
                     }
                 }
             }
-            if(!node && this.clip.cacheCanvas){
+            if(!node && this.clip.cacheCanvas){ // this clause might not be necessary
                 this.deadTick = false;
                 this.clip.gotoAndStop(0);
                 this.clip.uncache();

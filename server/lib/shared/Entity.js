@@ -541,7 +541,7 @@ var init = function(createjs,Global,Effect){
             if(curTime>=this.interpFrom.time){
                 var from = this.interpFrom; // Start state
                 var to = buf[0]; // End state
-                var t = to.time - from.time > 0 ? (curTime-from.time)/(to.time-from.time) : 1;
+                var t = to.time-from.time > 0 ? (curTime-from.time)/(to.time-from.time) : 1;
                 
                 // Shift to next state update
                 if(t>=1){
