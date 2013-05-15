@@ -15,16 +15,6 @@ c.live = c.static.live;
 
 c.version = readJson('server/package.json').version  || "?"; 
 c.httpPort = c.live ? 8080 : c.static.httpPort || 80;
-c.db = {
-    host        : c.static.mysqlHost || 'localhost',
-    port        : c.static.mysqlPort || 3306,
-    user        : c.static.mysqlLogin || 'root',
-    password    : c.static.mysqlPassword || 'novasex',
-    database    : 'gifted_alpha',
-    flags       : '-CONNECT_WITH_DB', // Prevents immediate connection to database (it might not exist)
-    sql         : readFile(c.basePath+'server/sql/gifted.sql'),
-    multipleStatements  : true
-};
 c.worlds = c.static.worlds || [
 	"Buren"
 ];

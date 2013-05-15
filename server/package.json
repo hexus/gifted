@@ -5,7 +5,6 @@
 	"dependencies":	{
 		"async" 	: "*",
 		"mime" 		: "*",
-		"mysql" 	: "*",
 		"socket.io"	: "*"
 	},
 	"private": true

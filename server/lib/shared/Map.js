@@ -2,10 +2,6 @@
 var node = typeof window === 'undefined';
 var deps = [];
 var init = function(){
-
-    if(node){
-        var db = require('../DB');
-    }
     
     var solidarr = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13];
     
@@ -18,8 +14,6 @@ var init = function(){
     	var spawn = {x:0,y:0}
     	
     	var regions = [];
-    	
-    	//this.load();
     	
     	this.getProperties = function(){
     		return {
@@ -165,45 +159,6 @@ var init = function(){
     	return [
     		this.getWorldSize(), this.getRegionSize(), this.getTileSize(), this.getSpawn()
     	]
-    }
-    
-    m.load = function(cb){
-        if(node){
-            var that = this;
-            db.connection.query("SELECT * FROM worlds WHERE name='"+that.name+"'",function(err,rows){
-                var success = false;
-                if(rows){
-                    if(rows.length>0){
-                        var world = rows[0];
-                        that.setProperties({
-                           worldSize:{width:world.width,height:world.height},
-                           tileSize:world.size,
-                           spawn:{x:world.spawnX,y:world.spawnY} 
-                        });
-                        that.expand(world.map); // Needs to be LONGTEXT in MySQL
-                        console.log('Loaded world \''+that.name+'\'');
-                        success = true;
-                    }else{
-                        success = false; // Not found
-                    }
-                }else{
-                    console.log(err);
-                    success = false; // Other error
-                }
-                if(typeof cb === 'function'){
-                    cb(success);
-                }
-            });
-        }
-    }
-    
-    m.save = function(){ // swag
-    	if(node){
-            var values = [this.name, this.getTileSize(), this.getWorldSize().width, this.getWorldSize().height, this.flat(), this.getSpawn().x, this.getSpawn().y];
-            var values_sql = "'" + values.join("','") + "'";
-        	db.connection.query("REPLACE INTO worlds (name,size,width,height,map,spawnX,spawnY) "+
-        						"VALUES ("+values_sql+")");
-        }
     }
     
     // Miner class
@@ -769,31 +724,6 @@ var init = function(){
             height:height,
             data:data
         }
-    }
-    
-    m.createHtml = function(){ // depracated ugly shit
-    	var html = '';
-    	for(ry=0;ry<this.getWorldSize().height;ry++){ // Region row
-    		var chunk = '';
-    		chunk += '<div class="row">';
-    		for(rx=0;rx<this.getWorldSize().width;rx++){ // Region column
-    			//html += "<b>Region: " + rx + "," + ry + "</b><br/>";
-    			chunk += '<div class="map">';
-    			for(y=0;y<this.getRegionSize().height;y++){ // Tile row
-    				chunk += '<div class="tilerow">';
-    				for(x=0;x<this.getRegionSize().width;x++){ // Tile
-    					var val = this.getTile(rx,ry,x,y);
-    					chunk += '<div class="'+((val==1)?'t':'e')+'"></div>';
-    				}
-    				chunk += '</div>';
-    			}
-    			chunk += '</div>';
-    			
-    		}
-    		chunk += '</div>';
-    		html += chunk;
-    	}
-    	return html;
     }
     
     return Map;
