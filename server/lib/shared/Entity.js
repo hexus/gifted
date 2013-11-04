@@ -543,6 +543,11 @@ var init = function(createjs,Global,Effect){
                 var to = buf[0]; // End state
                 var t = to.time-from.time > 0 ? (curTime-from.time)/(to.time-from.time) : 1;
                 
+                if(t>2){ // This causes the glitches
+                    //console.log(t,curTime-from.time,to.time-from.time);
+                    t = 2; // This fixes the glitches
+                }
+                
                 // Shift to next state update
                 if(t>=1){
                     var last = buf.shift();
