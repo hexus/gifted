@@ -3,6 +3,11 @@ function(createjs,lib,Global){
     
     var globalScale = 1;
     
+    Global.tiles = new createjs.SpriteSheet({
+        images: ['img/tiles_1.png'],
+        frames: {width:64, height:64, count:20, regX:0, regY:0}
+    });
+    
     var Tile = function(frame,x,y,scale){
     	this.initialize();
     	var that = this;
@@ -25,7 +30,9 @@ function(createjs,lib,Global){
         });
         this.set('frame',function(f){
             _f = parseInt(f) || 0;
-            var getFrame = /*_f>0 && f!=12 ? new createjs.Bitmap('img/cow.png') :*/ Global.tiles.getFrame(_f);
+            //that.gotoAndStop(_f);
+            //var getFrame = /*_f>0 && f!=12 ? new createjs.Bitmap('img/cow.png') :*/ Global.tiles.getFrame(_f);
+            var getFrame = Global.tiles.getFrame(_f);
             if(getFrame){
                 that.image = getFrame.image;
                 that.sourceRect = getFrame.rect;
@@ -45,7 +52,7 @@ function(createjs,lib,Global){
         
         this.x = x || 0;
         this.y = y || 0;
-        this.regX = this.regY = 4;
+        this.regX = this.regY = 0; // was 4
         if(frame){this.frame = frame;}
         this.scale = _scale;
         
@@ -61,6 +68,7 @@ function(createjs,lib,Global){
     };
     
     var p = Tile.prototype = new createjs.Bitmap();
+    //var p = Tile.prototype = new createjs.Sprite(Global.tiles,0);
     
     p.valueOf = function(){
         return parseInt(this.frame);
@@ -70,7 +78,7 @@ function(createjs,lib,Global){
         return ""+this.frame;
     }
     
-    Tile.buildSheet();
+    //Tile.buildSheet();
     
     return Tile;
 });

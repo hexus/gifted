@@ -38,13 +38,13 @@ input[type=text]{padding:0 2px;}
     padding:0 4px;
 }
 #canvas{}
-#mainMenu,#worldList{z-index:1337;height:50%;top:25%;text-align:center;font-size:150%;}
-#lobby{height:100%;}
-    #chat{position:relative;width:63%;height:95%;left:35%;}
+#mainMenu,#worldList{z-index:1337;height:50%;top:25%;text-align:center;font-size:2vw;}
+#lobby{height:100%;font-size:2vw;}
+    #chat{position:relative;width:63%;height:95%;left:35%;top:2%;}
     #chat #msg{width:80%;}
     #chat #send{width:10%;}
-    #chat #buffer{width:100%;height:85%;}
-    .outfit{position:absolute;}
+    #chat #buffer{width:100%;height:80%;font-size:2vw;}
+    .outfit{position:absolute;font-size:16px;}
     #headwear_prev{left:20px;top:80px;}
     #headwear_next{left:140px;top:80px;}
     #chat_top{padding:6px;}

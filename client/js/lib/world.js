@@ -21,7 +21,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         
         this.map = map;
         this.outerMargin = 3;
-        this.tileScale = this.map.getTileSize()/62;
+        this.tileScale = this.map.getTileSize()/64; // was /62. read from tile class instead pls.
         
         this.set('scale',function(v){
             that.view.scale = that.scaleX = that.scaleY = v;
@@ -452,7 +452,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         if(!times){times=1;}
         if(!full){full=false;}
         if(scale!=this.lastUpdated.scale){
-            Tile.buildSheet(scale);
+            //Tile.buildSheet(scale);
             this.clearDisplay();
             full=true;
             //times = 3;
@@ -561,6 +561,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         }else{
             // Caching = performance boost
             this.mapContainer.cache(dX1*tSize,dY1*tSize,(dX2-dX1)*tSize,(dY2-dY1)*tSize,scale);
+            this.mapContainer.cacheCanvas.getContext('2d').imageSmoothingEnabled = false;
         }
         
     }
