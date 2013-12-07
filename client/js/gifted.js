@@ -63,12 +63,13 @@ function($,Global){
                 world = Global.world = new World();
                 worldUi = Global.worldUi = new WorldUi(world);
                 player = Global.player = new Player();
+                
                 users = Global.users = {};
                 
-                stage.snapToPixelEnabled = true;
                 stage.addChild(world);
                 stage.addChild(worldUi);
                 stage.addChild(player);
+                stage.snapToPixelEnabled = true;
                 
                 Global.ui = Ui;
                 Ui.init();

@@ -10,7 +10,7 @@ var init = function(){
     	this.name = name || 'Buren';
     	var worldSize = {width:16,height:4}
     	var regionSize = {width:64,height:64}
-    	var tileSize = 40;
+    	var tileSize = 32;
     	var spawn = {x:0,y:0}
     	
     	var regions = [];
@@ -460,16 +460,23 @@ var init = function(){
         }
     	
     	// Flood fill
-    	var q = [];
-    	q[0] = [0,0];
+    	var q = [[0,0]];
     	while(q.length>0){
     	    var n = q.pop();
-    	    if(this.getTile(n[0],n[1])==0){
+    	    if(this.getTile(n[0],n[1])===0){
     	        this.setTile(n[0],n[1],7);
-    	        q.push([n[0]+1,n[1]]);
-    	        q.push([n[0],n[1]+1]);
-    	        q.push([n[0]-1,n[1]]);
-    	        q.push([n[0],n[1]-1]);
+    	        if(n[0]<fullWidth-1){
+    	           q.push([n[0]+1,n[1]]);
+    	        }
+    	        if(n[1]<fullHeight-1){
+    	           q.push([n[0],n[1]+1]);
+    	        }
+    	        if(n[0]>0){
+    	           q.push([n[0]-1,n[1]]);
+    	        }
+    	        if(n[1]>0){
+    	           q.push([n[0],n[1]-1]);
+    	        }
     	    }
     	}
     	
@@ -651,6 +658,15 @@ var init = function(){
                 this.setTile(rx,ry,x,y,parseInt(mapflat[i]));
             }
         }
+    }
+    
+    m.expandLinear_tiled = function(mapflat){
+        for(var i=0;i<mapflat.length;i++){
+            if(mapflat[i]>0){
+                mapflat[i]--;
+            }
+        }
+        this.expandLinear(mapflat);
     }
     
     m.print = function(){

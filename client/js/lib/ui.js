@@ -1,5 +1,5 @@
-define(['jquery','createjs','lib/global','lib/socket','shared/Bullet','shared/Weapon'],
-function($,createjs,Global,Socket,Bullet,Weapon){
+define(['jquery','createjs','lib/global','lib/socket','shared/Bullet','shared/Weapon','lib/vichi'],
+function($,createjs,Global,Socket,Bullet,Weapon,Vichi){
     
     var Ui = {}, dom,stage,socket,player,world,worldUi,selected,original;
     
@@ -12,18 +12,26 @@ function($,createjs,Global,Socket,Bullet,Weapon){
         original.aspect = original.width/original.height;
         
         $(window).resize(function(){
+            var newWidth = Math.max($(window).width(),original.width);
             $('#client').css({
-                'width':        ($(window).width())+'px',
-                'height':       Math.round($(window).width()/original.aspect)+'px',
-                'margin-left':  (-$(window).width()/2)+'px',
-                'margin-top':   Math.round(-($(window).width()/original.aspect)/2)+'px'
+                'width':        newWidth+'px',
+                'height':       Math.round(newWidth/original.aspect)+'px',
+                'margin-left':  (-newWidth/2)+'px',
+                'margin-top':   Math.round(-(newWidth/original.aspect)/2)+'px'
             });
             $('#canvas').attr({
-               'width':$(window).width()+'px',
-               'height':Math.round($(window).width()/original.aspect)+'px'
+               'width':newWidth+'px',
+               'height':Math.round(newWidth/original.aspect)+'px'
             });
-            world.scale = $(window).width()/original.width;
-            worldUi.scaleX = worldUi.scaleY = $(window).width()/original.width;
+            $('#mainMenu,#worldList,#lobby,#chat #buffer').css({
+                'font-size':($('#client').width()*0.02)+'px'
+            });
+            world.scale = newWidth/original.width;
+            worldUi.scaleX = worldUi.scaleY = newWidth/original.width;
+            with(stage.canvas.getContext('2d')){
+                imageSmoothingEnabled = false;
+                mozImageSmoothingEnabled = false;
+            }
         });
         
         Ui.reset();
@@ -50,6 +58,29 @@ function($,createjs,Global,Socket,Bullet,Weapon){
                 socket.connect();
             }
             Ui.selectWorld();
+        });
+        
+        $('#tp').click(function(){
+            if(world){
+                $('#client').hide();
+                var cb = function(){
+                    $.get('maps/testmap1.json',{},function(data){
+                        world.map.setWorldSize(1,1);
+                        world.map.setRegionSize(data.layers[0].width,data.layers[0].height);
+                        world.map.expandLinear_tiled(data.layers[0].data);
+                        console.log(data.layers[1].objects[0].x,data.layers[1].objects[0].y);
+                        world.map.setSpawn(data.layers[1].objects[0].x || 0,data.layers[1].objects[0].y || 0);
+                        worldUi.updateMap();
+                        var vichi = Global.player = new Vichi();
+                        world.addPlayer(vichi.uid,vichi);
+                        world.focusOn(vichi);
+                        Ui.showWorld();
+                        $('#client').show();
+                        
+                    },'json');
+                }
+                Ui.showLoading('retrieving world',cb);
+            }
         });
         
         $("#headwear_prev").click(function(){

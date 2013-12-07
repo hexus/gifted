@@ -69,9 +69,12 @@ function(createjs,lib,Global,Character,Effect){
         
         this.isGhost = args.isGhost;
         if(!this.isGhost){
-            this.ghost = this.world.addChild(new Player({isGhost:true}));
+            this.ghost = new Player({isGhost:true});
             this.ghost.alpha = 0.5;
             this.ghost.state = JSON.parse(JSON.stringify(this.state));
+            if(this.world){
+                this.world.addChild(this.ghost);
+            }
         }
     }
     

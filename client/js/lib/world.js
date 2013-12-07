@@ -1,7 +1,7 @@
 define(['createjs','assets','lib/global','lib/tile','lib/player',
-        'shared/Map','shared/Entity','shared/Bullet','shared/Item','shared/Weapon',
+        'shared/Map','shared/Entity','shared/Character','shared/Bullet','shared/Item','shared/Weapon',
         'shared/Spawner','shared/Enemy/Flybot','shared/BulletEnemy'],
-function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,Flybot,BulletEnemy){
+function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon,Spawner,Flybot,BulletEnemy){
     var World = function(map){
         this.initialize();
         this.get = this.__defineGetter__;
@@ -21,7 +21,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
         
         this.map = map;
         this.outerMargin = 3;
-        this.tileScale = this.map.getTileSize()/64; // was /62. read from tile class instead pls.
+        this.tileScale = this.map.getTileSize() / Tile.originalSize(); // was /62. read from tile class instead pls.
         
         this.set('scale',function(v){
             that.view.scale = that.scaleX = that.scaleY = v;
@@ -162,7 +162,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
     }
     
     p.addPlayer = function(id,u){
-        if(u instanceof Player){
+        if(u instanceof Character){
             this.users[id] = u;
             u.world = this;
             u.spawn();
@@ -559,9 +559,11 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Bullet,Item,Weapon,Spawner,F
             times--;
             this.updateDisplay(x,y,scale,times);
         }else{
-            // Caching = performance boost
+            // Caching provides a bit of a performance boost
             this.mapContainer.cache(dX1*tSize,dY1*tSize,(dX2-dX1)*tSize,(dY2-dY1)*tSize,scale);
-            this.mapContainer.cacheCanvas.getContext('2d').imageSmoothingEnabled = false;
+            var mapContext = this.mapContainer.cacheCanvas.getContext('2d')
+            mapContext.imageSmoothingEnabled = false;
+            mapContext.mozImageSmoothingEnabled = false;
         }
         
     }
