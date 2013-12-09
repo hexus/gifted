@@ -22,6 +22,6 @@ var boot = function(){
     httpServer = http.start(config.httpPort);
     tcpServer = sockets.tcp.start(config.listenPort);
     ioServer = sockets.io.start(config.listenPort2);
-}
+};
 
 boot();
