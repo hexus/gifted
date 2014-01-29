@@ -15,7 +15,7 @@ h.handleData = function(data){ // Called in context of a User
     	// Lobby handlers
         case "<policy-file-request/>": // Flash policy
             this.send('<cross-domain-policy><allow-access-from domain="*" to-ports="*"/></cross-domain-policy>');
-            break;aw
+            break;
         case "/worlds-pls": // Client is ready to log in and wants a list of worlds
             this.send('/login-request ' + rooms.list());
             break;
