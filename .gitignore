@@ -1,4 +1,13 @@
 #################
+## Artwork
+#################
+
+artwork/vichi/export/
+artwork/vichi/old/
+artwork/vichi/render/
+artwork/vichi/screenshots/
+
+#################
 ## Node
 #################
 
