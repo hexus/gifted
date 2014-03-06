@@ -58,8 +58,8 @@ var server = http.createServer(function(request, response) { // One day this wil
         		var m = r[i].map;
         		resp[i] = {
         			name: m.name,
-        			width: m.getWorldSize().width * m.getRegionSize().width,
-        			height: m.getWorldSize().height * m.getRegionSize().height,
+        			width: m.getWorldSize().width,
+        			height: m.getWorldSize().height,
         			spawn: {
         				x: m.getSpawn().x,
         				y: m.getSpawn().y

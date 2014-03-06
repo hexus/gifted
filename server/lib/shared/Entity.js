@@ -226,41 +226,9 @@ var init = function(createjs,Global,Effect){
         return Math.floor(v/tSize) * tSize;
     }
     
-    p.chkSolid = function(xCord,yCord){ // Why the fuck isn't this in Map?
-        var cords = this.map.convertCords(xCord,yCord); // Check and Region coords
-        var cx = cords["x"],
-            cy = cords["y"],
-            rx = cords["rx"],
-            ry = cords["ry"];
-                
-        if((ry==0 && cy<=0) || ry>this.map.getWorldSize().height && cy>=this.map.getRegionSize().height){// Prevent Y looping
-            return true;
-        }
-        if((cx>=0 && cy>=0 && cx<this.map.getRegionSize().width && cy<this.map.getRegionSize().height) &&
-           (ry>=0 && ry<this.map.getWorldSize().height)){
-            var leTile = this.map.getTile(rx,ry,cx,cy); // Check map array for tile
-            
-            if(typeof leTile == 'object'){
-                leTile = leTile.frame;
-            }else{ // Typing problems going on here, only tile objects working
-                leTile = parseInt(leTile);
-            }
-            
-            if(leTile!=null){
-                if(this.map.getSolidArr().indexOf(leTile)>-1){ // Check map's solid array
-                    //this.hasCollided = true;
-                    return true;
-                }else{
-                    return false;
-                }
-            }else{
-                return false;
-            }
-        }else{
-            console.log("Out of bounds collision: " + rx + " " + ry + " " + cx + " " + cy,this.state.x,this.state.y,this.state.direction);
-            console.trace();
-            return true;
-        }
+    p.chkSolid = function(x,y){
+        var c = this.map.convertCords(x,y);
+        return this.map.testCollision(c.x,c.y);
     }
     
     p.tick = function(){

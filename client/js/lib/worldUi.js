@@ -72,8 +72,8 @@ function(createjs,lib,Global){
         
         //this.fullmap.scaleX = this.fullmap.scaleY = this.world.scrW/this.mapCanvas.width;
         this.fullmap.scaleX = this.fullmap.scaleY = (Global.stage.canvas.width/this.scaleX)/this.mapCanvas.width;
-        var fullWidth = this.world.map.getWorldSize().width * this.world.map.getRegionSize().width;
-        var fullHeight = this.world.map.getWorldSize().height * this.world.map.getRegionSize().height;
+        var fullWidth = this.world.map.getWorldSize().width;
+        var fullHeight = this.world.map.getWorldSize().height;
         this.fullmap.map.x = -this.mapCanvas.width/2; // Center
         this.fullmap.map.y = -this.mapCanvas.height/2; // align
         this.fullmap.player.x = (tX/tSize) - (fullWidth/2); // Player

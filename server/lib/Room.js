@@ -208,8 +208,8 @@ p.generateMap = function(){
             
             // Surface spawners
             var tSize = this.map.getTileSize();
-            var fullWidth = this.map.getWorldSize().width * this.map.getRegionSize().width;
-            var fullHeight = this.map.getWorldSize().height * this.map.getRegionSize().height;
+            var fullWidth = this.map.getWorldSize().width;
+            var fullHeight = this.map.getWorldSize().height;
             var numSpawners = 12;
             for(var i=0;i<numSpawners;i++){
                 var x = Math.floor((fullWidth/numSpawners*i) + (fullWidth/numSpawners)/2);

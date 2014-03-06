@@ -65,8 +65,7 @@ function($,createjs,Global,Socket,Bullet,Weapon,Vichi){
                 $('#client').hide();
                 var cb = function(){
                     $.get('maps/testmap1.json',{},function(data){
-                        world.map.setWorldSize(1,1);
-                        world.map.setRegionSize(data.layers[0].width,data.layers[0].height);
+                        world.map.setWorldSize(data.layers[0].width,data.layers[0].height);
                         world.map.expandLinear_tiled(data.layers[0].data);
                         console.log(data.layers[1].objects[0].x,data.layers[1].objects[0].y);
                         world.map.setSpawn(data.layers[1].objects[0].x || 0,data.layers[1].objects[0].y || 0);

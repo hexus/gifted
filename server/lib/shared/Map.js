@@ -3,22 +3,22 @@ var node = typeof window === 'undefined';
 var deps = [];
 var init = function(){
     
-    var solidarr = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13];
+    var solidarr = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13]; // we can probably get rid of this soon
     
     var Map = function(name){
     	var that = this;
-    	this.name = name || 'Buren';
-    	var worldSize = {width:16,height:4}
-    	var regionSize = {width:64,height:64}
+    	this.name = name || 'Test World';
+    	var worldSize = {width:1024,height:256}
     	var tileSize = 32;
-    	var spawn = {x:0,y:0}
+    	var spawn = {x:0,y:0};
     	
-    	var regions = [];
+    	
+    	var collisionMap = [];
+    	var tileMap = [];
     	
     	this.getProperties = function(){
     		return {
     			worldSize:this.getWorldSize(),
-    			regionSize:this.getRegionSize(),
     			tileSize:this.getTileSize(),
     			spawn:this.getSpawn()
     		}
@@ -28,8 +28,6 @@ var init = function(){
     	        switch(i){
     	            case 'worldSize':
     	               worldSize = obj[i]; break;
-    	            case 'regionSize':
-    	               regionSize = obj[i]; break;
     	            case 'tileSize':
     	               tileSize = obj[i]; break;
     	            case 'spawn':
@@ -39,52 +37,61 @@ var init = function(){
     	}
     	
     	this.getWorldSize = function(){return worldSize;}
-    	this.getRegionSize = function(){return regionSize;}
     	this.getTileSize = function(){return tileSize;}
-    	this.getSolidArr = function(){return solidarr;}
+    	this.getSolidArr = function(){return solidarr;} // deprecate this
     	this.getSpawn = function(){return spawn;}
-    	this.getRegions = function(){return regions;}
-    	this.validCoords = function(rX,rY,tX,tY){
-    		return (rX>=0 && rX<worldSize.width &&
-    				rY>=0 && rY<worldSize.height &&
-    				tX>=0 && tX<regionSize.width &&
-    				tY>=0 && tY<regionSize.height);
+    	this.validCoords = function(x,y){
+    		return (x>=0 && x<worldSize.width && y>=0 && y<worldSize.height);
     	}
-    	this.checkTile = function(rX,rY,tX,tY){ // Creates dimensions if they don't yet exist
-    		if(this.validCoords(rX,rY,tX,tY)){
-    			if(!regions[rX]){regions[rX] = [];}
-    			if(!regions[rX][rY]){regions[rX][rY] = [];}
-    			if(!regions[rX][rY][tX]){regions[rX][rY][tX] = [];}
-    			if(!regions[rX][rY][tX][tY]){
-                    regions[rX][rY][tX][tY] = 0;
-    			}
+    	this.checkCollision = function(x,y){
+    	    if(this.validCoords(x,y)){
+    	        if(!collisionMap[y]){
+    	            collisionMap[y] = [];
+    	        }
+    	        if(!collisionMap[y][x]){
+    	            collisionMap[y][x] = 0;
+    	        }
+    	        return true;
+    	    }
+    	    return false;
+    	}
+    	this.checkTile = function(x,y){ // Creates dimensions if they don't yet exist
+    		if(this.validCoords(x,y)){
+    			if(!tileMap[y]){tileMap[y] = [];}
+    			if(!tileMap[y][x]){tileMap[y][x] = 0;}
     			return true;
     		}
     		return false;
     	}
-    	this.getTile = function(rX,rY,tX,tY){
-    	    if((rX!=null&&rY!=null) && (tX==null&&tY==null)){
-    	        var c = this.convertCords(rX,rY,true);
-    	        return this.getTile(c['rx'],c['ry'],c['x'],c['y']);
-    	    }
-    		if(this.checkTile(rX,rY,tX,tY)){
-    			return regions[rX][rY][tX][tY];
+    	this.getTile = function(x,y){
+    		if(this.checkTile(x,y)){
+    			return tileMap[y][x];
     		}
     	}
-    	this.setTile = function(rX,rY,tX,tY,v){
-            if((rX!=null&&rY!=null) && tY==null){
-                var c = this.convertCords(rX,rY,true);
-                return this.setTile(c['rx'],c['ry'],c['x'],c['y'],tX);
-            }
-    		if(this.checkTile(rX,rY,tX,tY)){
-    		    regions[rX][rY][tX][tY] = v;
+    	this.testCollision = function(x,y){
+    	    return this.getCollision(x,y) == 1;
+    	}
+    	this.getCollision = function(x,y){
+    	    if(this.checkCollision(x,y)){
+    	        return collisionMap[y][x];
+    	    }
+    	}
+    	this.setTile = function(x,y,v){
+    		if(this.checkTile(x,y)){
+    		    tileMap[y][x] = v;
     		}
+    	}
+    	this.setCollision = function(x,y,v){
+    	    if(this.checkCollision(x,y)){
+        	    v = !v ? 0 : v;
+        	    collisionMap[y][x] = v;
+    	    }
     	}
     	this.eachTile = function(d,under){ // Arg should have signature d(x,y,v)
     	    if(typeof(d)==='function'){
-                for(var y=0;y<worldSize.height*regionSize.height;y++){
-                    for(var x=0;x<worldSize.width*regionSize.width;x++){
-                        if(!under || (under && y > (worldSize.height*regionSize.height) - this.heights[x])){ // saves time
+                for(var y=0;y<worldSize.height;y++){
+                    for(var x=0;x<worldSize.width;x++){
+                        if(!under || (under && y > (worldSize.height) - this.heights[x])){ // saves time
                             d.call(this,x,y,this.getTile(x,y));
                         }
                     }
@@ -94,9 +101,9 @@ var init = function(){
         this.eachTileNbhd = function(d,under){ // Much slower for neighbourhood, arg should have signature d(x,y,v,n)
             if(typeof(d)==='function'){
                 var list = [];
-                for(var y=0;y<worldSize.height*regionSize.height;y++){
-                    for(var x=0;x<worldSize.width*regionSize.width;x++){
-                        if(!under || (under && y > (worldSize.height*regionSize.height) - this.heights[x])){ // saves time
+                for(var y=0;y<worldSize.height;y++){
+                    for(var x=0;x<worldSize.width;x++){
+                        if(!under || (under && y > worldSize.height - this.heights[x])){ // saves time
                             var nbhd = this.getTileNbhd(x,y);
                             var n = 0;
                             for(var j in nbhd){
@@ -135,10 +142,6 @@ var init = function(){
     	    worldSize.width = w;
     	    worldSize.height = h;
     	}
-    	this.setRegionSize = function(w,h){
-    	    regionSize.width = w;
-    	    regionSize.height = h;
-    	}
     	this.setTileSize = function(t){
     	    tileSize = t;
     	}
@@ -147,7 +150,14 @@ var init = function(){
     		spawn.y = y;
     	}
     	this.reset = function(){
-    	    regions = [];
+    	    collisionMap = [];
+    	    tileMap = [];
+    	}
+    	this.getTileMap = function(){
+    	    return tileMap;
+    	}
+    	this.getCollisionMap = function(){
+    	    return collisionMap;
     	}
     	
     	this.stages = [];
@@ -157,7 +167,7 @@ var init = function(){
     var m = Map.prototype;
     m.test = function(){
     	return [
-    		this.getWorldSize(), this.getRegionSize(), this.getTileSize(), this.getSpawn()
+    		this.getWorldSize(), this.getTileSize(), this.getSpawn()
     	]
     }
     
@@ -218,8 +228,8 @@ var init = function(){
         }
         this.setTile = function(x,y,v){
         	v = !v ? 0 : v;
-            var c = that.map.convertCords(x,y,true);
-            that.map.setTile(c['rx'],c['ry'],c['x'],c['y'],v);
+            that.map.setTile(x,y,v);
+            that.map.setCollision(x,y,!v?0:1);
         }
         this.dig = function(){
             width = that.width;
@@ -283,9 +293,8 @@ var init = function(){
     	}
     	
     	var wSize = this.getWorldSize(),
-            rSize = this.getRegionSize(),
-            fullWidth = wSize.width * rSize.width,
-            fullHeight = wSize.height * rSize.height,
+            fullWidth = wSize.width,
+            fullHeight = wSize.height,
             heights = this.heights = [],
             smoothWidth = 20,
             smooth = 3;
@@ -326,6 +335,7 @@ var init = function(){
         this.setSpawn(lowSpawn.x,lowSpawn.y);
     	
         this.eachTile(function(x,y){
+            this.setCollision(x,y,1);
             this.setTile(x,y,9);
         },true);
         
@@ -383,6 +393,7 @@ var init = function(){
             if(v==0){
                 if(Math.random()<0.4){
                     this.setTile(x,y,9);
+                    this.setCollision(x,y,1);
                 }
             }
         },true);
@@ -397,8 +408,10 @@ var init = function(){
             this.eachTileNbhd(function(x,y,v,n,nbhd){
                 if(n>5 || n<1){
                     this.setTile(x,y,9);
+                    this.setCollision(x,y,1);
                 }else{
                     this.setTile(x,y,0);
+                    this.setCollision(x,y,0);
                 }
             },true);
         }
@@ -412,17 +425,23 @@ var init = function(){
             this.eachTileNbhd(function(x,y,v,n,nbhd){
                 if(n<3){
                     this.setTile(x,y,0);
+                    this.setCollision(x,y,0);
                 }
                 if((v==1 && nbhd[2]==0 && nbhd[6]==0) || n<3){
                     this.setTile(x,y,0);
+                    this.setCollision(x,y,0);
                 }
                 if(v==0 && nbhd[2]>0 && nbhd[6]>0){
                     this.setTile(x,y-1,0);
+                    this.setCollision(x,y-1,0);
                     this.setTile(x,y+1,0);
+                    this.setCollision(x,y+1,0);
                 }
                 if(v==0 && nbhd[0]>0 && nbhd[4]>0){
                     this.setTile(x-1,y,0);
+                    this.setCollision(x-1,y,0);
                     this.setTile(x+1,y,0);
+                    this.setCollision(x+1,y,0);
                 }
             },true);
         }
@@ -435,8 +454,8 @@ var init = function(){
         // Carve spawn
         for(var i=lowSpawn.x-Math.round(lowSpawn.width/2);i<lowSpawn.x+Math.round(lowSpawn.width/2);i++){
             for(var j=lowSpawn.y-Math.round(lowSpawn.height/2);j<lowSpawn.y+Math.round(lowSpawn.height/2);j++){
-                var c = this.convertCords(i,j,true);
-                this.setTile(c['rx'],c['ry'],c['x'],c['y'],0);
+                this.setTile(i,j,0);
+                this.setCollision(i,j,0);
             }
         }
         
@@ -489,6 +508,7 @@ var init = function(){
     	this.eachTile(function(x,y,v){
     	    if(v==0){
     	        this.setTile(x,y,9);
+    	        this.setCollision(x,y,1);
     	    }
     	});
     	
@@ -525,7 +545,8 @@ var init = function(){
                     if(heightDif>40){
                         t = 9;
                     }
-                    this.setTile(x,y,t);
+                    //this.setTile(x,y,t);
+                    this.setCollision(x,y,1);
                 }else{
                     if(heightDif>30){
                         t = 12;
@@ -543,33 +564,25 @@ var init = function(){
         }
 
     	// Done.
+    	
+    	console.log(this.getCollisionMap());
     }
     
     m.expand = function(str){
     	var mapflat = str.split(','),
-    		wSize = this.getWorldSize(),
-    		rSize = this.getRegionSize();
+    		wSize = this.getWorldSize();
     	for(i=0;i<mapflat.length;i++){
-    		var rx = Math.floor(i / (rSize.width * rSize.height)) % wSize.width;
-    		var ry = Math.floor(i / (rSize.width * rSize.height * wSize.width)) % wSize.height;
-    		var x = i % rSize.width;
-    		var y = Math.floor(i / rSize.width) % rSize.height;
-    		this.setTile(rx,ry,x,y,parseInt(mapflat[i]));
+    		var x = i % wSize.width;
+    		var y = Math.floor(i / wSize.width) % wSize.height;
+    		this.setTile(x,y,parseInt(mapflat[i]));
     	}
     }
     
     m.flat = function(){
     	var str = '';
-    	for(ry=0;ry<this.getWorldSize().height;ry++){
-    		//out[ry] = [];
-    		for(rx=0;rx<this.getWorldSize().width;rx++){
-    			//out[ry][rx] = [];
-    			for(y=0;y<this.getRegionSize().height;y++){
-    				//out[ry][rx][y] = [];
-    				for(x=0;x<this.getRegionSize().width;x++){
-    					str += this.getTile(rx,ry,x,y)+',';
-    				}
-    			}
+    	for(y=0;y<this.getWorldSize().height;y++){
+    		for(x=0;x<this.getWorldSize().width;x++){
+    			str += this.getTile(x,y)+',';
     		}
     	}
     	return str;
@@ -578,65 +591,51 @@ var init = function(){
     m.convertCords = function(xCord,yCord,tiles){
         if(!tiles){tiles=false;}
         var wSize = this.getWorldSize(),
-            rSize = this.getRegionSize(),
             tileSize = this.getTileSize();
         var xInd, yInd, rObj = {};
         if(!tiles){
             xInd = Math.floor(xCord/tileSize); // Divide to
-            yInd = Math.floor(yCord/tileSize); // region index
+            yInd = Math.floor(yCord/tileSize); // map indexes
         }else{
             xInd = xCord;
             yInd = yCord;
         }
         
-        var rx,ry,cx,cy;
+        var cx,cy;
         
-        // loop x
+        // loop x with real mod
         if(xInd<0){
-            rx = ((Math.floor(xInd/rSize.width) % wSize.width) + wSize.width) % wSize.width;
-            cx = ((xInd % rSize.width) + rSize.width) % rSize.width ;
+            cx = ((xInd % wSize.width) + wSize.width) % wSize.width;
         }else{
-            rx = Math.floor(xInd/rSize.width) % wSize.width;
-            cx = xInd % rSize.width;
+            cx = xInd % wSize.width;
         }   
         
         // cutoff top, loop bottom
         if(yInd<0){
-            ry = 0;
             cy = 0;
+            // cy = ((yInd % wSize.height) + wSize.height) % wSize.height; // loop top
         }else{
-            ry = Math.floor(yInd/rSize.height) % wSize.height;
-            cy = yInd % rSize.height;
+            cy = yInd % wSize.height;
         }
         
-        rObj["rx"] = rx; // Region
-        rObj["ry"] = ry;
-        rObj["x"] = cx; // Tile
-        rObj["y"] = cy;
+        rObj['x'] = cx;
+        rObj['y'] = cy;
         return rObj;
     }
     
     m.flatLinear = function(){
         var arr = [];
         
-        var wSize = this.getWorldSize(),
-            rSize = this.getRegionSize();
+        var wSize = this.getWorldSize();
         
-        var dX1 = 0,
-            dY1 = 0,
-            dX2 = wSize.width * rSize.width,
-            dY2 = wSize.height * rSize.height;
+        var dX1 = dY1 = 0,
+            dX2 = wSize.width,
+            dY2 = wSize.height;
             
         // Loop through view bounds, append tiles
-        var rx,ry,cx,cy,cord;
         for(y=dY1;y<dY2;y++){
             for(x=dX1;x<dX2;x++){
-                var cord = this.convertCords(x,y,true),
-                    rx = cord["rx"],
-                    ry = cord["ry"],
-                    cx = cord["x"],
-                    cy = cord["y"],
-                    tileGet = this.getTile(rx,ry,cx,cy);
+                tileGet = this.getTile(x,y);
                 arr[x+y*(dX2)] = parseInt(tileGet,10);
             }
         }
@@ -644,18 +643,13 @@ var init = function(){
     }
     
     m.expandLinear = function(mapflat){
-        var wSize = this.getWorldSize(),
-            rSize = this.getRegionSize(),
-            fullWidth = wSize.width * rSize.width,
-            fullHeight = wSize.height * rSize.height;
-        if(mapflat.length==fullWidth*fullHeight){
+        var wSize = this.getWorldSize();
+        if(mapflat.length==wSize.width*wSize.height){
             for(var i=0;i<mapflat.length;i++){
-                var rx = Math.floor(i / rSize.width) % wSize.width,
-                    ry = Math.floor(i / (fullWidth * rSize.height)) % wSize.height,
-                    x = i % rSize.width,
-                    y = Math.floor(i / fullWidth) % rSize.height;
-                //console.log(rx+' '+ry+' '+x+' '+y);
-                this.setTile(rx,ry,x,y,parseInt(mapflat[i]));
+                var x = i % wSize.width,
+                    y = Math.floor(i / wSize.width) % wSize.height;
+                //console.log(x+' '+y);
+                this.setTile(x,y,parseInt(mapflat[i]));
             }
         }
     }
@@ -671,15 +665,9 @@ var init = function(){
     
     m.print = function(){
     	var str = "";
-    	for(ry=0;ry<this.getWorldSize().height;ry++){
-    		for(rx=0;rx<this.getWorldSize().width;rx++){
-    			str += "Region: " + rx + "," + ry + "\n";
-    			for(y=0;y<this.getRegionSize().height;y++){
-    				for(x=0;x<this.getRegionSize().width;x++){
-    					str += this.getTile(rx,ry,x,y);
-    				}
-    				str += "\n";
-    			}
+    	for(y=0;y<this.getWorldSize().height;y++){
+    		for(x=0;x<this.getWorldSize().width;x++){
+    			str += this.getTile(x,y);
     			str += "\n";
     		}
     	}
@@ -688,8 +676,8 @@ var init = function(){
     
     m.createCanvasData = function(){
         var flat = this.flatLinear();
-        var width = this.getWorldSize().width * this.getRegionSize().width;
-        var height = this.getWorldSize().height * this.getRegionSize().height;
+        var width = this.getWorldSize().width;
+        var height = this.getWorldSize().height;
         var length = width*height*4;
         
         //console.log(flat.length*4,length,width,height);

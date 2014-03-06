@@ -146,8 +146,8 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
         
         // surface spawners
         var tSize = this.map.getTileSize();
-        var fullWidth = this.map.getWorldSize().width * this.map.getRegionSize().width;
-        var fullHeight = this.map.getWorldSize().height * this.map.getRegionSize().height;
+        var fullWidth = this.map.getWorldSize().width;
+        var fullHeight = this.map.getWorldSize().height;
         var numSpawners = 12;
         for(var i=0;i<numSpawners;i++){
             var x = Math.floor((fullWidth/numSpawners*i) + (fullWidth/numSpawners)/2);
@@ -402,11 +402,9 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
     
     p.addTile = function(cx,cy,v){
         var cords = this.map.convertCords(cx,cy,true),
-            rx = cords['rx'],
-            ry = cords['ry'],
             dx = cords['x'],
             dy = cords['y'];
-        var newtile = this.map.getTile(rx,ry,dx,dy);
+        var newtile = this.map.getTile(dx,dy);
         var at = 0;
         if(newtile instanceof Tile){
             v = newtile.frame;
@@ -420,7 +418,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
                 at = this.map.getSolidArr().indexOf(v)<0 ? 0 : this.mapContainer.getNumChildren();
                 newtile = new Tile();
                 newtile = this.mapContainer.addChildAt(newtile,at);
-                this.map.setTile(rx,ry,dx,dy,newtile);
+                this.map.setTile(dx,dy,newtile);
             }
         }
         if(v>0){
@@ -434,7 +432,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
     p.removeTile = function(t){
         if(t instanceof Tile){
             var cords = this.map.convertCords(t.x,t.y);
-            this.map.setTile(cords['rx'],cords['ry'],cords['x'],cords['y'],t.frame);
+            this.map.setTile(cords['x'],cords['y'],t.frame);
             //t.frame = 0;
             this.mapContainer.removeChild(t);
         }
@@ -477,13 +475,8 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
             // Iterate through entire view bounds to append tiles
             for(var x=dX1;x<dX2;x++){
                 for(var y=dY1;y<dY2;y++){
-                    cord = this.map.convertCords(x,y,true);
-                    rx = cord['rx'];
-                    ry = cord['ry'];
-                    cx = cord['x'];
-                    cy = cord['y'];
-                    
-                    var tile = this.map.getTile(rx,ry,cx,cy);
+                    c = this.map.convertCords(x,y,true);
+                    var tile = this.map.getTile(c.x,c.y);
                     this.addTile(x,y,tile);
                 }
             }
@@ -512,12 +505,12 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
                             remX = deltas[1]-k;
                             addX = deltas[0]-k;
                         }
-                        cord = this.map.convertCords(remX,l,true);
-                        remTile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
+                        c = this.map.convertCords(remX,l,true);
+                        remTile = this.map.getTile(c.x,c.y);
                         this.removeTile(remTile);
                         if(l>=dY1 && l<=dY2){
-                            cord = this.map.convertCords(addX,l,true); 
-                            var tile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
+                            c = this.map.convertCords(addX,l,true); 
+                            var tile = this.map.getTile(c.x,c.y);
                             this.addTile(addX,l,tile);
                         }
                     }
@@ -536,12 +529,12 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
                             remY = deltas[3]-m;
                             addY = deltas[2]-m;
                         }
-                        cord = this.map.convertCords(n,remY,true);
-                        remTile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
+                        c = this.map.convertCords(n,remY,true);
+                        remTile = this.map.getTile(c.x,c.y);
                         this.removeTile(remTile);
                         if(n>=dX1 && n<=dX2){
-                            cord = this.map.convertCords(n,addY,true);
-                            var tile = this.map.getTile(cord['rx'],cord['ry'],cord['x'],cord['y']);
+                            c = this.map.convertCords(n,addY,true);
+                            var tile = this.map.getTile(c.x,c.y);
                             this.addTile(n,addY,tile);
                         }
                     }
@@ -561,7 +554,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
         }else{
             // Caching provides a bit of a performance boost
             this.mapContainer.cache(dX1*tSize,dY1*tSize,(dX2-dX1)*tSize,(dY2-dY1)*tSize,scale);
-            var mapContext = this.mapContainer.cacheCanvas.getContext('2d')
+            var mapContext = this.mapContainer.cacheCanvas.getContext('2d');
             mapContext.imageSmoothingEnabled = false;
             mapContext.mozImageSmoothingEnabled = false;
         }

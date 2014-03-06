@@ -131,6 +131,7 @@ p.sendTo = function(u){
 }
 
 p.sendWorld = function(format){
+    console.log('sendWorld() says hi')
     var m = this.room.map;
     var mp = m.getProperties();
     // World send (initial information)
@@ -139,8 +140,6 @@ p.sendWorld = function(format){
             this.room.name,' ',
             mp.worldSize.width,' ',
             mp.worldSize.height,' ',
-            mp.regionSize.width,' ',
-            mp.regionSize.height,' ',
             mp.tileSize,' ',
             mp.spawn.x,' ',
             mp.spawn.y
