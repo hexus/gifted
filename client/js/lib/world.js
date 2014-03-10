@@ -20,7 +20,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
         this.entitycount = 0;
         
         this.map = map;
-        this.outerMargin = 3;
+        this.margin = 3;
         this.tileScale = this.map.getTileSize() / Tile.originalSize(); // was /62. read from tile class instead pls.
         
         this.set('scale',function(v){
@@ -89,6 +89,7 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
                 }
             }
         }
+        
         this.iScroll();
     }
     
@@ -465,10 +466,10 @@ function(createjs,lib,Global,Tile,Player,Map,Entity,Character,Bullet,Item,Weapon
             dwt = Math.floor(scrW / tSize),
             dht = Math.floor(scrH / tSize); 
         
-        var dX1 = Math.floor(dxt - ((dwt*0.5)/scale) - this.outerMargin),
-            dY1 = Math.floor(dyt - ((dht*0.5)/scale) - this.outerMargin),
-            dX2 = Math.floor(dxt + ((dwt*0.5)/scale) + this.outerMargin),
-            dY2 = Math.floor(dyt + ((dht*0.5)/scale) + this.outerMargin);
+        var dX1 = Math.floor(dxt - ((dwt*0.5)/scale) - this.margin),
+            dY1 = Math.floor(dyt - ((dht*0.5)/scale) - this.margin),
+            dX2 = Math.floor(dxt + ((dwt*0.5)/scale) + this.margin),
+            dY2 = Math.floor(dyt + ((dht*0.5)/scale) + this.margin);
         
         
         if(full){

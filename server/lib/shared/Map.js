@@ -43,46 +43,36 @@ var init = function(){
     	this.validCoords = function(x,y){
     		return (x>=0 && x<worldSize.width && y>=0 && y<worldSize.height);
     	}
-    	this.checkCollision = function(x,y){
-    	    if(this.validCoords(x,y)){
-    	        if(!collisionMap[y]){
-    	            collisionMap[y] = [];
-    	        }
-    	        if(!collisionMap[y][x]){
-    	            collisionMap[y][x] = 0;
-    	        }
-    	        return true;
-    	    }
-    	    return false;
-    	}
-    	this.checkTile = function(x,y){ // Creates dimensions if they don't yet exist
+    	this.verifyTile = function(x,y){ // Creates indexes if they don't yet exist
     		if(this.validCoords(x,y)){
     			if(!tileMap[y]){tileMap[y] = [];}
     			if(!tileMap[y][x]){tileMap[y][x] = 0;}
+                if(!collisionMap[y]){collisionMap[y] = [];}
+                if(!collisionMap[y][x]){collisionMap[y][x] = 0;}
     			return true;
     		}
     		return false;
     	}
     	this.getTile = function(x,y){
-    		if(this.checkTile(x,y)){
+    		if(this.verifyTile(x,y)){
     			return tileMap[y][x];
     		}
     	}
-    	this.testCollision = function(x,y){
+    	this.checkCollision = function(x,y){
     	    return this.getCollision(x,y) == 1;
     	}
     	this.getCollision = function(x,y){
-    	    if(this.checkCollision(x,y)){
+    	    if(this.verifyTile(x,y)){
     	        return collisionMap[y][x];
     	    }
     	}
     	this.setTile = function(x,y,v){
-    		if(this.checkTile(x,y)){
+    		if(this.verifyTile(x,y)){
     		    tileMap[y][x] = v;
     		}
     	}
     	this.setCollision = function(x,y,v){
-    	    if(this.checkCollision(x,y)){
+    	    if(this.verifyTile(x,y)){
         	    v = !v ? 0 : v;
         	    collisionMap[y][x] = v;
     	    }
@@ -564,8 +554,6 @@ var init = function(){
         }
 
     	// Done.
-    	
-    	console.log(this.getCollisionMap());
     }
     
     m.expand = function(str){

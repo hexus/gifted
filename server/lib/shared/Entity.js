@@ -228,7 +228,7 @@ var init = function(createjs,Global,Effect){
     
     p.chkSolid = function(x,y){
         var c = this.map.convertCords(x,y);
-        return this.map.testCollision(c.x,c.y);
+        return this.map.checkCollision(c.x,c.y);
     }
     
     p.tick = function(){
