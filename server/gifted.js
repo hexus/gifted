@@ -8,7 +8,7 @@ var Map = require('./lib/shared/Map');
 var rooms = require('./lib/Global').rooms;
 
 // Initial output
-console.log("Gifted Server v"+config.version);
+console.log("Gifted Server v" + config.version);
 
 // Prepare servers
 var httpServer, tcpServer, ioServer;
@@ -19,9 +19,10 @@ var boot = function(){
 			fps:config.fps
 		}));
 	}
-    httpServer = http.start(config.httpPort);
-    tcpServer = sockets.tcp.start(config.listenPort);
-    ioServer = sockets.io.start(config.listenPort2);
+	
+	httpServer = http.start(config.httpPort);
+	tcpServer = sockets.tcp.start(config.listenPort);
+	ioServer = sockets.io.start(config.listenPort2);
 };
 
 boot();
