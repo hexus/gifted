@@ -576,6 +576,29 @@ var init = function(){
     	return str;
     }
     
+    m.expandCollision = function(str){
+    	var mapflat = str.split(',');
+    	var wSize = this.getWorldSize();
+    	
+    	for(i = 0; i < mapflat.length; i++){
+    		var x = i % wSize.width;
+    		var y = Math.floor(i / wSize.width) % wSize.height;
+    		this.setCollision(x, y, parseInt(mapflat[i]));
+    	}
+    }
+    
+    m.flatCollision = function() {
+    	var str = '';
+    	
+    	for (y = 0; y < this.getWorldSize().height; y++) {
+    		for (x = 0; x < this.getWorldSize().width; x++) {
+    			str += this.getCollision(x, y) + ',';
+    		}
+    	}
+    	
+    	return str;
+    }
+    
     m.convertCords = function(xCord,yCord,tiles){
         if(!tiles){tiles=false;}
         var wSize = this.getWorldSize(),

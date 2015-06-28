@@ -150,6 +150,9 @@ p.sendWorld = function(format){
     
     // World data (flattened map)
     this.send('/wd ' + m.flat());
+    
+    // World collision data
+    this.send('/wc ' + m.flatCollision());
 }
 
 module.exports = User;

@@ -138,11 +138,15 @@ function($,createjs,io,Global,Player,Item,Weapon,Bullet){
                 case "/wd": // World data (map)
                     world.map.expand(dstr);
                     Global.worldUi.updateMap();
-                    world.addPlayer(player.uid,player);
+                    world.addPlayer(player.uid, player);
                     world.focusOn(player);
                     Ui.showWorld(); // Implement a loading overlay!
                     logData = false;
                     break;
+                case "/wc": // World collision data
+                	world.map.expandCollision(dstr);
+                	logData = false;
+                	break;
                 case "/ping":
                     Global.debugObj.out.ping = d[1];
                     logData = false;
